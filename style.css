@@ -44,11 +44,22 @@ header:hover {
 }
 .menu > li:hover .sub-menu {
   visibility: visible;
-  top: 45px;
+  top: 44px;
 }
 .sub-menu {
   position: absolute;
-  width: 150px;
+  width: 200px;
+  border: 1px solid #ccc;
+  padding: 10px 0px 10px 20px;
+  visibility: hidden;
+  top: 80px;
+  transition: 0.2s;
+  z-index: 1;
+  background-color: #fff;
+}
+.sub-menu.sub-menu-new {
+  position: absolute;
+  width: 400px;
   border: 1px solid #ccc;
   padding: 10px 0px 10px 20px;
   visibility: hidden;
@@ -62,10 +73,17 @@ header:hover {
 }
 .sub-menu ul a {
   font-weight: normal !important;
-  font-size: 15px !important;
+  font-size: 19px !important;
+  margin-top: 5px;
+}
+.sub-menu.sub-menu-new li a {
+  font-weight: normal !important;
+  font-size: 20px !important;
+  margin-top: 5px;
+  text-transform: capitalize;
 }
 .menu li a {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: bold;
   display: block;
   line-height: 20px;
@@ -422,7 +440,7 @@ footer {
   margin: 20px 0 12px;
   transition: all 0.3s ease;
 }
-.product-content-right-product-button button:first-child {
+.product-content-right-product-button a:first-child button {
   display: flex;
   justify-content: space-evenly;
   align-items: center;
@@ -430,15 +448,21 @@ footer {
   border: 2px solid black;
   cursor: pointer;
 }
-.product-content-right-product-button button:first-child:hover {
+.product-content-right-product-button a:first-child button:hover {
   background-color: black;
   color: #ffff;
+  border: 2px solid white;
 }
-.product-content-right-product-button button:last-child {
+.product-content-right-product-button a:last-child button {
   border: 2px solid #bf8a49;
   color: #bf8a49;
   background-color: #ffff;
   cursor: pointer;
+}
+.product-content-right-product-button a:last-child button:hover {
+  background-color: #bf8a49;
+  color: #ffff;
+  border: 2px solid #fff;
 }
 .product-content-right-product-icon {
   display: flex;
