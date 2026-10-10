@@ -296,7 +296,7 @@ footer {
   font-size: 17px;
   color: #a1a0a0;
 }
-.category-left {
+/* .category-left {
   width: 20%;
 }
 .category-right {
@@ -311,7 +311,33 @@ footer {
 .category-right-top-item {
   flex: 1;
   padding: 0 12px;
+} */
+
+.category-left {
+  width: 20%;
+  box-sizing: border-box;
 }
+
+.category-right {
+  width: 80%;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  box-sizing: border-box;
+}
+
+.category-right-top-item {
+  box-sizing: border-box;
+}
+
+.category-right-top-item:first-child {
+  flex: 2;
+}
+
+.category-right-top-item:not(:first-child) {
+  flex: 1;
+}
+
 .category-right-top-item button {
   width: 100%;
   padding: 10px 15px;
@@ -330,7 +356,7 @@ footer {
   border: 1px solid #ddd;
   cursor: pointer;
 }
-.category-right-content {
+/* .category-right-content {
   margin-top: 20px;
   justify-content: space-between;
 }
@@ -353,7 +379,52 @@ footer {
 
 .category-right-content-item p {
   font-size: 18px;
+} */
+
+.category-right-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: 100%;
+  margin-top: 20px;
 }
+
+.category-right-content-item {
+  width: 25%;
+  box-sizing: border-box;
+  text-align: center;
+  padding: 12px;
+}
+
+.category-right-content-item img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.category-right-content-item h1 {
+  /* font-size: 18px;
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: center;
+  margin-top: 6px;
+  color: #333;
+  min-height: 42px; */
+  font-size: 18px;
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: center;
+  margin-top: 6px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-right-content-item p {
+  font-size: 18px;
+  margin-top: 4px;
+}
+
 .category-right-bottom {
   justify-content: space-between;
   margin: 30px 0 20px;
@@ -1082,7 +1153,7 @@ label {
   font-style: 20px;
   font-weight: bold;
 }
-/* ============ Collection===================== */
+/* ============================ Collection======================== */
 .collection {
   padding: 100px 0;
 }
@@ -1109,6 +1180,9 @@ label {
   border-radius: 0 0 70px 0;
 
   object-fit: cover;
+}
+.collection-banner.new {
+  margin-top: 70px;
 }
 .collection-content {
   padding: 50px 80px;
@@ -1137,6 +1211,8 @@ label {
   margin-top: 10px;
   display: flex;
   justify-content: space-between;
+  width: 100%;
+  margin-left: 18px;
 }
 .collection-image-show-box {
   width: 48.8%;
@@ -1151,12 +1227,16 @@ label {
   margin-top: 60px;
   display: flex;
   justify-content: space-between;
-
+  width: 100%;
+  margin-left: 18px;
   align-items: center;
 }
 .collection-image-sale-item {
-  width: 32%;
+  width: 31.5%;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 15px;
 }
+
 .collection-image-sale-item img {
   width: 100%;
   object-fit: cover;
@@ -1300,4 +1380,239 @@ label {
 }
 .about-celebrity {
   width: 100%;
+}
+/* ==============================Register=================== */
+
+.register-page {
+  max-width: 1580px;
+  width: 87%;
+  margin: 0 auto;
+  padding: 100px 0 80px;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #222;
+}
+
+.register-heading {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 600;
+  margin: 5px 0 32px;
+}
+
+.register-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.customer-info h2,
+.password-info h2 {
+  font-size: 18px;
+  font-weight: 400;
+  margin: 0 0 14px;
+}
+
+.customer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 32px;
+}
+
+.register-field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.register-field label {
+  color: #777;
+  font-size: 17px;
+  margin-bottom: 6px;
+}
+
+.register-field label span {
+  color: red;
+}
+
+.register-field input,
+.register-field select,
+.register-field textarea {
+  width: 100%;
+  height: 45px;
+  padding: 0 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #fff;
+  font-family: inherit;
+  font-size: 16px;
+  color: #444;
+  outline: none;
+}
+
+.register-field input::placeholder {
+  color: #aaa;
+}
+
+.register-field input:focus,
+.register-field select:focus,
+.register-field textarea:focus {
+  border-color: #888;
+}
+
+.register-field select {
+  cursor: pointer;
+}
+
+.register-field textarea {
+  height: 86px;
+  padding: 12px;
+  resize: vertical;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Cột thông tin mật khẩu */
+
+.password-info > .register-field {
+  margin-bottom: 20px;
+}
+
+.captcha-field input {
+  margin-bottom: 15px;
+}
+
+.captcha-image {
+  width: 132px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  font-family: Georgia, serif;
+  font-size: 27px;
+  font-weight: bold;
+  font-style: italic;
+  letter-spacing: 5px;
+  color: #222;
+  user-select: none;
+}
+
+.captcha-refresh {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: #555;
+  font-size: 12px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* Checkbox */
+.register-options {
+  margin: 12px 0 24px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 15px;
+  color: #777;
+  line-height: 1.5;
+}
+
+.checkbox-row input {
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: #222;
+}
+
+.checkbox-row a {
+  color: #ed1c24;
+  text-decoration: none;
+}
+
+.checkbox-row a:hover {
+  text-decoration: underline;
+}
+
+/* Nút đăng ký */
+.register-button {
+  width: 100%;
+  height: 55px;
+  border: none;
+  border-radius: 18px 0 18px 0;
+  background-color: #231f20;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.25s;
+}
+
+.register-button:hover {
+  background-color: white;
+  color: black;
+  border: 2px solid black;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 14px;
+  color: #666;
+}
+
+.login-link a {
+  color: #222;
+  font-weight: bold;
+  text-decoration: underline;
+}
+/* Responsive */
+
+@media screen and (max-width: 900px) {
+  .register-page {
+    width: 92%;
+  }
+
+  .register-form {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+}
+
+@media screen and (max-width: 550px) {
+  .register-page {
+    width: 92%;
+    padding-top: 20px;
+  }
+
+  .register-heading {
+    font-size: 23px;
+    margin-bottom: 25px;
+  }
+
+  .customer-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+  .register-field label {
+    font-size: 14px;
+  }
+
+  .register-field input,
+  .register-field select {
+    height: 46px;
+  }
 }
