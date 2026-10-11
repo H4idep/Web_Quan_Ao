@@ -325,7 +325,9 @@ footer {
   align-content: flex-start;
   box-sizing: border-box;
 }
-
+.category-right-top-item > p {
+  font-weight: bold;
+}
 .category-right-top-item {
   box-sizing: border-box;
 }
@@ -388,7 +390,12 @@ footer {
   width: 100%;
   margin-top: 20px;
 }
-
+.category-left-li > a {
+  display: block;
+  width: 85%;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #ccc;
+}
 .category-right-content-item {
   width: 25%;
   box-sizing: border-box;
@@ -453,8 +460,11 @@ footer {
   display: block;
 }
 .category-left ul li ul li a {
-  color: #333;
-  font-size: 13px;
+  color: #605e5e;
+  font-size: 14px;
+}
+.category-left ul li ul li a:hover {
+  color: red;
 }
 .vach {
   border-top: 3px solid #000;
