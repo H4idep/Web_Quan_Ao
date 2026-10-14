@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tài khoản - Routine</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+    <%- include("partials/header") %>
+
+        <main class="register-page">
+            <h1 class="register-heading">THÔNG TIN TÀI KHOẢN</h1>
+
+            <p>Họ tên: <strong>
+                    <%= currentUser.fullName %>
+                </strong></p>
+            <p>Email: <%= currentUser.email %>
+            </p>
+            <p>
+                Vai trò:
+                <%= currentUser.role==="admin" ? "Quản trị viên" : "Khách hàng" %>
+            </p>
+
+            <p><a href="/">Tiếp tục xem cửa hàng</a></p>
+        </main>
+
+        <%- include("partials/footer") %>
+</body>
+
+</html>

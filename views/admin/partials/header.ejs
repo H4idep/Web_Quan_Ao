@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>
+        <%= title %> | Routine Admin
+    </title>
+
+    <link rel="stylesheet" href="/css/admin.css">
+    <script src="/js/admin.js" defer></script>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <a class="brand" href="/admin">
+            ROUTINE<span>QUẢN TRỊ CỬA HÀNG</span>
+        </a>
+
+        <p class="nav-label">QUẢN LÝ</p>
+
+        <nav aria-label="Điều hướng quản trị">
+            <a href="/admin" class="<%= active === 'dashboard' ? 'active' : '' %>">
+                <span>01</span> Tổng quan
+            </a>
+
+            <a href="/admin/products" class="<%= active === 'products' ? 'active' : '' %>">
+                <span>02</span> Sản phẩm
+            </a>
+
+            <a href="/admin/categories" class="<%= active === 'categories' ? 'active' : '' %>">
+                <span>03</span> Danh mục
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a href="/">← Xem cửa hàng</a>
+
+            <form action="/logout" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="logout">Đăng xuất</button>
+            </form>
+        </div>
+    </aside>
+
+    <div class="workspace">
+        <header class="topbar">
+            <span>Không gian quản trị</span>
+
+            <div class="admin-user">
+                <span class="avatar">
+                    <%= currentUser.fullName.charAt(0).toUpperCase() %>
+                </span>
+
+                <div>
+                    <strong>
+                        <%= currentUser.fullName %>
+                    </strong>
+                    <small>Quản trị viên</small>
+                </div>
+            </div>
+
+            <!-- THÊM ĐOẠN NÀY -->
+            <form action="/logout" method="POST" class="mobile-logout">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                <button class="btn small" type="submit">
+                    Đăng xuất
+                </button>
+            </form>
+        </header>
+
+        <main class="main">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">CỬA HÀNG / <%= title.toUpperCase() %>
+                    </p>
+                    <h1>
+                        <%= title %>
+                    </h1>
+                </div>
+            </div>
+
+            <% if (flash) { %>
+                <div class="alert <%= flash.type %>" role="status">
+                    <%= flash.message %>
+                </div>
+                <% } %>

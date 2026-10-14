@@ -1,0 +1,142 @@
+<%- include("partials/header") %>
+
+    <section class="panel">
+        <div class="toolbar">
+            <form method="GET" action="/admin/<%= kind %>" class="search-form">
+                <label class="sr-only" for="q">Tìm theo tên</label>
+
+                <input id="q" name="q" value="<%= q %>" maxlength="100" placeholder="Tìm theo tên...">
+
+                <button class="btn" type="submit">Tìm kiếm</button>
+
+                <% if (q) { %>
+                    <a class="text-link" href="/admin/<%= kind %>">Bỏ lọc</a>
+                    <% } %>
+            </form>
+
+            <a class="btn primary" href="/admin/<%= kind %>/create">
+                + Thêm <%= kind==="products" ? "sản phẩm" : "danh mục" %>
+            </a>
+        </div>
+
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã</th>
+                        <th>
+                            <%= label %>
+                        </th>
+
+                        <% if (kind==="products" ) { %>
+                            <th>Danh mục</th>
+                            <th>Giá bán</th>
+                            <th>Tồn kho</th>
+                            <% } else { %>
+                                <th>Mô tả</th>
+                                <th>Số sản phẩm</th>
+                                <% } %>
+
+                                    <th class="align-right">Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <% if (!rows.length) { %>
+                        <tr>
+                            <td colspan="<%= kind === 'products' ? 6 : 5 %>" class="empty">
+                                <%= q ? "Không có kết quả phù hợp." : "Chưa có dữ liệu. Hãy thêm mục đầu tiên." %>
+                            </td>
+                        </tr>
+                        <% } %>
+
+                            <% rows.forEach(row=> { %>
+                                <tr>
+                                    <td class="muted">#<%= row.id %>
+                                    </td>
+
+                                    <td>
+                                        <div class="product-cell">
+                                            <% if (kind==="products" ) { %>
+                                                <% if (row.image_url) { %>
+                                                    <img src="<%= row.image_url %>" alt="" class="product-thumb"
+                                                        loading="lazy">
+                                                    <% } else { %>
+                                                        <span class="product-thumb placeholder">—</span>
+                                                        <% } %>
+                                                            <% } %>
+
+                                                                <strong>
+                                                                    <%= row.name %>
+                                                                </strong>
+                                        </div>
+                                    </td>
+
+                                    <% if (kind==="products" ) { %>
+                                        <td>
+                                            <%= row.category_name %>
+                                        </td>
+                                        <td class="nowrap">
+                                            <%= money(row.price) %>
+                                        </td>
+                                        <td>
+                                            <span class="badge <%= Number(row.stock) <= 5 ? 'pending' : 'completed' %>">
+                                                <%= row.stock %>
+                                            </span>
+                                        </td>
+                                        <% } else { %>
+                                            <td class="description-cell">
+                                                <%= row.description || "—" %>
+                                            </td>
+                                            <td>
+                                                <%= row.product_count %>
+                                            </td>
+                                            <% } %>
+
+                                                <td>
+                                                    <div class="row-actions">
+                                                        <a class="btn small"
+                                                            href="/admin/<%= kind %>/<%= row.id %>/edit">
+                                                            Sửa
+                                                        </a>
+
+                                                        <form method="POST"
+                                                            action="/admin/<%= kind %>/<%= row.id %>/delete"
+                                                            data-confirm="Bạn có chắc muốn xóa mục này? Thao tác không thể hoàn tác.">
+                                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                                                            <button type="submit" class="btn small danger">
+                                                                Xóa
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                </tr>
+                                <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <span class="muted">
+                <%= total %> kết quả · Trang <%= page %>/<%= pages %>
+            </span>
+
+            <div class="row-actions">
+                <% if (page> 1) { %>
+                    <a class="btn small" href="/admin/<%= kind %>?q=<%= encodeURIComponent(q) %>&page=<%= page - 1 %>">
+                        ← Trước
+                    </a>
+                    <% } %>
+
+                        <% if (page < pages) { %>
+                            <a class="btn small"
+                                href="/admin/<%= kind %>?q=<%= encodeURIComponent(q) %>&page=<%= page + 1 %>">
+                                Sau →
+                            </a>
+                            <% } %>
+            </div>
+        </div>
+    </section>
+
+    <%- include("partials/footer") %>
