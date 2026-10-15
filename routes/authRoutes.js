@@ -3,6 +3,7 @@ const { rateLimit } = require("express-rate-limit");
 
 const AuthController = require("../controllers/AuthController");
 const addressCatalog = require("../config/addressCatalog");
+const HomeController = require("../controllers/HomeController");
 
 const {
     requireLogin,
@@ -37,9 +38,7 @@ const captchaLimiter = rateLimit({
     message: "Bạn đổi mã quá nhanh. Hãy thử lại sau."
 });
 
-router.get("/", (req, res) => {
-    res.render("index");
-});
+router.get("/", HomeController.index);
 
 router.get("/register", guestOnly, AuthController.showRegister);
 

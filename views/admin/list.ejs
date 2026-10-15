@@ -50,9 +50,11 @@
                         </tr>
                         <% } %>
 
-                            <% rows.forEach(row=> { %>
+                            <% rows.forEach((row, index)=> { %>
                                 <tr>
-                                    <td class="muted">#<%= row.id %>
+                                    <td class="muted">
+                                        <%= index + 1 %>
+                                    </td>
                                     </td>
 
                                     <td>

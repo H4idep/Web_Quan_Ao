@@ -115,26 +115,67 @@ const AdminModel = {
     },
 
     async categoryOptions() {
-        const [rows] = await pool.query(
-            "SELECT id, name FROM categories ORDER BY name"
-        );
+    const [rows] = await pool.query(`
+        SELECT
+            c.id,
+            CONCAT(parent.name, ' / ', c.name) AS name
+        FROM categories c
+        JOIN categories parent ON parent.id = c.parent_id
+        WHERE parent.parent_id IS NULL
+          AND parent.name IN ('Nam', 'Nữ')
+        ORDER BY parent.name, c.name
+    `);
+
+    return rows;
+    },
+
+    async parentOptions() {
+        const [rows] = await pool.query(`
+            SELECT id, name
+            FROM categories
+            WHERE parent_id IS NULL
+            AND name IN ('Nam', 'Nữ')
+            ORDER BY name
+        `);
 
         return rows;
+    },
+
+    async hasChildren(id) {
+        const [rows] = await pool.execute(
+            `SELECT id
+            FROM categories
+            WHERE parent_id = ?
+            LIMIT 1`,
+            [id]
+        );
+
+        return rows.length > 0;
     },
 
     async saveCategory(id, data) {
         if (id) {
             return pool.execute(
                 `UPDATE categories
-                 SET name = ?, description = ?
-                 WHERE id = ?`,
-                [data.name, data.description, id]
+                SET name = ?, description = ?, parent_id = ?
+                WHERE id = ?`,
+                [
+                    data.name,
+                    data.description,
+                    data.parent_id,
+                    id
+                ]
             );
         }
 
         return pool.execute(
-            "INSERT INTO categories (name, description) VALUES (?, ?)",
-            [data.name, data.description]
+            `INSERT INTO categories (name, description, parent_id)
+            VALUES (?, ?, ?)`,
+            [
+                data.name,
+                data.description,
+                data.parent_id
+            ]
         );
     },
 

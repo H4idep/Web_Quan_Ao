@@ -1,190 +1,175 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css" />
-  <img src="/img" alt="">
-  <title>Website - Routine</title>
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Routine — Thời trang mỗi ngày</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/home.css">
+
+  <script src="/js/home.js" defer></script>
 </head>
 
-<body>
-  <header>
-    <div class="logo">
-      <a href="./index.html"><img src="/images/Logo-Rountine.webp" width="180px" height="50px" /></a>
-    </div>
-    <div class="menu">
-      <li>
-        <a href="">NỮ</a>
-        <ul class="sub-menu">
-          <li><a href="./category_nu.html">Hàng mới về</a></li>
-          <li>
-            <a href="">Áo</a>
-            <ul>
-              <li><a href="./category_ao_somi_nu.html">Áo sơ mi</a></li>
-              <li><a href="./category_ao_khoac_nu.html">Áo khoác</a></li>
-            </ul>
-          </li>
-          <li>
-            <a href="">Quần</a>
-            <ul>
-              <li><a href="./category_quan_dai_nu.html">Quần dài</a></li>
-              <li><a href="./category_quan_jeans_nu.html">Quần jean</a></li>
-            </ul>
-          </li>
-          <li>
-            <a href="">Đầm </a>
-            <ul>
-              <li><a href="./category_dam.html">Đầm thời trang</a></li>
-              <li><a href="./Category_ao_dai_nu.html">Áo dài</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
+<body class="routine-home">
+  <%- include("partials/header") %>
 
-      <li>
-        <a href="">NAM</a>
-        <ul class="sub-menu">
-          <li><a href="./category_nam.html">Hàng mới về</a></li>
-          <li>
-            <a href="">Áo</a>
-            <ul>
-              <li><a href="./category_ao_polo.html">Áo Polo</a></li>
-              <li><a href="./category_ao_khoac_nam.html">Áo khoác</a></li>
-            </ul>
-          </li>
-          <li>
-            <a href="">Quần</a>
-            <ul>
-              <li><a href="./category_quandai_nam.html">Quần dài</a></li>
-              <li><a href="./category_quan_jean_nam.html">Quần jean</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li>
-        <a href="">BỘ SƯU TẬP</a>
-        <ul class="sub-menu sub-menu-new">
-          <li>
-            <a href="./collection.html">Ngọc Vương Ánh Nguyệt | BST Áo Dài</a>
-          </li>
-          <li>
-            <a href="./collection_1.html">Rhythm of SaiGon</a>
-          </li>
-        </ul>
-      </li>
-      <li><a href="./aboutme.html">THÔNG TIN</a></li>
-    </div>
-    <div class="other">
-      <li>
-        <input placeholder="Tìm kiếm" type="text" />
-        <i class="fa-solid fa-magnifying-glass"></i>
-      </li>
-      <li>
-        <a class="fa-solid fa-paw" href=""></a>
-        <ul class="sub-menu sub-menu-social">
-          <li><a href="">Hotline trực tuyến</a></li>
-          <li><a href="">Messenger</a></li>
-          <li><a href="">Email</a></li>
-          <li><a href="">Facebook</a></li>
-        </ul>
-      </li>
-      <%- include("partials/account-menu") %>
-        <li><a class="fa-solid fa-cart-shopping" href="./cart.html"></a></li>
-    </div>
-  </header>
-  <!-- Slider -->
-  <section id="Slider">
-    <div class="aspect-ratio-169 img">
-      <img src="./images/63d0bb09238edcf27af288aac6cac3b8.jpg" />
-      <img src="./images/c91a8e5ec50506042be29e6b4514586c.jpg" />
-      <img src="./images/80c46c0f6108dcc0248485c177f9afa6.jpg" />
-      <img src="./images/b7fde7af0bb7b4d7011d9599baf4561e.jpg" />
-      <img src="./images/3e4ddac28ff0914fd1969e75f5b7ca2c.jpg" />
-    </div>
-    <div class="dot-container">
-      <div class="dot active"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-    </div>
-  </section>
-  <!-- app-container -->
-  <section class="app-container">
-    <p style="font-size: 23px">Tải ứng dụng Routine</p>
-    <div class="app-google">
-      <img src="./images/download-on-the-app-store-apple-logo.svg" />
-      <img src="./images/google-play-badge-logo.svg" />
-    </div>
-    <p style="font-size: 23px">Nhận tin Routine</p>
-    <input type="text" placeholder="Nhập Email của bạn..." style="font-size: 17px" />
-  </section>
-  <!-- footer -->
-  <div class="footer-top">
-    <li>
-      <a href=""><img class="cong-thuong" src="./images/img-congthuong.png" alt="" /></a>
-    </li>
-    <li><a style="font-size: 18px" href="">Liên hệ</a></li>
-    <li><a style="font-size: 18px" href="">Tuyển dụng</a></li>
-    <li><a style="font-size: 18px" href="">Giới thiệu</a></li>
-    <li class="icon">
-      <a href=""><img src="./images/ic_fb.svg" alt="" /></a>
-      <a href=""><img src="./images/ic_instagram.svg" alt="" /></a>
-      <a href=""><img src="./images/ic_zalo.png" alt="" /></a>
-    </li>
-  </div>
-  <div class="footer-center">
-    <p style="font-size: 17px">
-      Công ty cổ phần Dự kiem với số đăng ký kinh doanh: 0993849385 <br />
-      Đại chỉ đăng ký: Tổ dân phố Tháp, P.Đại Mỗ, Q.Nam Từ Liêm, TP.Hà Nội,
-      Việt Nam - 0243 025 3333 <br />
-      Đặt hàng online: <b>0243 025 3333</b>
-    </p>
-  </div>
-  <div class="footer-bottom">© Routine All rights reserved</div>
+    <main class="fashion-home">
+
+      <!-- THANH ĐIỀU HƯỚNG NHANH -->
+      <div class="home-announcements">
+        <a href="#new-arrivals">KHÁM PHÁ SẢN PHẨM MỚI</a>
+        <a href="/products">PHONG CÁCH CHO MỖI NGÀY</a>
+        <a href="#collection">CẢM HỨNG PHỐI ĐỒ</a>
+      </div>
+
+      <!-- BANNER -->
+      <section class="home-hero" aria-label="Bộ sưu tập nổi bật">
+        <div class="home-hero-track">
+          <a class="home-slide is-active" href="/products">
+            <img src="/images/63d0bb09238edcf27af288aac6cac3b8.jpg" alt="Khám phá bộ sưu tập Routine"
+              fetchpriority="high">
+          </a>
+
+          <a class="home-slide" href="/products" hidden>
+            <img src="/images/c91a8e5ec50506042be29e6b4514586c.jpg" alt="Phong cách thời trang Routine">
+          </a>
+
+          <a class="home-slide" href="/products" hidden>
+            <img src="/images/b7fde7af0bb7b4d7011d9599baf4561e.jpg" alt="Trang phục cho mỗi ngày">
+          </a>
+        </div>
+
+        <button class="home-hero-arrow previous" id="previousSlide" type="button" aria-label="Banner trước">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <button class="home-hero-arrow next" id="nextSlide" type="button" aria-label="Banner tiếp theo">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <div class="home-hero-dots">
+          <button type="button" class="is-active" data-slide="0" aria-label="Banner 1" aria-pressed="true"></button>
+
+          <button type="button" data-slide="1" aria-label="Banner 2" aria-pressed="false"></button>
+
+          <button type="button" data-slide="2" aria-label="Banner 3" aria-pressed="false"></button>
+        </div>
+      </section>
+
+      <!-- SẢN PHẨM MỚI -->
+      <section class="home-arrivals" id="new-arrivals">
+        <div class="home-section-title">
+          <p>ROUTINE COLLECTION</p>
+          <h1>NEW ARRIVALS</h1>
+        </div>
+
+        <% const categoryNames=[ ...new Set(products.map(product=> product.category_name))
+          ];
+          %>
+
+          <div class="home-category-tabs" role="group" aria-label="Lọc sản phẩm theo danh mục">
+            <button type="button" class="is-active" data-category="" aria-pressed="true">
+              Tất cả
+            </button>
+
+            <% categoryNames.forEach(categoryName=> { %>
+              <button type="button" data-category="<%= categoryName %>" aria-pressed="false">
+                <%= categoryName %>
+              </button>
+              <% }) %>
+          </div>
+
+          <p class="home-result-count" id="productCount" aria-live="polite">
+            <%= products.length %> sản phẩm
+          </p>
+
+          <% if (products.length===0) { %>
+            <div class="home-empty">
+              <h2>Sản phẩm mới đang được cập nhật</h2>
+              <p>Bạn vui lòng quay lại sau.</p>
+            </div>
+            <% } else { %>
+              <div class="home-product-grid">
+                <% products.forEach(product=> { %>
+                  <article class="home-product-card" data-product-category="<%= product.category_name %>">
+                    <a class="home-product-photo" href="/products/<%= product.id %>">
+                      <% if (product.image_url) { %>
+                        <img src="<%= product.image_url %>" alt="<%= product.name %>" loading="lazy">
+                        <% } else { %>
+                          <span class="home-no-image">
+                            ROUTINE
+                            <small>Ảnh đang cập nhật</small>
+                          </span>
+                          <% } %>
+
+                            <% if (Number(product.stock)===0) { %>
+                              <span class="home-stock-label">Hết hàng</span>
+                              <% } %>
+
+                                <span class="home-product-overlay">
+                                  Xem chi tiết
+                                </span>
+                    </a>
+
+                    <div class="home-product-meta">
+                      <p class="home-product-category">
+                        <%= product.category_name %>
+                      </p>
+
+                      <h2>
+                        <a href="/products/<%= product.id %>">
+                          <%= product.name %>
+                        </a>
+                      </h2>
+
+                      <div class="home-product-bottom">
+                        <strong>
+                          <%= formatMoney(product.price) %>
+                        </strong>
+
+                        <a class="home-detail-button" href="/products/<%= product.id %>"
+                          aria-label="Xem chi tiết <%= product.name %>">
+                          <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </article>
+                  <% }) %>
+              </div>
+              <% } %>
+
+                <div class="home-view-all">
+                  <a href="/products">Xem tất cả sản phẩm</a>
+                </div>
+      </section>
+
+      <!-- BANNER BỘ SƯU TẬP -->
+      <section class="home-collection" id="collection">
+        <a class="home-collection-image" href="/products">
+          <img src="/images/b7fde7af0bb7b4d7011d9599baf4561e.jpg" alt="Cảm hứng thời trang Routine" loading="lazy">
+        </a>
+
+        <div class="home-collection-caption">
+          <div>
+            <p>EVERYDAY INSPIRATION</p>
+            <h2>Phong cách bắt đầu từ bạn</h2>
+          </div>
+
+          <a href="/products">
+            Khám phá ngay
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <%- include("partials/footer") %>
 </body>
-<script>
-  const header = document.querySelector("header");
-  window.addEventListener("scroll", function () {
-    x = window.pageYOffset;
-    console.log(x);
-    if (x > 0) {
-      header.classList.add("sticky");
-    } else {
-      header.classList.remove("sticky");
-    }
-  });
-  const imgPosition = document.querySelectorAll(".aspect-ratio-169 img");
-  const imgContainer = document.querySelector(".aspect-ratio-169");
-  const dotItem = document.querySelectorAll(".dot");
-  let imgNumber = imgPosition.length;
-  let index = 0;
-  //console.log(imgPosition);
-  imgPosition.forEach(function (image, index) {
-    image.style.left = index * 100 + "%";
-    dotItem[index].addEventListener("click", function () {
-      slider(index);
-    });
-  });
-  function imgSlide() {
-    index++;
-    console.log(index);
-    if (index >= imgNumber) {
-      index = 0;
-    }
-    slider(index);
-  }
-  function slider(index) {
-    imgContainer.style.left = "-" + index * 100 + "%";
-    const dotActive = document.querySelector(".active");
-    dotActive.classList.remove("active");
-    dotItem[index].classList.add("active");
-  }
-  setInterval(imgSlide, 5000);
-</script>
-<script src="/script.js"></script>
 
 </html>

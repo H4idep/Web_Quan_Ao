@@ -1,0 +1,548 @@
+/* ===== TRANG CHỦ ===== */
+
+.routine-home {
+    background: #fff;
+    color: #221f20;
+}
+
+.fashion-home {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 90px 40px 60px;
+}
+
+.fashion-home *,
+.fashion-home *::before,
+.fashion-home *::after {
+    box-sizing: border-box;
+}
+
+.fashion-home a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.fashion-home button {
+    font: inherit;
+    cursor: pointer;
+}
+
+.fashion-home [hidden] {
+    display: none !important;
+}
+
+.fashion-home a:focus-visible,
+.fashion-home button:focus-visible {
+    outline: 2px solid #222;
+    outline-offset: 5px;
+}
+
+/* ===== THANH THÔNG TIN ===== */
+
+.home-announcements {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 8px 0 22px;
+}
+
+.home-announcements a {
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    background: #f2eeea;
+}
+
+.home-announcements a:nth-child(2) {
+    background: #e8e4df;
+}
+
+.home-announcements a:nth-child(3) {
+    background: #efe8e2;
+}
+
+/* ===== BANNER ===== */
+
+.home-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 70px 0 70px 0;
+    background: #f2f2f2;
+}
+
+.home-hero-track {
+    aspect-ratio: 2.35 / 1;
+}
+
+.home-slide {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.home-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.home-hero-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    color: #222;
+}
+
+.home-hero-arrow:hover {
+    background: white;
+}
+
+.home-hero-arrow.previous {
+    left: 20px;
+}
+
+.home-hero-arrow.next {
+    right: 20px;
+}
+
+.home-hero-dots {
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+}
+
+.home-hero-dots button {
+    width: 11px;
+    height: 11px;
+    padding: 0;
+    border: 1px solid white;
+    border-radius: 50%;
+    background: transparent;
+}
+
+.home-hero-dots button.is-active {
+    background: white;
+}
+
+/* ===== TIÊU ĐỀ VÀ LỌC DANH MỤC ===== */
+
+.home-arrivals {
+    padding-top: 65px;
+    scroll-margin-top: 95px;
+}
+
+.home-section-title {
+    text-align: center;
+}
+
+.home-section-title > p {
+    margin: 0 0 10px;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: #777;
+}
+
+.home-section-title h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+.home-category-tabs {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px 30px;
+    margin-top: 24px;
+}
+
+.home-category-tabs button {
+    padding: 8px 0;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: #777;
+    font-size: 15px;
+}
+
+.home-category-tabs button:hover,
+.home-category-tabs button.is-active {
+    color: #221f20;
+    border-bottom-color: #221f20;
+}
+
+.home-result-count {
+    margin: 20px 0;
+    text-align: center;
+    color: #8a8a8a;
+    font-size: 12px;
+}
+
+/* ===== DANH SÁCH SẢN PHẨM ===== */
+
+.home-product-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 34px 22px;
+}
+
+.home-product-card {
+    min-width: 0;
+}
+
+.home-product-photo {
+    position: relative;
+    display: block;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    background: #f4f4f4;
+    border-radius: 0 0 24px 0;
+}
+
+.home-product-photo > img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.home-product-card:hover .home-product-photo > img {
+    transform: scale(1.035);
+}
+
+.home-no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #999;
+    letter-spacing: 3px;
+    font-size: 18px;
+}
+
+.home-no-image small {
+    font-size: 11px;
+    letter-spacing: 0;
+}
+
+.home-stock-label {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 5px 9px;
+    background: white;
+    color: #666;
+    font-size: 11px;
+}
+
+.home-product-overlay {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    padding: 11px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.95);
+    font-size: 12px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.home-product-photo:hover .home-product-overlay,
+.home-product-photo:focus-visible .home-product-overlay {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.home-product-meta {
+    padding-top: 13px;
+}
+
+.home-product-category {
+    margin: 0 0 7px;
+    font-size: 11px;
+    color: #8a8a8a;
+}
+
+.home-product-meta h2 {
+    margin: 0;
+    min-height: 42px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.home-product-meta h2 a:hover {
+    color: #777;
+}
+
+.home-product-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.home-product-bottom strong {
+    font-size: 15px;
+}
+
+.home-detail-button {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid #221f20;
+    border-radius: 8px 0 8px 0;
+    background: #221f20;
+    color: white !important;
+    font-size: 12px;
+}
+
+.home-detail-button:hover {
+    background: white;
+    color: #221f20 !important;
+}
+
+.home-view-all {
+    margin-top: 38px;
+    text-align: center;
+}
+
+.home-view-all a {
+    display: inline-block;
+    padding: 13px 30px;
+    border: 1px solid #221f20;
+    border-radius: 20px 0 20px 0;
+    font-size: 14px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.home-view-all a:hover {
+    background: #221f20;
+    color: white;
+}
+
+.home-empty {
+    padding: 50px 20px;
+    text-align: center;
+    background: #fafafa;
+}
+
+.home-empty h2 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.home-empty p {
+    color: #777;
+}
+
+/* ===== BỘ SƯU TẬP ===== */
+
+.home-collection {
+    margin-top: 75px;
+    scroll-margin-top: 95px;
+}
+
+.home-collection-image {
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 2.6 / 1;
+    border-radius: 65px 0 65px 0;
+    background: #f3f3f3;
+}
+
+.home-collection-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.home-collection-caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding-top: 24px;
+}
+
+.home-collection-caption p {
+    margin: 0 0 8px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #888;
+}
+
+.home-collection-caption h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.home-collection-caption > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid #222;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/* ===== MÀN HÌNH NHỎ ===== */
+
+@media (max-width: 1200px) {
+    .fashion-home {
+        padding-right: 24px;
+        padding-left: 24px;
+    }
+
+    .home-product-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 28px 18px;
+    }
+}
+
+@media (max-width: 900px) {
+    .home-product-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .home-hero {
+        border-radius: 40px 0 40px 0;
+    }
+
+    .home-announcements a {
+        font-size: 9px;
+        letter-spacing: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .fashion-home {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    .home-announcements {
+        grid-template-columns: 1fr;
+        margin-bottom: 14px;
+    }
+
+    .home-announcements a:not(:first-child) {
+        display: none;
+    }
+
+    .home-announcements a {
+        font-size: 10px;
+    }
+
+    .home-hero-track {
+        aspect-ratio: 1.6 / 1;
+    }
+
+    .home-hero {
+        border-radius: 28px 0 28px 0;
+    }
+
+    .home-hero-arrow {
+        width: 30px;
+        height: 30px;
+        font-size: 10px;
+    }
+
+    .home-hero-arrow.previous {
+        left: 10px;
+    }
+
+    .home-hero-arrow.next {
+        right: 10px;
+    }
+
+    .home-arrivals {
+        padding-top: 40px;
+    }
+
+    .home-section-title h1 {
+        font-size: 25px;
+    }
+
+    .home-category-tabs {
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        gap: 22px;
+        overflow-x: auto;
+    }
+
+    .home-category-tabs button {
+        flex-shrink: 0;
+        font-size: 13px;
+    }
+
+    .home-product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 26px 12px;
+    }
+
+    .home-product-meta h2 {
+        font-size: 13px;
+    }
+
+    .home-product-bottom strong {
+        font-size: 13px;
+    }
+
+    .home-collection {
+        margin-top: 45px;
+    }
+
+    .home-collection-image {
+        aspect-ratio: 1.6 / 1;
+        border-radius: 30px 0 30px 0;
+    }
+
+    .home-collection-caption {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .home-collection-caption h2 {
+        font-size: 21px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fashion-home *,
+    .fashion-home *::before,
+    .fashion-home *::after {
+        transition: none !important;
+    }
+}

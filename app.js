@@ -6,6 +6,7 @@ const crypto = require("node:crypto");
 const path = require("node:path");
 const adminRoutes = require("./routes/adminRoutes");
 const productRoutes = require("./routes/productRoutes");
+const loadMenuCategories = require("./middleware/menuMiddleware");
 
 const MySQLStore = require("express-mysql-session")(session);
 
@@ -109,11 +110,17 @@ app.use((req, res, next) => {
     return next();
 });
 
+app.use(loadMenuCategories);
+
 app.use(loadCurrentUser);
 
 app.use("/admin", adminRoutes);
 app.use("/products", productRoutes);
 app.use("/", authRoutes);
+
+app.get("/about", (req, res) => {
+    res.render("about");
+});
 
 app.use((req, res) => {
     res.status(404).send("Không tìm thấy trang.");

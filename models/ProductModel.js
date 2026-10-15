@@ -1,8 +1,8 @@
 const pool = require("../config/database");
 
 const ProductModel = {
-    async findAll() {
-        const [rows] = await pool.query(`
+    async findAll(categoryId = null) {
+        let sql = `
             SELECT
                 p.id,
                 p.name,
@@ -12,10 +12,38 @@ const ProductModel = {
                 c.name AS category_name
             FROM products p
             JOIN categories c ON c.id = p.category_id
+        `;
+
+        const params = [];
+
+        if (categoryId !== null) {
+            sql += `
+                WHERE c.id = ?
+                OR c.parent_id = ?
+            `;
+
+            params.push(categoryId, categoryId);
+        }
+
+        sql += `
             ORDER BY p.created_at DESC, p.id DESC
-        `);
+        `;
+
+        const [rows] = await pool.execute(sql, params);
 
         return rows;
+    },
+
+    async findCategoryById(id) {
+        const [rows] = await pool.execute(
+            `SELECT id, name, parent_id
+            FROM categories
+            WHERE id = ?
+            LIMIT 1`,
+            [id]
+        );
+
+        return rows[0];
     },
 
     async findById(id) {

@@ -20,11 +20,36 @@ function formatMoney(value) {
 const ProductController = {
     async index(req, res, next) {
         try {
-            const products = await ProductModel.findAll();
+            const rawCategoryId = req.query.category;
+
+            let categoryId = null;
+            let selectedCategory = null;
+
+            if (rawCategoryId !== undefined) {
+                if (!validId(rawCategoryId)) {
+                    return res.status(400).send("Mã danh mục không hợp lệ.");
+                }
+
+                selectedCategory = await ProductModel.findCategoryById(
+                    rawCategoryId
+                );
+
+                if (!selectedCategory) {
+                    return res.status(404).send("Danh mục không tồn tại.");
+                }
+
+                categoryId = rawCategoryId;
+            }
+
+            const products = await ProductModel.findAll(categoryId);
 
             return res.render("products/index", {
                 products,
-                formatMoney
+                formatMoney,
+                selectedCategory,
+                pageTitle: selectedCategory
+                    ? selectedCategory.name
+                    : "Tất cả sản phẩm"
             });
         } catch (error) {
             return next(error);

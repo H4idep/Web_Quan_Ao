@@ -10,34 +10,70 @@
     </title>
 
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/store-products.css">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/product-detail.css">
+
+    <script src="/js/product-detail.js" defer></script>
 </head>
 
-<body>
-    <%- include("../partials/header") %>
+<body class="product-detail-page">
+    <% function imagePath(value) { if (typeof value !=="string" ) { return "" ; } let imageUrl=value.trim(); if
+        (!imageUrl) { return "" ; } imageUrl=imageUrl.split("\\").join("/"); if ( imageUrl.startsWith("https://") ||
+        imageUrl.startsWith("http://") ) { return imageUrl; } if (imageUrl.startsWith("//")) { return "" ; } if
+        (imageUrl.startsWith("/")) { return imageUrl; } if (imageUrl.startsWith("./")) { imageUrl=imageUrl.slice(2); }
+        if (imageUrl.startsWith("public/")) { imageUrl=imageUrl.slice(7); } if ( imageUrl.startsWith("images/") ||
+        imageUrl.startsWith("uploads/") ) { return "/" + imageUrl; } return "" ; } const
+        extraImages=Array.isArray(product.images) ? product.images : []; const galleryImages=Array.from( new Set(
+        [product.image_url] .concat(extraImages) .map(imagePath) .filter(Boolean) ) ); const
+        inStock=Number(product.stock)> 0;
+        %>
 
-        <main class="store-products">
-            <p class="store-breadcrumb">
+        <main class="pd-container">
+            <nav class="pd-breadcrumb" aria-label="Đường dẫn">
                 <a href="/">Trang chủ</a>
-                /
+                <span>/</span>
                 <a href="/products">Sản phẩm</a>
-                /
-                <%= product.name %>
-            </p>
+                <span>/</span>
+                <span aria-current="page">
+                    <%= product.name %>
+                </span>
+            </nav>
 
-            <div class="store-detail">
-                <div class="store-detail-image">
-                    <% if (product.image_url) { %>
-                        <img src="<%= product.image_url %>" alt="<%= product.name %>">
-                        <% } else { %>
-                            <span>Chưa có ảnh sản phẩm</span>
-                            <% } %>
-                </div>
+            <div class="pd-layout">
+                <!-- Ảnh sản phẩm -->
+                <section class="pd-gallery" aria-label="Ảnh sản phẩm">
+                    <div class="pd-main-photo">
+                        <% if (galleryImages.length> 0) { %>
+                            <img id="pd-main-image" src="<%= galleryImages[0] %>" alt="<%= product.name %>"
+                                fetchpriority="high">
 
-                <section class="store-detail-info">
-                    <p class="store-category">
+                            <p id="pd-image-error" class="pd-image-message" hidden>
+                                Không tải được ảnh sản phẩm.
+                            </p>
+                            <% } else { %>
+                                <p class="pd-image-message">
+                                    Sản phẩm chưa có ảnh.
+                                </p>
+                                <% } %>
+                    </div>
+
+                    <% if (galleryImages.length> 0) { %>
+                        <div class="pd-thumbnails" aria-label="Chọn ảnh sản phẩm">
+                            <% galleryImages.forEach((url, index)=> { %>
+                                <button type="button" class="pd-thumbnail <%= index === 0 ? 'is-active' : '' %>"
+                                    data-image="<%= url %>" aria-label="Xem ảnh <%= index + 1 %>"
+                                    aria-pressed="<%= index === 0 ? 'true' : 'false' %>">
+                                    <img src="<%= url %>" alt="<%= product.name %> - ảnh <%= index + 1 %>"
+                                        loading="lazy">
+                                </button>
+                                <% }) %>
+                        </div>
+                        <% } %>
+                </section>
+
+                <!-- Thông tin sản phẩm -->
+                <section class="pd-info">
+                    <p class="pd-category">
                         <%= product.category_name %>
                     </p>
 
@@ -45,30 +81,88 @@
                         <%= product.name %>
                     </h1>
 
-                    <p class="store-product-code">
-                        Mã sản phẩm: <%= product.id %>
+                    <p class="pd-code">
+                        Mã sản phẩm: SP<%= product.id %>
                     </p>
 
-                    <p class="store-detail-price">
+                    <p class="pd-price">
                         <%= formatMoney(product.price) %>
                     </p>
 
-                    <% if (Number(product.stock)> 0) { %>
-                        <p class="store-in-stock">Còn hàng</p>
-                        <% } else { %>
-                            <p class="store-out-of-stock">Sản phẩm đã hết hàng</p>
-                            <% } %>
+                    <p class="pd-stock <%= inStock ? '' : 'is-sold-out' %>">
+                        <span class="pd-stock-dot" aria-hidden="true"></span>
 
-                                <div class="store-description">
-                                    <h2>Mô tả sản phẩm</h2>
-                                    <p>
-                                        <%= product.description %>
-                                    </p>
+                        <% if (inStock) { %>
+                            Còn hàng · <%= product.stock %> sản phẩm
+                                <% } else { %>
+                                    Tạm hết hàng
+                                    <% } %>
+                    </p>
+
+                    <div class="pd-summary">
+                        <span>Danh mục</span>
+                        <strong>
+                            <%= product.category_name %>
+                        </strong>
+                    </div>
+
+                    <a class="pd-shop-link" href="/products">
+                        Khám phá thêm sản phẩm
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+
+                    <div class="pd-details">
+                        <div class="pd-tabs" role="tablist" aria-label="Thông tin sản phẩm">
+                            <button id="pd-description-tab" type="button" class="pd-tab is-active" role="tab"
+                                aria-selected="true" aria-controls="pd-description-panel" tabindex="0">
+                                Giới thiệu
+                            </button>
+
+                            <button id="pd-specs-tab" type="button" class="pd-tab" role="tab" aria-selected="false"
+                                aria-controls="pd-specs-panel" tabindex="-1">
+                                Chi tiết sản phẩm
+                            </button>
+                        </div>
+
+                        <div id="pd-description-panel" class="pd-panel" role="tabpanel"
+                            aria-labelledby="pd-description-tab" tabindex="0">
+                            <p class="pd-description">
+                                <%= product.description || "Thông tin sản phẩm đang được cập nhật." %>
+                            </p>
+                        </div>
+
+                        <div id="pd-specs-panel" class="pd-panel" role="tabpanel" aria-labelledby="pd-specs-tab"
+                            tabindex="0" hidden>
+                            <dl class="pd-specs">
+                                <div>
+                                    <dt>Mã sản phẩm</dt>
+                                    <dd>SP<%= product.id %>
+                                    </dd>
                                 </div>
 
-                                <a class="store-back" href="/products">
-                                    ← Tiếp tục xem sản phẩm
-                                </a>
+                                <div>
+                                    <dt>Danh mục</dt>
+                                    <dd>
+                                        <%= product.category_name %>
+                                    </dd>
+                                </div>
+
+                                <div>
+                                    <dt>Giá bán</dt>
+                                    <dd>
+                                        <%= formatMoney(product.price) %>
+                                    </dd>
+                                </div>
+
+                                <div>
+                                    <dt>Tình trạng</dt>
+                                    <dd>
+                                        <%= inStock ? "Còn hàng" : "Tạm hết hàng" %>
+                                    </dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
                 </section>
             </div>
         </main>

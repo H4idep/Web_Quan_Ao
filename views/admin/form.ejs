@@ -34,81 +34,111 @@
                                     <% } %>
                             </div>
 
-                            <% if (kind==="products" ) { %>
+                            <% if (kind==="categories" ) { %>
                                 <div class="field">
-                                    <label for="category_id">Danh mục *</label>
+                                    <label for="parent_id">Thuộc nhóm *</label>
 
-                                    <select id="category_id" name="category_id" required>
-                                        <option value="">Chọn danh mục</option>
+                                    <select id="parent_id" name="parent_id" required>
+                                        <option value="">Chọn Nam hoặc Nữ</option>
 
-                                        <% categories.forEach(category=> { %>
-                                            <option value="<%= category.id %>"
-                                                <%=String(item.category_id)===String(category.id) ? "selected" : "" %>
+                                        <% parentCategories.forEach(parent=> { %>
+                                            <option value="<%= parent.id %>"
+                                                <%=String(item.parent_id)===String(parent.id) ? "selected" : "" %>
                                                 >
-                                                <%= category.name %>
+                                                <%= parent.name %>
                                             </option>
                                             <% }) %>
                                     </select>
 
-                                    <% if (!categories.length) { %>
-                                        <small>
-                                            Chưa có danh mục.
-                                            <a href="/admin/categories/create">Tạo danh mục trước</a>.
+                                    <small>
+                                        Ví dụ: Áo nam thuộc Nam, Váy nữ thuộc Nữ.
+                                    </small>
+
+                                    <% if (errors.parent_id) { %>
+                                        <small class="field-error">
+                                            <%= errors.parent_id %>
                                         </small>
                                         <% } %>
-
-                                            <% if (errors.category_id) { %>
-                                                <small class="field-error">
-                                                    <%= errors.category_id %>
-                                                </small>
-                                                <% } %>
-                                </div>
-
-                                <div class="two-columns">
-                                    <div class="field">
-                                        <label for="price">Giá bán (đ) *</label>
-
-                                        <input id="price" name="price" type="number" min="0.01" max="9999999999.99"
-                                            step="0.01" value="<%= item.price ?? '' %>" required>
-
-                                        <% if (errors.price) { %>
-                                            <small class="field-error">
-                                                <%= errors.price %>
-                                            </small>
-                                            <% } %>
-                                    </div>
-
-                                    <div class="field">
-                                        <label for="stock">Tồn kho *</label>
-
-                                        <input id="stock" name="stock" type="number" min="0" max="4294967295" step="1"
-                                            value="<%= item.stock ?? 0 %>" required>
-
-                                        <% if (errors.stock) { %>
-                                            <small class="field-error">
-                                                <%= errors.stock %>
-                                            </small>
-                                            <% } %>
-                                    </div>
                                 </div>
                                 <% } %>
 
-                                    <div class="field">
-                                        <label for="description">
-                                            Mô tả <%= kind==="products" ? "*" : "" %>
-                                        </label>
+                                    <% if (kind==="products" ) { %>
+                                        <div class="field">
+                                            <label for="category_id">Danh mục *</label>
 
-                                        <textarea id="description" name="description" rows="7"
-                                            maxlength="<%= kind === 'products' ? 5000 : 500 %>" <%=kind==="products"
-                                            ? "required" : "" %>
+                                            <select id="category_id" name="category_id" required>
+                                                <option value="">Chọn danh mục</option>
+
+                                                <% categories.forEach(category=> { %>
+                                                    <option value="<%= category.id %>"
+                                                        <%=String(item.category_id)===String(category.id) ? "selected"
+                                                        : "" %>
+                                                        >
+                                                        <%= category.name %>
+                                                    </option>
+                                                    <% }) %>
+                                            </select>
+
+                                            <% if (!categories.length) { %>
+                                                <small>
+                                                    Chưa có danh mục.
+                                                    <a href="/admin/categories/create">Tạo danh mục trước</a>.
+                                                </small>
+                                                <% } %>
+
+                                                    <% if (errors.category_id) { %>
+                                                        <small class="field-error">
+                                                            <%= errors.category_id %>
+                                                        </small>
+                                                        <% } %>
+                                        </div>
+
+                                        <div class="two-columns">
+                                            <div class="field">
+                                                <label for="price">Giá bán (đ) *</label>
+
+                                                <input id="price" name="price" type="number" min="0.01"
+                                                    max="9999999999.99" step="0.01" value="<%= item.price ?? '' %>"
+                                                    required>
+
+                                                <% if (errors.price) { %>
+                                                    <small class="field-error">
+                                                        <%= errors.price %>
+                                                    </small>
+                                                    <% } %>
+                                            </div>
+
+                                            <div class="field">
+                                                <label for="stock">Tồn kho *</label>
+
+                                                <input id="stock" name="stock" type="number" min="0" max="4294967295"
+                                                    step="1" value="<%= item.stock ?? 0 %>" required>
+
+                                                <% if (errors.stock) { %>
+                                                    <small class="field-error">
+                                                        <%= errors.stock %>
+                                                    </small>
+                                                    <% } %>
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <div class="field">
+                                                <label for="description">
+                                                    Mô tả <%= kind==="products" ? "*" : "" %>
+                                                </label>
+
+                                                <textarea id="description" name="description" rows="7"
+                                                    maxlength="<%= kind === 'products' ? 5000 : 500 %>"
+                                                    <%=kind==="products" ? "required" : "" %>
         ><%= item.description || "" %></textarea>
 
-                                        <% if (errors.description) { %>
-                                            <small class="field-error">
-                                                <%= errors.description %>
-                                            </small>
-                                            <% } %>
-                                    </div>
+                                                <% if (errors.description) { %>
+                                                    <small class="field-error">
+                                                        <%= errors.description %>
+                                                    </small>
+                                                    <% } %>
+                                            </div>
                 </section>
 
                 <% if (kind==="products" ) { %>
