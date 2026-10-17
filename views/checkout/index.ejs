@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đặt hàng - Routine</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/cart.css">
+    <link rel="stylesheet" href="/css/checkout.css">
+</head>
+
+<body class="cart-page">
+    <%- include("../partials/header") %>
+
+    <main class="cart-container">
+        <h1>Đặt hàng</h1>
+
+        <div class="checkout-layout">
+            <form method="post" action="/checkout" class="checkout-form" novalidate>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                <h2>Thông tin giao hàng</h2>
+
+                <div class="field">
+                    <label for="customerName">Họ và tên</label>
+                    <input id="customerName" name="customerName" type="text" maxlength="120" required
+                        value="<%= form.customerName %>">
+                    <% if (errors.customerName) { %><p class="field-error"><%= errors.customerName %></p><% } %>
+                </div>
+
+                <div class="field">
+                    <label for="phone">Số điện thoại</label>
+                    <input id="phone" name="phone" type="tel" inputmode="numeric" maxlength="10" required
+                        value="<%= form.phone %>">
+                    <% if (errors.phone) { %><p class="field-error"><%= errors.phone %></p><% } %>
+                </div>
+
+                <div class="field">
+                    <label for="shippingAddress">Địa chỉ giao hàng</label>
+                    <textarea id="shippingAddress" name="shippingAddress" rows="3" maxlength="500"
+                        required><%= form.shippingAddress %></textarea>
+                    <% if (errors.shippingAddress) { %><p class="field-error"><%= errors.shippingAddress %></p><% } %>
+                </div>
+
+                <div class="field">
+                    <label for="notes">Ghi chú (không bắt buộc)</label>
+                    <textarea id="notes" name="notes" rows="2" maxlength="1000"><%= form.notes %></textarea>
+                    <% if (errors.notes) { %><p class="field-error"><%= errors.notes %></p><% } %>
+                </div>
+
+                <button type="submit" class="cart-btn">Xác nhận đặt hàng</button>
+                <a class="cart-btn cart-btn-secondary" href="/cart">Quay lại giỏ hàng</a>
+            </form>
+
+            <aside class="checkout-summary">
+                <h2>Đơn hàng của bạn</h2>
+                <ul>
+                    <% items.forEach(item => { %>
+                        <li>
+                            <span><%= item.name %> × <%= item.quantity %></span>
+                            <span><%= formatMoney(item.line_total) %></span>
+                        </li>
+                    <% }) %>
+                </ul>
+                <p class="checkout-total">Tổng cộng: <strong><%= formatMoney(subtotal) %></strong></p>
+                <p class="checkout-note">Phương thức thanh toán sẽ được chọn ở bước tiếp theo.</p>
+            </aside>
+        </div>
+    </main>
+
+    <%- include("../partials/footer") %>
+</body>
+
+</html>

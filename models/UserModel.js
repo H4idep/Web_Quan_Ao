@@ -25,6 +25,19 @@ const UserModel = {
         return rows[0];
     },
 
+    // Thông tin dùng để điền sẵn form đặt hàng.
+    async findCheckoutProfile(id) {
+        const [rows] = await pool.execute(
+            `SELECT full_name, phone, province, district, ward, address
+             FROM users
+             WHERE id = ?
+             LIMIT 1`,
+            [id]
+        );
+
+        return rows[0];
+    },
+
     async create(data, passwordHash) {
         const [result] = await pool.execute(
             `INSERT INTO users (

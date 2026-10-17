@@ -45,4 +45,13 @@ function imagePath(value) {
     return "";
 }
 
-module.exports = { formatMoney, imagePath };
+// Nhãn trạng thái đơn hàng (khớp enum trong bảng orders).
+const ORDER_STATUS_LABELS = {
+    pending: "Chờ xử lý",
+    processing: "Đang xử lý",
+    shipped: "Đang giao",
+    completed: "Hoàn thành",
+    cancelled: "Đã hủy"
+};
+
+module.exports = { formatMoney, imagePath, ORDER_STATUS_LABELS };

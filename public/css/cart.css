@@ -35,3 +35,5 @@
     .cart-table tr { display: block; border-bottom: 1px solid #e5e5e5; padding: 8px 0; }
     .cart-table td { display: block; border: 0; padding: 4px 0; }
 }
+
+.cart-btn-disabled { background: #ccc; color: #666; cursor: not-allowed; }

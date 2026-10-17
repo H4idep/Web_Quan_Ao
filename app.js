@@ -15,6 +15,8 @@ const authRoutes = require("./routes/authRoutes");
 const { loadCurrentUser } = require("./middleware/authMiddleware");
 const { loadCartCount } = require("./middleware/cartMiddleware");
 const cartRoutes = require("./routes/cartRoutes");
+const checkoutRoutes = require("./routes/checkoutRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -116,6 +118,8 @@ app.use(loadCartCount);
 app.use("/admin", adminRoutes);
 app.use("/products", productRoutes);
 app.use("/cart", cartRoutes);
+app.use("/checkout", checkoutRoutes);
+app.use("/orders", orderRoutes);
 app.use("/", authRoutes);
 
 app.get("/about", (req, res) => {

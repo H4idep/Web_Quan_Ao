@@ -89,7 +89,11 @@
                     <p class="cart-warn">Vui lòng xử lý các sản phẩm vượt tồn kho trước khi đặt hàng.</p>
                 <% } %>
                 <a class="cart-btn cart-btn-secondary" href="/products">Tiếp tục mua sắm</a>
-                <!-- Bước 2 (Đặt hàng) sẽ thêm nút "Đặt hàng" tại đây. -->
+                <% if (hasProblem) { %>
+                    <span class="cart-btn cart-btn-disabled" aria-disabled="true">Đặt hàng</span>
+                <% } else { %>
+                    <a class="cart-btn" href="/checkout">Đặt hàng</a>
+                <% } %>
             </div>
         <% } %>
     </main>
