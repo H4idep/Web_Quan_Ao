@@ -21,6 +21,9 @@
         <div class="checkout-layout">
             <form method="post" action="/checkout" class="checkout-form" novalidate>
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <% selectedIds.forEach(id => { %>
+                    <input type="hidden" name="selected" value="<%= id %>">
+                <% }) %>
 
                 <h2>Thông tin giao hàng</h2>
 

@@ -8,7 +8,22 @@ const CartModel = {
 
     // Giá và tồn kho luôn lấy từ bảng products, không lưu trong giỏ,
     // nên admin đổi giá thì giỏ cập nhật theo.
-    async getItems(userId) {
+    //
+    // productIds (tuỳ chọn): chỉ lấy các sản phẩm được chọn để đặt hàng.
+    // Bỏ trống/null = lấy cả giỏ (dùng cho trang giỏ hàng).
+    async getItems(userId, productIds = null) {
+        const params = [userId];
+        let filter = "";
+
+        if (productIds !== null) {
+            if (productIds.length === 0) {
+                return [];
+            }
+
+            filter = `AND ci.product_id IN (${productIds.map(() => "?").join(",")})`;
+            params.push(...productIds);
+        }
+
         const [rows] = await pool.execute(
             `SELECT
                 ci.product_id,
@@ -20,9 +35,9 @@ const CartModel = {
                 (ci.quantity * p.price) AS line_total
              FROM cart_items ci
              JOIN products p ON p.id = ci.product_id
-             WHERE ci.user_id = ?
+             WHERE ci.user_id = ? ${filter}
              ORDER BY ci.updated_at DESC, ci.id DESC`,
-            [userId]
+            params
         );
 
         return rows;

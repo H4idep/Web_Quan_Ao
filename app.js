@@ -62,7 +62,8 @@ app.use(
   express.urlencoded({
     extended: false,
     limit: "16kb",
-    parameterLimit: 30,
+    // Form đặt hàng gửi kèm mỗi sản phẩm được chọn là một tham số.
+    parameterLimit: 100,
   }),
 );
 

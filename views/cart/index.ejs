@@ -30,6 +30,9 @@
             <table class="cart-table">
                 <thead>
                     <tr>
+                        <th class="cart-select-col">
+                            <input type="checkbox" id="select-all" aria-label="Chọn tất cả sản phẩm">
+                        </th>
                         <th>Sản phẩm</th>
                         <th>Đơn giá</th>
                         <th>Số lượng</th>
@@ -44,6 +47,14 @@
                         const overStock = !soldOut && Number(item.quantity) > Number(item.stock);
                     %>
                         <tr>
+                            <td class="cart-select-col">
+                                <%# Checkbox nằm ngoài form đặt hàng nên gắn vào bằng thuộc tính form=. %>
+                                <input type="checkbox" class="cart-select" name="selected"
+                                    value="<%= item.product_id %>" form="select-form"
+                                    data-line-total="<%= Number(item.line_total) %>"
+                                    <%= (soldOut || overStock) ? "disabled" : "checked" %>
+                                    aria-label="Chọn <%= item.name %> để đặt hàng">
+                            </td>
                             <td class="cart-product">
                                 <% if (image) { %>
                                     <img src="<%= image %>" alt="" width="72" height="72">
@@ -51,9 +62,9 @@
                                 <div>
                                     <a href="/products/<%= item.product_id %>"><%= item.name %></a>
                                     <% if (soldOut) { %>
-                                        <small class="cart-warn">Đã hết hàng, hãy xóa khỏi giỏ.</small>
+                                        <small class="cart-warn">Đã hết hàng, không thể chọn để đặt. Hãy xóa khỏi giỏ.</small>
                                     <% } else if (overStock) { %>
-                                        <small class="cart-warn">Chỉ còn <%= item.stock %> sản phẩm, hãy giảm số lượng.</small>
+                                        <small class="cart-warn">Chỉ còn <%= item.stock %> sản phẩm, hãy giảm số lượng rồi mới chọn được.</small>
                                     <% } %>
                                 </div>
                             </td>
@@ -83,22 +94,23 @@
                 </tbody>
             </table>
 
-            <div class="cart-summary">
-                <p>Tạm tính: <strong><%= formatMoney(subtotal) %></strong></p>
+            <form id="select-form" class="cart-summary" method="get" action="/checkout">
+                <p>
+                    Đã chọn <strong id="selected-count">0</strong> sản phẩm.
+                    Tạm tính: <strong id="selected-subtotal"><%= formatMoney(0) %></strong>
+                </p>
+                <p class="cart-note">Tổng giá trị cả giỏ: <%= formatMoney(subtotal) %></p>
                 <% if (hasProblem) { %>
-                    <p class="cart-warn">Vui lòng xử lý các sản phẩm vượt tồn kho trước khi đặt hàng.</p>
+                    <p class="cart-warn">Sản phẩm hết hàng hoặc vượt tồn kho sẽ không thể chọn. Hãy điều chỉnh số lượng hoặc xóa khỏi giỏ.</p>
                 <% } %>
                 <a class="cart-btn cart-btn-secondary" href="/products">Tiếp tục mua sắm</a>
-                <% if (hasProblem) { %>
-                    <span class="cart-btn cart-btn-disabled" aria-disabled="true">Đặt hàng</span>
-                <% } else { %>
-                    <a class="cart-btn" href="/checkout">Đặt hàng</a>
-                <% } %>
-            </div>
+                <button type="submit" id="checkout-btn" class="cart-btn" disabled>Đặt hàng</button>
+            </form>
         <% } %>
     </main>
 
     <%- include("../partials/footer") %>
+    <script src="/js/cart.js"></script>
 </body>
 
 </html>

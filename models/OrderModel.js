@@ -28,13 +28,20 @@ function fromCents(cents) {
 }
 
 const OrderModel = {
-    // Đặt hàng từ giỏ của user, trong MỘT transaction:
-    // khóa dòng -> kiểm tra tồn kho -> tạo đơn -> trừ kho -> xóa giỏ.
+    // Đặt hàng các sản phẩm ĐƯỢC CHỌN trong giỏ của user, trong MỘT transaction:
+    // khóa dòng -> kiểm tra tồn kho -> tạo đơn -> trừ kho -> xóa các món đã đặt khỏi giỏ.
+    // Các món không được chọn vẫn nằm lại trong giỏ.
+    // productIds: mảng id (đã validate) các sản phẩm muốn đặt.
     // Trả về:
-    //   { status: "empty" }
+    //   { status: "empty" }          (không có món nào được chọn còn trong giỏ)
     //   { status: "stock", problems: [{ name, stock }] }
     //   { status: "ok", orderNumber }
-    async createFromCart(user, info) {
+    async createFromCart(user, info, productIds) {
+        if (!Array.isArray(productIds) || productIds.length === 0) {
+            return { status: "empty" };
+        }
+
+        const placeholders = productIds.map(() => "?").join(",");
         const connection = await pool.getConnection();
 
         try {
@@ -54,12 +61,15 @@ const OrderModel = {
                  FROM cart_items ci
                  JOIN products p ON p.id = ci.product_id
                  WHERE ci.user_id = ?
+                   AND ci.product_id IN (${placeholders})
                  ORDER BY p.id
                  FOR UPDATE`,
-                [user.id]
+                [user.id, ...productIds]
             );
 
-            if (items.length === 0) {
+            // Có món được chọn nhưng không còn trong giỏ (vd: đã xóa ở tab khác)
+            // thì không đặt một phần đơn âm thầm, bắt người dùng kiểm tra lại.
+            if (items.length !== productIds.length) {
                 await connection.rollback();
 
                 return { status: "empty" };
@@ -178,9 +188,11 @@ const OrderModel = {
                 }
             }
 
+            // Chỉ xóa các món đã đặt, giữ nguyên các món không chọn.
             await connection.execute(
-                "DELETE FROM cart_items WHERE user_id = ?",
-                [user.id]
+                `DELETE FROM cart_items
+                 WHERE user_id = ? AND product_id IN (${placeholders})`,
+                [user.id, ...productIds]
             );
 
             await connection.commit();
