@@ -48,6 +48,11 @@
             </ul>
         </li>
         <%- include("account-menu") %>
-            <li><a class="fa-solid fa-cart-shopping" href="./cart.html"></a></li>
+            <li class="cart-link">
+                <a class="fa-solid fa-cart-shopping" href="/cart" aria-label="Giỏ hàng"></a>
+                <% if (typeof cartCount !== "undefined" && cartCount > 0) { %>
+                    <span class="cart-badge"><%= cartCount %></span>
+                <% } %>
+            </li>
     </div>
 </header>

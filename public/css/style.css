@@ -1735,3 +1735,6 @@ label {
     height: 100%;
     object-fit: contain;
 }
+/* Số lượng trong giỏ hàng trên header */
+.cart-link { position: relative; }
+.cart-badge { position: absolute; top: -8px; right: -10px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #d32f2f; color: #fff; font-size: 11px; line-height: 18px; text-align: center; pointer-events: none; }

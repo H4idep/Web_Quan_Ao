@@ -345,3 +345,7 @@
     margin-top: 30px;
   }
 }
+/* Form thêm vào giỏ hàng */
+.pd-cart-form { display: flex; align-items: center; gap: 10px; margin: 16px 0; flex-wrap: wrap; }
+.pd-cart-form input[type="number"] { width: 72px; padding: 8px; }
+.pd-add-btn { padding: 10px 20px; border: 0; border-radius: 4px; background: #111; color: #fff; cursor: pointer; }
