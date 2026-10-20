@@ -1,9 +1,11 @@
 const express = require("express");
 const { rateLimit } = require("express-rate-limit");
 
+const adminCustomerRoutes = require("./adminCustomerRoutes");
 const AdminController = require("../controllers/AdminController");
 const { requireAdmin } = require("../middleware/authMiddleware");
 const { parseImage, saveImage } = require("../middleware/adminUpload");
+
 
 const router = express.Router();
 
@@ -72,5 +74,7 @@ for (const kind of ["categories", "products"]) {
 
     router.post(`/${kind}/:id/delete`, AdminController.remove(kind));
 }
+
+router.use("/customers", adminCustomerRoutes);
 
 module.exports = router;

@@ -179,6 +179,7 @@ const AuthController = {
                 }
 
                 req.session.userId = user.id;
+                req.session.sessionVersion = String(user.session_version);
 
                 req.session.save(error => {
                     if (error) {

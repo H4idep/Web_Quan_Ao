@@ -17,7 +17,7 @@ async function loadCurrentUser(req, res, next) {
         // Đọc lại quyền và trạng thái từ database mỗi request.
         const user = await UserModel.findSessionUser(userId);
 
-        if (!user || user.status !== "active") {
+        if (!user || user.status !== "active" || String(req.session.sessionVersion) !== String(user.session_version)) {
             return req.session.destroy(error => {
                 if (error) {
                     return next(error);

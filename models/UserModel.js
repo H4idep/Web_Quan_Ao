@@ -3,7 +3,7 @@ const pool = require("../config/database");
 const UserModel = {
     async findByEmail(email) {
         const [rows] = await pool.execute(
-            `SELECT id, full_name, email, password_hash, role, status
+            `SELECT id, full_name, email, password_hash, role, status, session_version
              FROM users
              WHERE email = ?
              LIMIT 1`,
@@ -15,7 +15,7 @@ const UserModel = {
 
     async findSessionUser(id) {
         const [rows] = await pool.execute(
-            `SELECT id, full_name, email, role, status
+            `SELECT id, full_name, email, role, status, session_version
              FROM users
              WHERE id = ?
              LIMIT 1`,

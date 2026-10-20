@@ -86,12 +86,18 @@ const AdminModel = {
         } else {
             [rows] = await pool.execute(
                 `SELECT c.*,
-                    (SELECT COUNT(*) FROM products p
-                     WHERE p.category_id = c.id) AS product_count
-                 FROM categories c
-                 WHERE c.name LIKE ?
-                 ORDER BY c.created_at DESC, c.id DESC
-                 LIMIT ${pageSize} OFFSET ${offset}`,
+                    (
+                        SELECT COUNT(*)
+                        FROM products p
+                        JOIN categories product_category
+                            ON product_category.id = p.category_id
+                        WHERE product_category.id = c.id
+                        OR product_category.parent_id = c.id
+                    ) AS product_count
+                FROM categories c
+                WHERE c.name LIKE ?
+                ORDER BY c.created_at DESC, c.id DESC
+                LIMIT ${pageSize} OFFSET ${offset}`,
                 [pattern]
             );
         }
