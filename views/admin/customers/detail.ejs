@@ -1,0 +1,317 @@
+<%- include("../partials/header") %>
+
+    <a class="back-link" href="/admin/customers">
+        ← Danh sách khách hàng
+    </a>
+
+    <div class="customer-layout">
+        <section class="panel customer-panel">
+            <div class="customer-heading">
+                <div>
+                    <p class="muted">KH<%= customer.id %>
+                    </p>
+                    <h2>
+                        <%= customer.full_name %>
+                    </h2>
+                </div>
+
+                <span class="badge <%= customer.status === 'active'
+                ? 'completed' : 'pending' %>">
+                    <%= customer.status==="active" ? "Hoạt động" : "Đang khóa" %>
+                </span>
+            </div>
+
+            <dl class="customer-facts">
+                <div>
+                    <dt>Email</dt>
+                    <dd>
+                        <%= customer.email %>
+                    </dd>
+                </div>
+                <div>
+                    <dt>Số điện thoại</dt>
+                    <dd>
+                        <%= customer.phone %>
+                    </dd>
+                </div>
+                <div>
+                    <dt>Ngày sinh</dt>
+                    <dd>
+                        <%= customer.birthday_text || "—" %>
+                    </dd>
+                </div>
+                <div>
+                    <dt>Giới tính</dt>
+                    <dd>
+                        <%= customer.gender %>
+                    </dd>
+                </div>
+                <div>
+                    <dt>Ngày đăng ký</dt>
+                    <dd>
+                        <%= customer.registered_at %>
+                    </dd>
+                </div>
+                <div>
+                    <dt>Địa chỉ</dt>
+                    <dd>
+                        <%= [ customer.address, customer.ward, customer.district, customer.province
+                            ].filter(Boolean).join(", ") %>
+                </dd>
+            </div>
+        </dl>
+
+        <h3>Cập nhật thông tin hỗ trợ</h3>
+
+        <% if (Object.keys(errors).length) { %>
+            <div class=" alert error" role="alert">
+                            <% Object.values(errors).forEach(message=> { %>
+                                <p>
+                                    <%= message %>
+                                </p>
+                                <% }) %>
+                </div>
+                <% } %>
+
+                    <form method="POST" action="/admin/customers/<%= customer.id %>/update">
+
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="version" value="<%= form.version ?? customer.management_version %>">
+
+                        <div class="two-columns">
+                            <div class="field">
+                                <label for="last_name">Họ và tên đệm *</label>
+                                <input id="last_name" name="last_name" maxlength="50" value="<%= form.last_name %>"
+                                    required>
+                            </div>
+
+                            <div class="field">
+                                <label for="first_name">Tên *</label>
+                                <input id="first_name" name="first_name" maxlength="50" value="<%= form.first_name %>"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label for="phone">Số điện thoại *</label>
+                            <input id="phone" name="phone" type="tel" inputmode="numeric" maxlength="10"
+                                pattern="0[35789][0-9]{8}" value="<%= form.phone %>" required>
+                        </div>
+
+                        <div class="two-columns">
+                            <div class="field">
+                                <label for="province">Tỉnh/Thành phố *</label>
+                                <input id="province" name="province" maxlength="100" value="<%= form.province %>"
+                                    required>
+                            </div>
+
+                            <div class="field">
+                                <label for="district">Quận/Huyện *</label>
+                                <input id="district" name="district" maxlength="100" value="<%= form.district %>"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label for="ward">Phường/Xã *</label>
+                            <input id="ward" name="ward" maxlength="100" value="<%= form.ward %>" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="address">Địa chỉ cụ thể *</label>
+                            <input id="address" name="address" minlength="5" maxlength="255" value="<%= form.address %>"
+                                required>
+                        </div>
+
+                        <button class="btn primary" type="submit">
+                            Lưu thông tin
+                        </button>
+                    </form>
+        </section>
+
+        <section class="panel customer-panel">
+            <h2>Trạng thái tài khoản</h2>
+
+            <p class="muted">
+                Khóa tài khoản tạm thời ngăn khách đăng nhập.
+                Thông tin cá nhân và đơn hàng vẫn được giữ lại.
+            </p>
+
+            <% if (customer.status==="blocked" ) { %>
+                <div class="alert error">
+                    <p>
+                        <strong>Thời điểm khóa:</strong>
+                        <%= customer.blocked_at_text || "Chưa có thông tin" %>
+                    </p>
+                    <p>
+                        <strong>Lý do:</strong>
+                        <%= customer.blocked_reason || "Chưa có lý do được ghi nhận." %>
+                    </p>
+                </div>
+                <% } %>
+
+                    <% if (Object.keys(statusErrors).length) { %>
+                        <div class="alert error" role="alert">
+                            <% Object.values(statusErrors).forEach(message=> { %>
+                                <p>
+                                    <%= message %>
+                                </p>
+                                <% }) %>
+                        </div>
+                        <% } %>
+
+                            <form method="POST" action="/admin/customers/<%= customer.id %>/status" data-confirm="<%= customer.status === 'active'
+                  ? 'Bạn có chắc muốn khóa tạm thời tài khoản này?'
+                  : 'Bạn có chắc muốn mở khóa tài khoản này?' %>">
+
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <input type="hidden" name="version" value="<%= customer.management_version %>">
+
+                                <input type="hidden" name="status" value="<%= customer.status === 'active'
+                    ? 'blocked' : 'active' %>">
+
+                                <div class="field">
+                                    <label for="reason">
+                                        <%= customer.status==="active" ? "Lý do khóa *" : "Ghi chú mở khóa" %>
+                                    </label>
+
+                                    <input id="reason" name="reason" maxlength="500" value="<%= reason %>"
+                                        <%=customer.status==="active" ? 'required minlength="5"' : "" %>
+                                    >
+                                </div>
+
+                                <button type="submit" class="btn <%= customer.status === 'active'
+                    ? 'danger' : 'primary' %>">
+                                    <%= customer.status==="active" ? "Khóa tài khoản" : "Mở khóa tài khoản" %>
+                                </button>
+                            </form>
+        </section>
+    </div>
+
+    <section class="panel customer-section">
+        <div class="customer-panel">
+            <h2>Lịch sử đơn hàng</h2>
+            <p class="muted">
+                <%= orders.total %> đơn hàng
+            </p>
+        </div>
+
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Ngày đặt</th>
+                        <th>Người nhận</th>
+                        <th>Địa chỉ giao hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (!orders.rows.length) { %>
+                        <tr>
+                            <td colspan="6" class="empty">
+                                Chưa có đơn hàng được liên kết với khách hàng này.
+                            </td>
+                        </tr>
+                        <% } %>
+
+                            <% orders.rows.forEach(order=> { %>
+                                <tr>
+                                    <td>
+                                        <%= order.order_number %>
+                                    </td>
+                                    <td class="nowrap">
+                                        <%= order.ordered_at %>
+                                    </td>
+                                    <td>
+                                        <strong>
+                                            <%= order.customer_name %>
+                                        </strong>
+                                        <p class="muted">
+                                            <%= order.customer_phone %>
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <%= order.shipping_address %>
+                                    </td>
+                                    <td class="nowrap">
+                                        <%= money(order.total_amount) %>
+                                    </td>
+                                    <td>
+                                        <%= orderStatuses[order.status] || order.status %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <span class="muted">
+                Trang <%= orders.page %>/<%= orders.pages %>
+            </span>
+
+            <div class="row-actions">
+                <% if (orders.page> 1) { %>
+                    <a class="btn small" href="/admin/customers/<%= customer.id %>?orderPage=<%= orders.page - 1 %>">
+                        ← Trước
+                    </a>
+                    <% } %>
+
+                        <% if (orders.page < orders.pages) { %>
+                            <a class="btn small"
+                                href="/admin/customers/<%= customer.id %>?orderPage=<%= orders.page + 1 %>">
+                                Sau →
+                            </a>
+                            <% } %>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel customer-section">
+        <div class="customer-panel">
+            <h2>Lịch sử khóa / mở khóa</h2>
+            <p class="muted">20 thay đổi gần nhất</p>
+        </div>
+
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Quản trị viên</th>
+                        <th>Thao tác</th>
+                        <th>Lý do / ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (!logs.length) { %>
+                        <tr>
+                            <td colspan="4" class="empty">Chưa có thay đổi.</td>
+                        </tr>
+                        <% } %>
+
+                            <% logs.forEach(log=> { %>
+                                <tr>
+                                    <td class="nowrap">
+                                        <%= log.changed_at %>
+                                    </td>
+                                    <td>
+                                        <%= log.admin_name %>
+                                    </td>
+                                    <td>
+                                        <%= log.new_status==="blocked" ? "Khóa tài khoản" : "Mở khóa tài khoản" %>
+                                    </td>
+                                    <td>
+                                        <%= log.reason || "—" %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <%- include("../partials/footer") %>
