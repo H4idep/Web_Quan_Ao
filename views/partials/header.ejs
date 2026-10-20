@@ -1,0 +1,53 @@
+<header>
+    <div class="logo">
+        <a href="/">
+            <img src="/images/Logo-Rountine.webp" width="180" height="50" alt="Routine">
+        </a>
+    </div>
+    <div class="menu">
+        <% menuCategories.forEach(group=> { %>
+            <li>
+                <a href="/products?category=<%= group.id %>">
+                    <%= group.name.toUpperCase() %>
+                </a>
+
+                <ul class="sub-menu">
+                    <li>
+                        <a href="/products?category=<%= group.id %>">
+                            Xem tất cả
+                        </a>
+                    </li>
+
+                    <% group.children.forEach(category=> { %>
+                        <li>
+                            <a href="/products?category=<%= category.id %>">
+                                <%= category.name %>
+                            </a>
+                        </li>
+                        <% }) %>
+                </ul>
+            </li>
+            <% }) %>
+
+                <li>
+                    <a href="/about">THÔNG TIN</a>
+                </li>
+    </div>
+    <div class="other">
+        <li>
+            <input placeholder="Tìm kiếm" type="text" />
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </li>
+        <li>
+            <a class="fa-solid fa-paw" href=""></a>
+            <ul class="sub-menu sub-menu-social">
+                <li><a href="">Hotline trực tuyến</a></li>
+                <li><a href="">Messenger</a></li>
+                <li><a href="">Email</a></li>
+                <li><a href="">Facebook</a></li>
+            </ul>
+        </li>
+        <%- include("account-menu") %>
+            <li><a class="fa-solid fa-cart-shopping" href="./cart.html"></a></li>
+    </div>
+</header>

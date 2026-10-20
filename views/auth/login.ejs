@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <title>Document</title>
+</head>
+
+<body>
+  <header style="border-bottom: 2px solid #ccc">
+    <div class="logo">
+      <a href="/"><img src="/images/Logo-Rountine.webp" width="180px" height="50px" /></a>
+    </div>
+    <div class="menu">
+      <li>
+        <a href="">NỮ</a>
+        <ul class="sub-menu">
+          <li><a href="./category_nu.html">Hàng mới về</a></li>
+          <li>
+            <a href="">Áo</a>
+            <ul>
+              <li><a href="./category_ao_somi_nu.html">Áo sơ mi</a></li>
+              <li><a href="./category_ao_khoac_nu.html">Áo khoác</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="">Quần</a>
+            <ul>
+              <li><a href="./category_quan_dai_nu.html">Quần dài</a></li>
+              <li><a href="./category_quan_jeans_nu.html">Quần jean</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="">Đầm </a>
+            <ul>
+              <li><a href="./category_dam.html">Đầm thời trang</a></li>
+              <li><a href="./Category_ao_dai_nu.html">Áo dài</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <a href="">NAM</a>
+        <ul class="sub-menu">
+          <li><a href="./category_nam.html">Hàng mới về</a></li>
+          <li>
+            <a href="">Áo</a>
+            <ul>
+              <li><a href="./category_ao_polo.html">Áo Polo</a></li>
+              <li><a href="./category_ao_khoac_nam.html">Áo khoác</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="">Quần</a>
+            <ul>
+              <li><a href="./category_quandai_nam.html">Quần dài</a></li>
+              <li><a href="./category_quan_jean_nam.html">Quần jean</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="">BỘ SƯU TẬP</a>
+        <ul class="sub-menu sub-menu-new">
+          <li>
+            <a href="./collection.html">Ngọc Vương Ánh Nguyệt | BST Áo Dài</a>
+          </li>
+          <li>
+            <a href="./collection_1.html">Rhythm of SaiGon</a>
+          </li>
+        </ul>
+      </li>
+      <li><a href="./aboutme.html">THÔNG TIN</a></li>
+    </div>
+    <div class="other">
+      <li>
+        <input placeholder="Tìm kiếm" type="text" />
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </li>
+      <li>
+        <a class="fa-solid fa-paw" href=""></a>
+        <ul class="sub-menu sub-menu-social">
+          <li><a href="">Hotline trực tuyến</a></li>
+          <li><a href="">Messenger</a></li>
+          <li><a href="">Email</a></li>
+          <li><a href="">Facebook</a></li>
+        </ul>
+      </li>
+      <%- include("../partials/account-menu") %>
+
+        <li>
+          <a class="fa-solid fa-cart-shopping" href="./cart.html"></a>
+        </li>
+        <li><a class="fa-solid fa-cart-shopping" href="./cart.html"></a></li>
+    </div>
+  </header>
+
+  <section class="signin">
+    <div class="container">
+      <div class="chua">
+        <!-- CỘT TRÁI: ĐĂNG NHẬP -->
+        <div class="content-signin">
+          <h3>Bạn đã có tài khoản ROUTINE</h3>
+
+          <p>
+            Nếu bạn đã có tài khoản, hãy đăng nhập để tích lũy điểm thành viên
+            và nhận được những ưu đãi tốt hơn!
+          </p>
+
+          <% if (success) { %>
+            <div class="auth-notice auth-notice-success" role="status">
+              <%= success %>
+            </div>
+            <% } %>
+
+              <% if (error) { %>
+                <div class="auth-notice auth-notice-error" role="alert">
+                  <%= error %>
+                </div>
+                <% } %>
+
+                  <div class="content-signin-bottom">
+                    <form action="/login" method="POST">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+                      <label for="loginEmail">Email</label>
+                      <br />
+
+                      <input type="email" id="loginEmail" name="email" placeholder="Nhập email" value="<%= email %>"
+                        autocomplete="email" maxlength="254" style="font-size: 16px" required />
+
+                      <br />
+
+                      <label for="loginPassword">Mật Khẩu</label>
+                      <br />
+
+                      <input type="password" id="loginPassword" name="password" placeholder="Nhập mật khẩu"
+                        autocomplete="current-password" style="font-size: 16px" required />
+
+                      <br />
+
+                      <button type="submit">
+                        <h4>ĐĂNG NHẬP</h4>
+                      </button>
+                    </form>
+                  </div>
+        </div>
+
+        <!-- CỘT PHẢI: CHUYỂN ĐẾN ĐĂNG KÝ -->
+        <div class="content-signin right">
+          <h3>Khách hàng mới của ROUTINE</h3>
+
+          <p>
+            Nếu bạn chưa có tài khoản trên ROUTINE.com, hãy sử dụng tùy chọn
+            này để truy cập biểu mẫu đăng ký.
+          </p>
+
+          <p>
+            Bằng cách cung cấp cho ROUTINE thông tin chi tiết của bạn, quá
+            trình mua hàng trên ROUTINE sẽ là một trải nghiệm thú vị và nhanh
+            chóng hơn!
+          </p>
+
+          <form action="/register" method="GET">
+            <button type="submit">
+              <h4>ĐĂNG KÝ</h4>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- app-container -->
+  <section class="app-container vach">
+    <p style="font-size: 23px">Tải ứng dụng Routine</p>
+    <div class="app-google">
+      <img src="/images/download-on-the-app-store-apple-logo.svg" />
+      <img src="/images/google-play-badge-logo.svg" />
+    </div>
+    <p style="font-size: 23px">Nhận tin Routine</p>
+    <input type="text" placeholder="Nhập Email của bạn..." style="font-size: 17px" />
+  </section>
+  <!-- footer -->
+  <div class="footer-top">
+    <li>
+      <a href=""><img class="cong-thuong" src="/images/img-congthuong.png" alt="" /></a>
+    </li>
+    <li><a style="font-size: 18px" href="">Liên hệ</a></li>
+    <li><a style="font-size: 18px" href="">Tuyển dụng</a></li>
+    <li><a style="font-size: 18px" href="">Giới thiệu</a></li>
+    <li class="icon">
+      <a href=""><img src="/images/ic_fb.svg" alt="" /></a>
+      <a href=""><img src="/images/ic_instagram.svg" alt="" /></a>
+      <a href=""><img src="/images/ic_zalo.png" alt="" /></a>
+    </li>
+  </div>
+  <div class="footer-center">
+    <p style="font-size: 17px">
+      Công ty cổ phần Dự kiem với số đăng ký kinh doanh: 0993849385 <br />
+      Đại chỉ đăng ký: Tổ dân phố Tháp, P.Đại Mỗ, Q.Nam Từ Liêm, TP.Hà Nội,
+      Việt Nam - 0243 025 3333 <br />
+      Đặt hàng online: <b>0243 025 3333</b>
+    </p>
+  </div>
+  <div class="footer-bottom">© Routine All rights reserved</div>
+</body>
+
+</html>

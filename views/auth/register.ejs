@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <title>Đăng ký tài khoản - Routine</title>
+</head>
+
+<body>
+  <header style="border-bottom: 2px solid #ccc">
+    <div class="logo">
+      <a href="./index.html"><img src="./images/Logo-Rountine.webp" width="180px" height="50px" /></a>
+    </div>
+    <div class="menu">
+      <li>
+        <a href="">NỮ</a>
+        <ul class="sub-menu">
+          <li><a href="./category_nu.html">Hàng mới về</a></li>
+          <li>
+            <a href="">Áo</a>
+            <ul>
+              <li><a href="./category_ao_somi_nu.html">Áo sơ mi</a></li>
+              <li><a href="./category_ao_khoac_nu.html">Áo khoác</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="">Quần</a>
+            <ul>
+              <li><a href="./category_quan_dai_nu.html">Quần dài</a></li>
+              <li><a href="./category_quan_jeans_nu.html">Quần jean</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="">Đầm </a>
+            <ul>
+              <li><a href="./category_dam.html">Đầm thời trang</a></li>
+              <li><a href="./Category_ao_dai_nu.html">Áo dài</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <a href="">NAM</a>
+        <ul class="sub-menu">
+          <li><a href="./category_nam.html">Hàng mới về</a></li>
+          <li>
+            <a href="">Áo</a>
+            <ul>
+              <li><a href="./category_ao_polo.html">Áo Polo</a></li>
+              <li><a href="./category_ao_khoac_nam.html">Áo khoác</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="">Quần</a>
+            <ul>
+              <li><a href="./category_quandai_nam.html">Quần dài</a></li>
+              <li><a href="./category_quan_jean_nam.html">Quần jean</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="">BỘ SƯU TẬP</a>
+        <ul class="sub-menu sub-menu-new">
+          <li>
+            <a href="./collection.html">Ngọc Vương Ánh Nguyệt | BST Áo Dài</a>
+          </li>
+          <li>
+            <a href="./collection_1.html">Rhythm of SaiGon</a>
+          </li>
+        </ul>
+      </li>
+      <li><a href="./aboutme.html">THÔNG TIN</a></li>
+    </div>
+    <div class="other">
+      <li>
+        <input placeholder="Tìm kiếm" type="text" />
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </li>
+      <li>
+        <a class="fa-solid fa-paw" href=""></a>
+        <ul class="sub-menu sub-menu-social">
+          <li><a href="">Hotline trực tuyến</a></li>
+          <li><a href="">Messenger</a></li>
+          <li><a href="">Email</a></li>
+          <li><a href="">Facebook</a></li>
+        </ul>
+      </li>
+      <%- include("../partials/account-menu") %>
+
+        <li>
+          <a class="fa-solid fa-cart-shopping" href="./cart.html"></a>
+        </li>
+        <li><a class="fa-solid fa-cart-shopping" href="./cart.html"></a></li>
+    </div>
+  </header>
+
+  <!-- ĐĂNG KÝ -->
+  <main class="register-page">
+    <h1 class="register-heading">ĐĂNG KÝ</h1>
+
+    <% if (Object.keys(errors).length> 0) { %>
+      <div class="auth-notice auth-notice-error" role="alert">
+        Vui lòng kiểm tra lại các thông tin được đánh dấu.
+        <% if (errors.form) { %>
+          <p>
+            <%= errors.form %>
+          </p>
+          <% } %>
+      </div>
+      <% } %>
+
+        <form id="registerForm" class="register-form" action="/register" method="POST">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+          <section class="customer-info">
+            <h2>Thông tin khách hàng</h2>
+
+            <div class="customer-grid">
+              <% const fields=[ { name: "lastName" , label: "Họ" , type: "text" , max: 50 }, { name: "firstName" ,
+                label: "Tên" , type: "text" , max: 50 }, { name: "email" , label: "Email" , type: "email" , max: 254 },
+                { name: "phone" , label: "Điện thoại" , type: "tel" , max: 10 }, { name: "birthday" , label: "Ngày sinh"
+                , type: "date" , max: 10 } ]; %>
+
+                <% fields.forEach(field=> { %>
+                  <div class="register-field">
+                    <label for="<%= field.name %>">
+                      <%= field.label %>:<span>*</span>
+                    </label>
+
+                    <input type="<%= field.type %>" id="<%= field.name %>" name="<%= field.name %>"
+                      value="<%= form[field.name] || '' %>" maxlength="<%= field.max %>"
+                      placeholder="<%= field.label %>..." aria-invalid="<%= Boolean(errors[field.name]) %>"
+                      aria-describedby="<%= field.name %>-error" required>
+
+                    <% if (errors[field.name]) { %>
+                      <small class="field-error" id="<%= field.name %>-error">
+                        <%= errors[field.name] %>
+                      </small>
+                      <% } %>
+                  </div>
+                  <% }) %>
+
+                    <div class="register-field">
+                      <label for="gender">Giới tính:<span>*</span></label>
+
+                      <select id="gender" name="gender" required>
+                        <option value="">Chọn giới tính</option>
+
+                        <% ["Nữ", "Nam" , "Khác" ].forEach(value=> { %>
+                          <option value="<%= value %>" <%=form.gender===value ? "selected" : "" %>
+                            >
+                            <%= value %>
+                          </option>
+                          <% }) %>
+                      </select>
+
+                      <% if (errors.gender) { %>
+                        <small class="field-error">
+                          <%= errors.gender %>
+                        </small>
+                        <% } %>
+                    </div>
+
+                    <% const provinces=Object.keys(addressCatalog); const districtMap=Object.hasOwn( addressCatalog,
+                      form.province || "" ) ? addressCatalog[form.province] : {}; const
+                      districts=Object.keys(districtMap); const wards=Object.hasOwn( districtMap, form.district || "" )
+                      ? districtMap[form.district] : []; const addressFields=[ { name: "province" , label: "Tỉnh/TP" ,
+                      options: provinces, wide: false }, { name: "district" , label: "Quận/Huyện" , options: districts,
+                      wide: false }, { name: "ward" , label: "Phường/Xã" , options: wards, wide: true } ]; %>
+
+                      <% addressFields.forEach(field=> { %>
+                        <div class="register-field <%= field.wide ? 'full-width' : '' %>">
+                          <label for="<%= field.name %>">
+                            <%= field.label %>:<span>*</span>
+                          </label>
+
+                          <select id="<%= field.name %>" name="<%= field.name %>" required>
+                            <option value="">Chọn <%= field.label %>
+                            </option>
+
+                            <% field.options.forEach(value=> { %>
+                              <option value="<%= value %>" <%=form[field.name]===value ? "selected" : "" %>
+                                >
+                                <%= value %>
+                              </option>
+                              <% }) %>
+                          </select>
+
+                          <% if (errors[field.name]) { %>
+                            <small class="field-error">
+                              <%= errors[field.name] %>
+                            </small>
+                            <% } %>
+                        </div>
+                        <% }) %>
+
+                          <div class="register-field full-width">
+                            <label for="address">Địa chỉ:<span>*</span></label>
+
+                            <textarea id="address" name="address" rows="3" minlength="5" maxlength="255"
+                              required><%= form.address || "" %></textarea>
+
+                            <% if (errors.address) { %>
+                              <small class="field-error">
+                                <%= errors.address %>
+                              </small>
+                              <% } %>
+                          </div>
+            </div>
+          </section>
+
+          <section class="password-info">
+            <h2>Thông tin mật khẩu</h2>
+
+            <div class="register-field">
+              <label for="password">Mật khẩu:<span>*</span></label>
+
+              <input type="password" id="password" name="password" placeholder="Mật khẩu..." autocomplete="new-password"
+                minlength="10" required>
+
+              <small>
+                Từ 10 ký tự, gồm chữ hoa, chữ thường,
+                số và ký tự đặc biệt, không có khoảng trắng.
+              </small>
+
+              <% if (errors.password) { %>
+                <small class="field-error">
+                  <%= errors.password %>
+                </small>
+                <% } %>
+            </div>
+
+            <div class="register-field">
+              <label for="confirmPassword">
+                Nhập lại mật khẩu:<span>*</span>
+              </label>
+
+              <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu..."
+                autocomplete="new-password" minlength="10" required>
+
+              <% if (errors.confirmPassword) { %>
+                <small class="field-error">
+                  <%= errors.confirmPassword %>
+                </small>
+                <% } %>
+            </div>
+
+            <div class="register-field captcha-field">
+              <label for="captchaInput">
+                Mời nhập các ký tự trong hình vào ô sau:<span>*</span>
+              </label>
+
+              <input type="text" id="captchaInput" name="captchaInput" autocomplete="off" maxlength="5" required>
+
+              <div class="captcha-image">
+                <img id="captchaImage" src="/captcha" alt="Mã xác nhận">
+              </div>
+
+              <button type="button" id="refreshCaptcha" class="captcha-refresh">
+                <i class="fa-solid fa-rotate"></i>
+                Đổi mã
+              </button>
+
+              <% if (errors.captchaInput) { %>
+                <small class="field-error">
+                  <%= errors.captchaInput %>
+                </small>
+                <% } %>
+            </div>
+
+            <div class="register-options">
+              <label class="checkbox-row">
+                <input type="checkbox" id="agreeTerms" name="agreeTerms" value="1" <%=form.agreeTerms ? "checked" : ""
+                  %>
+                required
+                >
+
+                <span>
+                  Đồng ý với các <a href="#">điều khoản</a> của Routine
+                </span>
+              </label>
+
+              <% if (errors.agreeTerms) { %>
+                <small class="field-error">
+                  <%= errors.agreeTerms %>
+                </small>
+                <% } %>
+
+                  <label class="checkbox-row">
+                    <input type="checkbox" id="newsletter" name="newsletter" value="1" <%=form.newsletter ? "checked"
+                      : "" %>
+                    >
+                    <span>Đăng ký nhận bản tin</span>
+                  </label>
+            </div>
+
+            <button type="submit" class="register-button">
+              ĐĂNG KÝ
+            </button>
+
+            <p style="font-size: 16px" class="login-link">
+              Đã có tài khoản?
+              <a href="/login">Đăng Nhập</a>
+            </p>
+          </section>
+        </form>
+  </main>
+
+  <!-- app-container -->
+  <section class="app-container vach">
+    <p style="font-size: 23px">Tải ứng dụng Routine</p>
+    <div class="app-google">
+      <img src="./images/download-on-the-app-store-apple-logo.svg" />
+      <img src="./images/google-play-badge-logo.svg" />
+    </div>
+    <p style="font-size: 23px">Nhận tin Routine</p>
+    <input type="text" placeholder="Nhập Email của bạn..." style="font-size: 17px" />
+  </section>
+  <!-- footer -->
+  <div class="footer-top">
+    <li>
+      <a href=""><img class="cong-thuong" src="./images/img-congthuong.png" alt="" /></a>
+    </li>
+    <li><a style="font-size: 18px" href="">Liên hệ</a></li>
+    <li><a style="font-size: 18px" href="">Tuyển dụng</a></li>
+    <li><a style="font-size: 18px" href="">Giới thiệu</a></li>
+    <li class="icon">
+      <a href=""><img src="./images/ic_fb.svg" alt="" /></a>
+      <a href=""><img src="./images/ic_instagram.svg" alt="" /></a>
+      <a href=""><img src="./images/ic_zalo.png" alt="" /></a>
+    </li>
+  </div>
+  <div class="footer-center">
+    <p style="font-size: 17px">
+      Công ty cổ phần Dự kiem với số đăng ký kinh doanh: 0993849385 <br />
+      Đại chỉ đăng ký: Tổ dân phố Tháp, P.Đại Mỗ, Q.Nam Từ Liêm, TP.Hà Nội,
+      Việt Nam - 0243 025 3333 <br />
+      Đặt hàng online: <b>0243 025 3333</b>
+    </p>
+  </div>
+  <div class="footer-bottom">© Routine All rights reserved</div>
+
+  <script src="/js/register.js" defer></script>
+  <script src="/js/script.js" defer></script>
+</body>
+
+</html>

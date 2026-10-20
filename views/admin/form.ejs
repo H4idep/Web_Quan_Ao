@@ -1,0 +1,198 @@
+<%- include("partials/header") %>
+
+    <a class="back-link" href="/admin/<%= kind %>">
+        ← Quay lại danh sách
+    </a>
+
+    <% const action=item.id ? `/admin/${kind}/${item.id}/update` : `/admin/${kind}`; %>
+
+        <form method="POST" action="<%= action %>" class="edit-form" id="adminEditForm">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+            <div class="form-layout">
+                <section class="panel form-panel">
+                    <h2>Thông tin <%= kind==="products" ? "sản phẩm" : "danh mục" %>
+                    </h2>
+                    <p class="muted">Các trường có dấu * là bắt buộc.</p>
+
+                    <% if (Object.keys(errors).length) { %>
+                        <div class="alert error" role="alert">
+                            Thông tin chưa hợp lệ. Vui lòng kiểm tra các trường bên dưới.
+                        </div>
+                        <% } %>
+
+                            <div class="field">
+                                <label for="name">Tên <%= label.toLowerCase() %> *</label>
+
+                                <input id="name" name="name" value="<%= item.name || '' %>" minlength="2"
+                                    maxlength="<%= kind === 'products' ? 180 : 120 %>" required>
+
+                                <% if (errors.name) { %>
+                                    <small class="field-error">
+                                        <%= errors.name %>
+                                    </small>
+                                    <% } %>
+                            </div>
+
+                            <% if (kind==="categories" ) { %>
+                                <div class="field">
+                                    <label for="parent_id">Thuộc nhóm *</label>
+
+                                    <select id="parent_id" name="parent_id" required>
+                                        <option value="">Chọn Nam hoặc Nữ</option>
+
+                                        <% parentCategories.forEach(parent=> { %>
+                                            <option value="<%= parent.id %>"
+                                                <%=String(item.parent_id)===String(parent.id) ? "selected" : "" %>
+                                                >
+                                                <%= parent.name %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+
+                                    <small>
+                                        Ví dụ: Áo nam thuộc Nam, Váy nữ thuộc Nữ.
+                                    </small>
+
+                                    <% if (errors.parent_id) { %>
+                                        <small class="field-error">
+                                            <%= errors.parent_id %>
+                                        </small>
+                                        <% } %>
+                                </div>
+                                <% } %>
+
+                                    <% if (kind==="products" ) { %>
+                                        <div class="field">
+                                            <label for="category_id">Danh mục *</label>
+
+                                            <select id="category_id" name="category_id" required>
+                                                <option value="">Chọn danh mục</option>
+
+                                                <% categories.forEach(category=> { %>
+                                                    <option value="<%= category.id %>"
+                                                        <%=String(item.category_id)===String(category.id) ? "selected"
+                                                        : "" %>
+                                                        >
+                                                        <%= category.name %>
+                                                    </option>
+                                                    <% }) %>
+                                            </select>
+
+                                            <% if (!categories.length) { %>
+                                                <small>
+                                                    Chưa có danh mục.
+                                                    <a href="/admin/categories/create">Tạo danh mục trước</a>.
+                                                </small>
+                                                <% } %>
+
+                                                    <% if (errors.category_id) { %>
+                                                        <small class="field-error">
+                                                            <%= errors.category_id %>
+                                                        </small>
+                                                        <% } %>
+                                        </div>
+
+                                        <div class="two-columns">
+                                            <div class="field">
+                                                <label for="price">Giá bán (đ) *</label>
+
+                                                <input id="price" name="price" type="number" min="0.01"
+                                                    max="9999999999.99" step="0.01" value="<%= item.price ?? '' %>"
+                                                    required>
+
+                                                <% if (errors.price) { %>
+                                                    <small class="field-error">
+                                                        <%= errors.price %>
+                                                    </small>
+                                                    <% } %>
+                                            </div>
+
+                                            <div class="field">
+                                                <label for="stock">Tồn kho *</label>
+
+                                                <input id="stock" name="stock" type="number" min="0" max="4294967295"
+                                                    step="1" value="<%= item.stock ?? 0 %>" required>
+
+                                                <% if (errors.stock) { %>
+                                                    <small class="field-error">
+                                                        <%= errors.stock %>
+                                                    </small>
+                                                    <% } %>
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <div class="field">
+                                                <label for="description">
+                                                    Mô tả <%= kind==="products" ? "*" : "" %>
+                                                </label>
+
+                                                <textarea id="description" name="description" rows="7"
+                                                    maxlength="<%= kind === 'products' ? 5000 : 500 %>"
+                                                    <%=kind==="products" ? "required" : "" %>
+        ><%= item.description || "" %></textarea>
+
+                                                <% if (errors.description) { %>
+                                                    <small class="field-error">
+                                                        <%= errors.description %>
+                                                    </small>
+                                                    <% } %>
+                                            </div>
+                </section>
+
+                <% if (kind==="products" ) { %>
+                    <section class="panel form-panel">
+                        <h2>Ảnh sản phẩm</h2>
+                        <p class="muted">JPG, PNG hoặc WebP. Tối đa 3 MB.</p>
+
+                        <div class="image-preview">
+                            <img id="imagePreview" <% if (item.image_url) { %>
+                            src="<%= item.image_url %>"
+                                <% } %>
+                                    alt="Ảnh sản phẩm"
+                                    <%= item.image_url ? "" : "hidden" %>
+                                        >
+
+                                        <span id="imageEmpty" <%=item.image_url ? "hidden" : "" %>>
+                                            Chưa có ảnh
+                                        </span>
+                        </div>
+
+                        <div class="field">
+                            <label for="imageFile">Chọn ảnh từ máy</label>
+
+                            <!-- Không có name: file được gửi riêng bằng JavaScript. -->
+                            <input id="imageFile" type="file" accept="image/jpeg,image/png,image/webp">
+
+                            <small id="uploadStatus" role="status" aria-live="polite"></small>
+                        </div>
+
+                        <div class="field">
+                            <label for="image_url">Hoặc nhập đường dẫn ảnh</label>
+
+                            <input id="image_url" name="image_url" maxlength="500" value="<%= item.image_url || '' %>"
+                                placeholder="https://... hoặc /images/ten-anh.jpg">
+
+                            <% if (errors.image_url) { %>
+                                <small class="field-error">
+                                    <%= errors.image_url %>
+                                </small>
+                                <% } %>
+                        </div>
+                    </section>
+                    <% } %>
+            </div>
+
+            <div class="form-actions">
+                <a class="btn" href="/admin/<%= kind %>">Hủy</a>
+
+                <button class="btn primary" id="saveButton" type="submit" <%=kind==="products" && !categories.length
+                    ? "disabled" : "" %>
+                    >
+                    <%= item.id ? "Lưu thay đổi" : "Thêm mới" %>
+                </button>
+            </div>
+        </form>
+
+        <%- include("partials/footer") %>
