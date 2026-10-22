@@ -30,7 +30,7 @@
             <strong>
                 <%= stats.pendingCount %>
             </strong>
-            <small>Các đơn có trạng thái chờ xử lý</small>
+            <a href="/admin/orders?status=pending">Xử lý đơn hàng →</a>
         </article>
 
         <article class="stat-card">
@@ -63,21 +63,28 @@
                     <tbody>
                         <% if (!stats.recentOrders.length) { %>
                             <tr>
-                                <td colspan="4" class="empty">Chưa có đơn hàng.</td>
+                                <td colspan="4" class="empty">
+                                    Chưa có đơn hàng.
+                                </td>
                             </tr>
                             <% } %>
 
                                 <% stats.recentOrders.forEach(order=> { %>
                                     <tr>
-                                        <td><strong>
+                                        <td>
+                                            <a class="order-number" href="/admin/orders/<%= order.id %>">
                                                 <%= order.order_number %>
-                                            </strong></td>
+                                            </a>
+                                        </td>
+
                                         <td>
                                             <%= order.customer_name %>
                                         </td>
+
                                         <td class="nowrap">
                                             <%= money(order.total_amount) %>
                                         </td>
+
                                         <td>
                                             <span class="badge <%= order.status %>">
                                                 <%= orderStatuses[order.status] || order.status %>

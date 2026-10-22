@@ -106,9 +106,10 @@
                             </div>
 
                             <div class="field">
-                                <label for="district">Quận/Huyện *</label>
-                                <input id="district" name="district" maxlength="100" value="<%= form.district %>"
-                                    required>
+                                <label for="district">Quận/Huyện — chỉ dùng cho địa chỉ cũ</label>
+
+                                <input id="district" name="district" maxlength="100" value="<%= form.district || '' %>"
+                                    placeholder="Để trống nếu dùng địa chỉ mới">
                             </div>
                         </div>
 

@@ -150,7 +150,11 @@ function validateProfile(body) {
 
     for (const field of ["province", "district", "ward", "address"]) {
         const maxLength = field === "address" ? 255 : 100;
-        const minLength = field === "address" ? 5 : 1;
+        const minLength = field === "address"
+            ? 5
+            : field === "district"
+                ? 0
+                : 1;
 
         if (
             data[field].length < minLength ||

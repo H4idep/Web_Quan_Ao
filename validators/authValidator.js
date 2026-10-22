@@ -55,7 +55,7 @@ function validateRegister(body) {
         birthday: getText(body.birthday),
         gender: getText(body.gender),
         province: getText(body.province),
-        district: getText(body.district),
+        district: "",
         ward: getText(body.ward),
         address: getText(body.address),
         newsletter: body.newsletter === "1",
@@ -132,28 +132,23 @@ function validateRegister(body) {
         data.province
     );
 
-    const districts = provinceExists
+    const wards = provinceExists
         ? addressCatalog[data.province]
-        : {};
-
-    const districtExists = Object.hasOwn(
-        districts,
-        data.district
-    );
+        : [];
 
     if (!provinceExists) {
-        errors.province = "Vui lòng chọn tỉnh/thành trong danh mục.";
+        errors.province = "Vui lòng chọn tỉnh/thành phố trong danh mục.";
     }
 
-    if (!districtExists) {
-        errors.district = "Quận/huyện không thuộc tỉnh/thành đã chọn.";
+    if (!provinceExists || !wards.includes(data.ward)) {
+        errors.ward =
+            "Phường/xã/đặc khu không thuộc tỉnh/thành phố đã chọn.";
     }
 
-    if (
-        !districtExists ||
-        !districts[data.district].includes(data.ward)
-    ) {
-        errors.ward = "Phường/xã không thuộc quận/huyện đã chọn.";
+    // Form đăng ký mới không sử dụng cấp quận/huyện.
+    if (getText(body.district) !== "") {
+        errors.form =
+            "Biểu mẫu địa chỉ đã thay đổi. Vui lòng tải lại trang đăng ký.";
     }
 
     if (

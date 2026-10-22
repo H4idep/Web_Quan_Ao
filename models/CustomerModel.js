@@ -95,7 +95,7 @@ const CustomerModel = {
     async orders(customerId, requestedPage) {
         const [counts] = await pool.execute(
             `SELECT COUNT(*) AS total
-             FROM orders WHERE customer_id = ?`,
+             FROM orders WHERE user_id = ?`,
             [customerId]
         );
 

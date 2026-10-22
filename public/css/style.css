@@ -1738,3 +1738,59 @@ label {
 /* Số lượng trong giỏ hàng trên header */
 .cart-link { position: relative; }
 .cart-badge { position: absolute; top: -8px; right: -10px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #d32f2f; color: #fff; font-size: 11px; line-height: 18px; text-align: center; pointer-events: none; }
+
+/* Nút hiện / ẩn mật khẩu */
+.password-toggle-wrap {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+.password-toggle-wrap > input {
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 48px;
+}
+
+/* Chỉ tác động đến nút con mắt */
+.password-toggle-wrap > .password-toggle-button {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #666;
+
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.password-toggle-wrap > .password-toggle-button:hover {
+    background: #f2f2f2;
+    color: #111;
+}
+
+.password-toggle-wrap > .password-toggle-button:focus-visible {
+    outline: 2px solid #333;
+    outline-offset: 2px;
+}
+
+/* Tránh trùng nút hiện mật khẩu mặc định của Edge */
+.password-toggle-wrap > input::-ms-reveal,
+.password-toggle-wrap > input::-ms-clear {
+    display: none;
+}

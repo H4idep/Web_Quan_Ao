@@ -2,6 +2,7 @@ const express = require("express");
 const { rateLimit } = require("express-rate-limit");
 
 const adminCustomerRoutes = require("./adminCustomerRoutes");
+const adminOrderRoutes = require("./adminOrderRoutes");
 const AdminController = require("../controllers/AdminController");
 const { requireAdmin } = require("../middleware/authMiddleware");
 const { parseImage, saveImage } = require("../middleware/adminUpload");
@@ -76,5 +77,6 @@ for (const kind of ["categories", "products"]) {
 }
 
 router.use("/customers", adminCustomerRoutes);
+router.use("/orders", adminOrderRoutes);
 
 module.exports = router;
