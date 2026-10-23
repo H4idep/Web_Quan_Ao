@@ -33,7 +33,13 @@ const CartController = {
         try {
             const items = await CartModel.getItems(res.locals.currentUser.id);
 
-            const subtotal = items.reduce(
+            // Chỉ sản phẩm còn đủ hàng mới chọn để đặt được.
+            const isOrderable = item =>
+                Number(item.stock) >= Number(item.quantity);
+
+            const orderable = items.filter(isOrderable);
+
+            const orderableTotal = orderable.reduce(
                 (sum, item) => sum + Number(item.line_total),
                 0
             );
@@ -43,15 +49,14 @@ const CartController = {
 
             return res.render("cart/index", {
                 items,
-                subtotal,
                 flash,
                 formatMoney,
                 imagePath,
                 maxPerItem: CartModel.MAX_PER_ITEM,
-                // Có sản phẩm hết hàng hoặc vượt tồn kho thì Bước 2 sẽ chặn đặt hàng.
-                hasProblem: items.some(
-                    item => Number(item.stock) < Number(item.quantity)
-                )
+                isOrderable,
+                orderableCount: orderable.length,
+                orderableTotal,
+                hasUnavailable: orderable.length < items.length
             });
         } catch (error) {
             return next(error);

@@ -1,72 +1,81 @@
 const CartModel = require("../models/CartModel");
 const OrderModel = require("../models/OrderModel");
 const UserModel = require("../models/UserModel");
-const { validateCheckout } = require("../validators/orderValidator");
+const {
+    validateCheckout,
+    parseSelectedIds
+} = require("../validators/orderValidator");
 const { formatMoney, imagePath } = require("../utils/format");
+const { getPaymentConfig } = require("../config/payment");
+
+// Các phương thức thanh toán đang bật (chuyển khoản chỉ bật khi đã cấu hình).
+function getPaymentOptions() {
+    const options = [
+        {
+            value: "cod",
+            label: "Thanh toán khi nhận hàng (COD)",
+            hint: "Trả tiền mặt cho người giao hàng."
+        }
+    ];
+
+    if (getPaymentConfig().bankTransferEnabled) {
+        options.push({
+            value: "bank_transfer",
+            label: "Chuyển khoản ngân hàng",
+            hint: "Thông tin chuyển khoản và mã QR hiện ở trang đơn hàng sau khi đặt."
+        });
+    }
+
+    return options;
+}
 
 function setCartFlash(req, type, message) {
     req.session.cartFlash = { type, message };
 }
 
-// Số sản phẩm tối đa chọn đặt trong một đơn (khớp parameterLimit trong app.js).
-const MAX_SELECTED = 50;
+// Xác định các sản phẩm khách đã chọn và kiểm tra chúng.
+// Danh sách chọn đến từ client nên được đối chiếu lại với giỏ THẬT
+// của chính người dùng này trong database.
+// Trả về { items } nếu hợp lệ, hoặc { error } nếu không.
+async function resolveSelection(userId, rawSelected) {
+    const ids = parseSelectedIds(rawSelected);
 
-// Lấy danh sách id sản phẩm được chọn từ query (GET) hoặc body (POST).
-// Trả về mảng id không trùng lặp, hoặc null nếu dữ liệu không hợp lệ.
-// Mảng rỗng nghĩa là người dùng chưa chọn gì.
-function parseSelected(value) {
-    if (value === undefined) {
-        return [];
+    if (!ids) {
+        return { error: "Vui lòng chọn ít nhất một sản phẩm để đặt hàng." };
     }
 
-    const list = Array.isArray(value) ? value : [value];
+    const cart = await CartModel.getItems(userId);
+    const byId = new Map(cart.map(item => [String(item.product_id), item]));
+    const items = [];
 
-    if (list.length > MAX_SELECTED) {
-        return null;
+    for (const id of ids) {
+        const item = byId.get(id);
+
+        if (!item) {
+            return {
+                error: "Có sản phẩm đã chọn không còn trong giỏ hàng. Hãy chọn lại."
+            };
+        }
+
+        items.push(item);
     }
 
-    const ids = [];
+    const lacking = items.filter(
+        item => Number(item.stock) < Number(item.quantity)
+    );
 
-    for (const id of list) {
-        if (typeof id !== "string" || !/^[1-9]\d{0,19}$/.test(id)) {
-            return null;
-        }
-
-        if (BigInt(id) > 18446744073709551615n) {
-            return null;
-        }
-
-        if (!ids.includes(id)) {
-            ids.push(id);
-        }
+    if (lacking.length > 0) {
+        return {
+            error: `Không đủ hàng cho: ${lacking
+                .map(item => item.name)
+                .join(", ")}. Hãy giảm số lượng hoặc bỏ chọn sản phẩm này.`
+        };
     }
 
-    return ids;
+    return { items };
 }
 
-// Trả về lý do không cho đặt hàng, hoặc null nếu các món được chọn hợp lệ.
-// selectedIds: các id người dùng đã chọn; items: các món tìm thấy trong giỏ.
-function cartProblem(selectedIds, items) {
-    if (selectedIds === null) {
-        return "Dữ liệu sản phẩm đã chọn không hợp lệ.";
-    }
-
-    if (selectedIds.length === 0) {
-        return "Vui lòng chọn ít nhất một sản phẩm để đặt hàng.";
-    }
-
-    if (items.length !== selectedIds.length) {
-        return "Một số sản phẩm đã chọn không còn trong giỏ hàng. Hãy kiểm tra lại.";
-    }
-
-    if (items.some(item => Number(item.stock) < Number(item.quantity))) {
-        return "Có sản phẩm đã chọn đã hết hàng hoặc vượt tồn kho. Hãy điều chỉnh giỏ hàng trước khi đặt.";
-    }
-
-    return null;
-}
-
-function renderCheckout(res, items, selectedIds, form, errors = {}, status = 200) {
+function renderCheckout(res, items, form, errors = {}, status = 200) {
     const subtotal = items.reduce(
         (sum, item) => sum + Number(item.line_total),
         0
@@ -74,10 +83,10 @@ function renderCheckout(res, items, selectedIds, form, errors = {}, status = 200
 
     return res.status(status).render("checkout/index", {
         items,
-        selectedIds,
         subtotal,
         form,
         errors,
+        paymentOptions: getPaymentOptions(),
         formatMoney,
         imagePath
     });
@@ -87,12 +96,13 @@ const CheckoutController = {
     async show(req, res, next) {
         try {
             const user = res.locals.currentUser;
-            const selectedIds = parseSelected(req.query.selected);
-            const items = await CartModel.getItems(user.id, selectedIds);
-            const problem = cartProblem(selectedIds, items);
+            const selection = await resolveSelection(
+                user.id,
+                req.query.selected
+            );
 
-            if (problem) {
-                setCartFlash(req, "error", problem);
+            if (selection.error) {
+                setCartFlash(req, "error", selection.error);
 
                 return res.redirect("/cart");
             }
@@ -111,10 +121,11 @@ const CheckoutController = {
                 ]
                     .filter(Boolean)
                     .join(", "),
-                notes: ""
+                notes: "",
+                paymentMethod: "cod"
             };
 
-            return renderCheckout(res, items, selectedIds, form);
+            return renderCheckout(res, selection.items, form);
         } catch (error) {
             return next(error);
         }
@@ -123,31 +134,38 @@ const CheckoutController = {
     async place(req, res, next) {
         try {
             const user = res.locals.currentUser;
-            const selectedIds = parseSelected(req.body.selected);
-            const items = await CartModel.getItems(user.id, selectedIds);
-            const problem = cartProblem(selectedIds, items);
+            const selection = await resolveSelection(
+                user.id,
+                req.body.selected
+            );
 
-            if (problem) {
-                setCartFlash(req, "error", problem);
+            if (selection.error) {
+                setCartFlash(req, "error", selection.error);
 
                 return res.redirect("/cart");
             }
 
-            const { data, errors } = validateCheckout(req.body);
+            const { data, errors } = validateCheckout(
+                req.body,
+                getPaymentOptions().map(option => option.value)
+            );
 
             if (Object.keys(errors).length > 0) {
-                return renderCheckout(res, items, selectedIds, data, errors, 400);
+                return renderCheckout(res, selection.items, data, errors, 400);
             }
 
             // Kiểm tra tồn kho thật sự nằm trong transaction của OrderModel.
-            // Chỉ đặt và xóa khỏi giỏ các món được chọn.
-            const result = await OrderModel.createFromCart(user, data, selectedIds);
+            const result = await OrderModel.createFromCart(
+                user,
+                data,
+                selection.items.map(item => String(item.product_id))
+            );
 
-            if (result.status === "empty") {
+            if (result.status === "changed") {
                 setCartFlash(
                     req,
                     "error",
-                    "Một số sản phẩm đã chọn không còn trong giỏ hàng. Hãy kiểm tra lại."
+                    "Giỏ hàng đã thay đổi. Hãy chọn lại sản phẩm muốn đặt."
                 );
 
                 return res.redirect("/cart");
