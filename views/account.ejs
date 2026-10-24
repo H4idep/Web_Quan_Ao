@@ -4,32 +4,268 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tài khoản - Routine</title>
+    <title>Thông tin tài khoản - Routine</title>
 
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        .account-page-wrapper {
+            max-width: 860px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+        }
+
+        .account-header {
+            margin-bottom: 24px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .account-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #222;
+            text-transform: uppercase;
+        }
+
+        .alert-success {
+            padding: 12px 16px;
+            background-color: #e6f4ea;
+            color: #137333;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+            height: 42px;
+            padding: 0 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #000;
+        }
+
+        .form-group input[readonly] {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+            color: #777;
+        }
+
+        .field-error {
+            color: #d93025;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .btn-submit-account {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-submit-account:hover {
+            background: #333;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+
+            .form-grid-2,
+            .form-grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <%- include("partials/header") %>
 
-        <main class="register-page">
-            <h1 class="register-heading">THÔNG TIN TÀI KHOẢN</h1>
+        <main class="account-page-wrapper">
+            <div class="account-header">
+                <h1>Thông tin tài khoản</h1>
+                <p style="color: #666; font-size: 14px;">Quản lý thông tin hồ sơ và địa chỉ giao hàng của bạn</p>
+            </div>
 
-            <p>Họ tên: <strong>
-                    <%= currentUser.fullName %>
-                </strong></p>
-            <p>Email: <%= currentUser.email %>
-            </p>
-            <p>
-                Vai trò:
-                <%= currentUser.role==="admin" ? "Quản trị viên" : "Khách hàng" %>
-            </p>
+            <% if (success) { %>
+                <div class="alert-success">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <%= success %>
+                </div>
+                <% } %>
 
-            <p><a href="/">Tiếp tục xem cửa hàng</a></p>
+                    <form action="/account" method="POST" id="accountForm">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="lastName">Họ đệm *</label>
+                                <input type="text" id="lastName" name="lastName" value="<%= user.last_name || '' %>"
+                                    required>
+                                <% if (errors.lastName) { %><small class="field-error">
+                                        <%= errors.lastName %>
+                                    </small>
+                                    <% } %>
+                            </div>
+                            <div class="form-group">
+                                <label for="firstName">Tên *</label>
+                                <input type="text" id="firstName" name="firstName" value="<%= user.first_name || '' %>"
+                                    required>
+                                <% if (errors.firstName) { %><small class="field-error">
+                                        <%= errors.firstName %>
+                                    </small>
+                                    <% } %>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" value="<%= user.email || '' %>" readonly
+                                    title="Không thể thay đổi email">
+                                <small style="color: #888; font-size: 12px; margin-top: 4px;">Email đăng nhập cố
+                                    định</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Số điện thoại *</label>
+                                <input type="tel" id="phone" name="phone" value="<%= user.phone || '' %>" required
+                                    placeholder="0xxxxxxxxx">
+                                <% if (errors.phone) { %><small class="field-error">
+                                        <%= errors.phone %>
+                                    </small>
+                                    <% } %>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="birthday">Ngày sinh *</label>
+                                <input type="date" id="birthday" name="birthday" value="<%= user.birthday || '' %>"
+                                    required>
+                                <% if (errors.birthday) { %><small class="field-error">
+                                        <%= errors.birthday %>
+                                    </small>
+                                    <% } %>
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">Giới tính *</label>
+                                <select id="gender" name="gender" required>
+                                    <option value="">-- Chọn giới tính --</option>
+                                    <option value="Nam" <%=user.gender==="Nam" ? "selected" : "" %>>Nam</option>
+                                    <option value="Nữ" <%=user.gender==="Nữ" ? "selected" : "" %>>Nữ</option>
+                                    <option value="Khác" <%=user.gender==="Khác" ? "selected" : "" %>>Khác</option>
+                                </select>
+                                <% if (errors.gender) { %><small class="field-error">
+                                        <%= errors.gender %>
+                                    </small>
+                                    <% } %>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label for="province">Tỉnh / Thành phố *</label>
+                                <select id="province" name="province" data-selected="<%= user.province || '' %>"
+                                    required>
+                                    <option value="">Chọn Tỉnh/Thành</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="district">Quận / Huyện *</label>
+                                <select id="district" name="district" data-selected="<%= user.district || '' %>"
+                                    required>
+                                    <option value="">Chọn Quận/Huyện</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="ward">Phường / Xã *</label>
+                                <select id="ward" name="ward" data-selected="<%= user.ward || '' %>" required>
+                                    <option value="">Chọn Phường/Xã</option>
+                                </select>
+                            </div>
+                        </div>
+                        <% if (errors.addressHierarchy) { %>
+                            <small class="field-error" style="display:block; margin-bottom: 12px;">
+                                <%= errors.addressHierarchy %>
+                            </small>
+                            <% } %>
+
+                                <div class="form-group">
+                                    <label for="address">Địa chỉ cụ thể (Số nhà, ngõ/ngách, đường) *</label>
+                                    <input type="text" id="address" name="address" value="<%= user.address || '' %>"
+                                        required placeholder="Ví dụ: Số 12, Ngõ 45, Đường Cầu Giấy">
+                                    <% if (errors.address) { %><small class="field-error">
+                                            <%= errors.address %>
+                                        </small>
+                                        <% } %>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="newsletter" value="1" <%=user.newsletter
+                                            ? "checked" : "" %>>
+                                        <span>Đăng ký nhận thông tin ưu đãi và bản tin Routine</span>
+                                    </label>
+                                </div>
+
+                                <div style="margin-top: 24px;">
+                                    <button type="submit" class="btn-submit-account">LƯU THAY ĐỔI</button>
+                                </div>
+                    </form>
         </main>
 
         <%- include("partials/footer") %>
+
+            <script src="/js/account.js" defer></script>
 </body>
 
 </html>

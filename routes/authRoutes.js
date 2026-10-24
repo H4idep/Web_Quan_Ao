@@ -69,9 +69,13 @@ router.get("/address-options", (req, res) => {
     res.json(addressCatalog);
 });
 
-router.get("/account", requireLogin, (req, res) => {
-    res.render("account");
-});
+// router.get("/account", requireLogin, (req, res) => {
+//     res.render("account");
+// });
+
+router.get("/account", requireLogin, AuthController.showAccount);
+router.post("/account", requireLogin, AuthController.updateAccount);
+
 
 // Tất cả route quản trị đặt sau middleware này trong router.
 router.use("/admin", requireAdmin);

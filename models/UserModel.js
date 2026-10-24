@@ -80,7 +80,60 @@ const UserModel = {
         );
 
         return result.insertId;
+    },
+
+    // Lấy đầy đủ thông tin cá nhân để điền vào form hồ sơ
+    async findFullProfile(id) {
+        const [rows] = await pool.execute(
+            `SELECT 
+                id, full_name, last_name, first_name, email, phone,
+                DATE_FORMAT(birthday, '%Y-%m-%d') AS birthday,
+                gender, province, district, ward, address, newsletter, role
+             FROM users
+             WHERE id = ?
+             LIMIT 1`,
+            [id]
+        );
+
+        return rows[0];
+    },
+
+    // Cập nhật thông tin hồ sơ người dùng
+    async updateProfile(id, data) {
+        const [result] = await pool.execute(
+            `UPDATE users
+             SET
+                full_name = ?,
+                last_name = ?,
+                first_name = ?,
+                phone = ?,
+                birthday = ?,
+                gender = ?,
+                province = ?,
+                district = ?,
+                ward = ?,
+                address = ?,
+                newsletter = ?
+             WHERE id = ? AND role = 'user'`,
+            [
+                data.fullName,
+                data.lastName,
+                data.firstName,
+                data.phone,
+                data.birthday,
+                data.gender,
+                data.province,
+                data.district,
+                data.ward,
+                data.address,
+                data.newsletter ? 1 : 0,
+                id
+            ]
+        );
+
+        return result.affectedRows > 0;
     }
+
 };
 
 module.exports = UserModel;
