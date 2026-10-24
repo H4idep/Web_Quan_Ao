@@ -851,6 +851,7 @@ tbody tr:last-child td {
         gap: 6px;
     }
 }
+}
 
 /* Quản lý đơn hàng */
 .order-filters {

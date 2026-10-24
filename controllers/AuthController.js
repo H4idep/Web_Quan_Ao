@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const validator = require("validator");
 const svgCaptcha = require("svg-captcha");
+const { validateUpdateProfile } = require("../validators/accountValidator");
+
 
 const UserModel = require("../models/UserModel");
 const addressCatalog = require("../config/addressCatalog");
@@ -204,7 +206,55 @@ const AuthController = {
 
             return res.redirect("/login");
         });
-    }
+    },
+
+    async showAccount(req, res, next) {
+        try {
+            const user = await UserModel.findFullProfile(req.session.userId);
+            if (!user) {
+                return res.redirect("/login");
+            }
+
+            const successMessage = req.session.accountSuccess || "";
+            delete req.session.accountSuccess;
+
+            return res.render("account", {
+                user,
+                errors: {},
+                success: successMessage,
+                addressCatalog
+            });
+        } catch (error) {
+            return next(error);
+        }
+    },
+
+    async updateAccount(req, res, next) {
+        try {
+            const { data, errors } = validateUpdateProfile(req.body);
+
+            if (Object.keys(errors).length > 0) {
+                const currentUser = await UserModel.findFullProfile(req.session.userId);
+                return res.status(400).render("account", {
+                    user: { ...currentUser, ...data },
+                    errors,
+                    success: "",
+                    addressCatalog
+                });
+            }
+
+            await UserModel.updateProfile(req.session.userId, data);
+
+            req.session.accountSuccess = "Cập nhật thông tin thành công!";
+            req.session.save(err => {
+                if (err) return next(err);
+                return res.redirect("/account");
+            });
+        } catch (error) {
+            return next(error);
+        }
+    },
+
 };
 
 module.exports = AuthController;

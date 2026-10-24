@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="/css/cart.css">
+    <script src="/js/cart.js" defer></script>
 </head>
 
 <body class="cart-page">
@@ -27,11 +28,17 @@
                 <a class="cart-btn" href="/products">Tiếp tục mua sắm</a>
             </div>
         <% } else { %>
+            <%# Form chọn sản phẩm để đặt. Các ô tích và nút Đặt hàng nằm ngoài
+                form này nhưng gắn vào nó bằng thuộc tính form="select-form",
+                vì HTML không cho lồng form (mỗi dòng đã có form cập nhật/xóa riêng). %>
+            <form id="select-form" method="get" action="/checkout"></form>
+
             <table class="cart-table">
                 <thead>
                     <tr>
-                        <th class="cart-select-col">
-                            <input type="checkbox" id="select-all" aria-label="Chọn tất cả sản phẩm">
+                        <th class="cart-select">
+                            <input type="checkbox" id="select-all" aria-label="Chọn tất cả sản phẩm"
+                                <%= orderableCount > 0 ? "checked" : "disabled" %>>
                         </th>
                         <th>Sản phẩm</th>
                         <th>Đơn giá</th>
@@ -45,15 +52,15 @@
                         const image = imagePath(item.image_url);
                         const soldOut = Number(item.stock) <= 0;
                         const overStock = !soldOut && Number(item.quantity) > Number(item.stock);
+                        const canOrder = isOrderable(item);
                     %>
                         <tr>
-                            <td class="cart-select-col">
-                                <%# Checkbox nằm ngoài form đặt hàng nên gắn vào bằng thuộc tính form=. %>
-                                <input type="checkbox" class="cart-select" name="selected"
-                                    value="<%= item.product_id %>" form="select-form"
-                                    data-line-total="<%= Number(item.line_total) %>"
-                                    <%= (soldOut || overStock) ? "disabled" : "checked" %>
-                                    aria-label="Chọn <%= item.name %> để đặt hàng">
+                            <td class="cart-select">
+                                <input type="checkbox" name="selected" form="select-form"
+                                    value="<%= item.product_id %>"
+                                    data-line-total="<%= item.line_total %>"
+                                    aria-label="Chọn <%= item.name %> để đặt hàng"
+                                    <%= canOrder ? "checked" : "disabled" %>>
                             </td>
                             <td class="cart-product">
                                 <% if (image) { %>
@@ -62,9 +69,9 @@
                                 <div>
                                     <a href="/products/<%= item.product_id %>"><%= item.name %></a>
                                     <% if (soldOut) { %>
-                                        <small class="cart-warn">Đã hết hàng, không thể chọn để đặt. Hãy xóa khỏi giỏ.</small>
+                                        <small class="cart-warn">Đã hết hàng, hãy xóa khỏi giỏ.</small>
                                     <% } else if (overStock) { %>
-                                        <small class="cart-warn">Chỉ còn <%= item.stock %> sản phẩm, hãy giảm số lượng rồi mới chọn được.</small>
+                                        <small class="cart-warn">Chỉ còn <%= item.stock %> sản phẩm, hãy giảm số lượng.</small>
                                     <% } %>
                                 </div>
                             </td>
@@ -94,23 +101,22 @@
                 </tbody>
             </table>
 
-            <form id="select-form" class="cart-summary" method="get" action="/checkout">
+            <div class="cart-summary">
                 <p>
-                    Đã chọn <strong id="selected-count">0</strong> sản phẩm.
-                    Tạm tính: <strong id="selected-subtotal"><%= formatMoney(0) %></strong>
+                    Đã chọn <span id="selected-count"><%= orderableCount %></span> sản phẩm:
+                    <strong id="selected-total"><%= formatMoney(orderableTotal) %></strong>
                 </p>
-                <p class="cart-note">Tổng giá trị cả giỏ: <%= formatMoney(subtotal) %></p>
-                <% if (hasProblem) { %>
-                    <p class="cart-warn">Sản phẩm hết hàng hoặc vượt tồn kho sẽ không thể chọn. Hãy điều chỉnh số lượng hoặc xóa khỏi giỏ.</p>
+                <% if (hasUnavailable) { %>
+                    <p class="cart-warn">Sản phẩm không đủ hàng không thể chọn. Hãy giảm số lượng hoặc xóa khỏi giỏ.</p>
                 <% } %>
                 <a class="cart-btn cart-btn-secondary" href="/products">Tiếp tục mua sắm</a>
-                <button type="submit" id="checkout-btn" class="cart-btn" disabled>Đặt hàng</button>
-            </form>
+                <button type="submit" form="select-form" id="checkout-btn" class="cart-btn"
+                    <%= orderableCount === 0 ? "disabled" : "" %>>Đặt hàng</button>
+            </div>
         <% } %>
     </main>
 
     <%- include("../partials/footer") %>
-    <script src="/js/cart.js"></script>
 </body>
 
 </html>

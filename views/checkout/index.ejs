@@ -21,8 +21,8 @@
         <div class="checkout-layout">
             <form method="post" action="/checkout" class="checkout-form" novalidate>
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <% selectedIds.forEach(id => { %>
-                    <input type="hidden" name="selected" value="<%= id %>">
+                <% items.forEach(item => { %>
+                    <input type="hidden" name="selected" value="<%= item.product_id %>">
                 <% }) %>
 
                 <h2>Thông tin giao hàng</h2>
@@ -54,6 +54,21 @@
                     <% if (errors.notes) { %><p class="field-error"><%= errors.notes %></p><% } %>
                 </div>
 
+                <fieldset class="field payment-methods">
+                    <legend>Phương thức thanh toán</legend>
+                    <% paymentOptions.forEach(option => { %>
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="<%= option.value %>"
+                                <%= form.paymentMethod === option.value ? "checked" : "" %> required>
+                            <span>
+                                <strong><%= option.label %></strong>
+                                <small><%= option.hint %></small>
+                            </span>
+                        </label>
+                    <% }) %>
+                    <% if (errors.paymentMethod) { %><p class="field-error"><%= errors.paymentMethod %></p><% } %>
+                </fieldset>
+
                 <button type="submit" class="cart-btn">Xác nhận đặt hàng</button>
                 <a class="cart-btn cart-btn-secondary" href="/cart">Quay lại giỏ hàng</a>
             </form>
@@ -69,7 +84,6 @@
                     <% }) %>
                 </ul>
                 <p class="checkout-total">Tổng cộng: <strong><%= formatMoney(subtotal) %></strong></p>
-                <p class="checkout-note">Phương thức thanh toán sẽ được chọn ở bước tiếp theo.</p>
             </aside>
         </div>
     </main>

@@ -17,6 +17,7 @@ const { loadCartCount } = require("./middleware/cartMiddleware");
 const cartRoutes = require("./routes/cartRoutes");
 const checkoutRoutes = require("./routes/checkoutRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -58,12 +59,15 @@ app.use("/images", express.static(path.join(__dirname, "public", "img")));
 // Dự phòng các ảnh vẫn còn ở thư mục images gốc.
 app.use("/images", express.static(path.join(__dirname, "images")));
 
+// Webhook ngân hàng báo đã nhận tiền. PHẢI đặt trước session và CSRF vì
+// ngân hàng không có cookie/CSRF token; route tự xác thực bằng khóa bí mật.
+app.use("/payments", paymentRoutes);
+
 app.use(
   express.urlencoded({
     extended: false,
     limit: "16kb",
-    // Form đặt hàng gửi kèm mỗi sản phẩm được chọn là một tham số.
-    parameterLimit: 100,
+    parameterLimit: 30,
   }),
 );
 

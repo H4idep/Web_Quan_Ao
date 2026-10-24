@@ -10,67 +10,186 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="/css/cart.css">
     <link rel="stylesheet" href="/css/checkout.css">
+    <script src="/js/orders.js" defer></script>
 </head>
 
 <body class="cart-page">
     <%- include("../partials/header") %>
 
-    <main class="cart-container">
-        <% if (justPlaced) { %>
-            <p class="cart-flash cart-flash-success" role="status">
-                Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại Routine.
-            </p>
-        <% } %>
+        <main class="cart-container">
+            <p class="order-back"><a href="/orders">&larr; Đơn hàng của tôi</a></p>
 
-        <h1>Đơn hàng <%= order.order_number %></h1>
+            <% if (flash) { %>
+                <p class="cart-flash cart-flash-<%= flash.type %>" role="status">
+                    <%= flash.message %>
+                </p>
+                <% } %>
 
-        <dl class="order-info">
-            <dt>Trạng thái</dt>
-            <dd><span class="order-status order-status-<%= order.status %>"><%= statusLabel %></span></dd>
+                    <h1>Đơn hàng <%= order.order_number %>
+                    </h1>
 
-            <dt>Ngày đặt</dt>
-            <dd><%= new Date(order.created_at).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }) %></dd>
+                    <% if (order.status==="cancelled" ) { %>
+                        <p class="order-cancelled-note">Đơn hàng này đã được hủy.</p>
+                        <% } else { %>
+                            <ol class="order-steps" aria-label="Tiến trình đơn hàng">
+                                <% steps.forEach((step, index)=> { %>
+                                    <li class="<%= index < currentStep ? " done" : "" %>
+                                        <%= index===currentStep ? "current" : "" %>"
+                                            <%- index===currentStep ? 'aria-current="step"' : "" %>><%= step.label %>
+                                    </li>
+                                    <% }) %>
+                            </ol>
+                            <% } %>
 
-            <dt>Người nhận</dt>
-            <dd><%= order.customer_name %> · <%= order.customer_phone %></dd>
+                                <dl class="order-info">
+                                    <dt>Trạng thái</dt>
+                                    <dd><span class="order-status order-status-<%= order.status %>">
+                                            <%= statusLabel %>
+                                        </span></dd>
 
-            <dt>Địa chỉ giao hàng</dt>
-            <dd><%= order.shipping_address %></dd>
+                                    <dt>Ngày đặt</dt>
+                                    <dd>
+                                        <%= new Date(order.created_at).toLocaleString("vi-VN", {
+                                            timeZone: "Asia/Ho_Chi_Minh" }) %>
+                                    </dd>
 
-            <% if (order.notes) { %>
-                <dt>Ghi chú</dt>
-                <dd><%= order.notes %></dd>
-            <% } %>
-        </dl>
+                                    <dt>Người nhận</dt>
+                                    <dd>
+                                        <%= order.customer_name %> · <%= order.customer_phone %>
+                                    </dd>
 
-        <table class="cart-table">
-            <thead>
-                <tr>
-                    <th>Sản phẩm</th>
-                    <th>Đơn giá</th>
-                    <th>Số lượng</th>
-                    <th>Thành tiền</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% order.items.forEach(item => { %>
-                    <tr>
-                        <td><%= item.product_name %></td>
-                        <td><%= formatMoney(item.unit_price) %></td>
-                        <td><%= item.quantity %></td>
-                        <td><%= formatMoney(item.line_total) %></td>
-                    </tr>
-                <% }) %>
-            </tbody>
-        </table>
+                                    <dt>Địa chỉ giao hàng</dt>
+                                    <dd>
+                                        <%= order.shipping_address %>
+                                    </dd>
 
-        <div class="cart-summary">
-            <p>Tổng cộng: <strong><%= formatMoney(order.total_amount) %></strong></p>
-            <a class="cart-btn cart-btn-secondary" href="/products">Tiếp tục mua sắm</a>
-        </div>
-    </main>
+                                    <% if (order.notes) { %>
+                                        <dt>Ghi chú</dt>
+                                        <dd>
+                                            <%= order.notes %>
+                                        </dd>
+                                        <% } %>
+                                </dl>
 
-    <%- include("../partials/footer") %>
+                                <section class="payment-box">
+                                    <h2>Thanh toán</h2>
+                                    <dl class="order-info">
+                                        <dt>Phương thức</dt>
+                                        <dd>
+                                            <%= paymentMethodLabel %>
+                                        </dd>
+
+                                        <dt>Tình trạng</dt>
+                                        <dd>
+                                            <span class="order-status order-status-pay-<%= order.payment_status %>">
+                                                <%= paymentStatusText %>
+                                            </span>
+                                            <% if (order.payment_status==="paid" && order.paid_at) { %>
+                                                lúc <%= new Date(order.paid_at).toLocaleString("vi-VN", {
+                                                    timeZone: "Asia/Ho_Chi_Minh" }) %>
+                                                    <% } %>
+                                        </dd>
+                                    </dl>
+
+                                    <% if (awaitingTransfer) { %>
+                                        <% if (bankTransferEnabled) { %>
+                                            <div class="bank-box">
+                                                <p>Vui lòng chuyển khoản <strong>đúng số tiền</strong> và <strong>đúng
+                                                        nội dung</strong> bên dưới để cửa hàng đối soát đơn của bạn.</p>
+                                                <dl class="order-info">
+                                                    <dt>Ngân hàng</dt>
+                                                    <dd>
+                                                        <%= bank.name %>
+                                                    </dd>
+
+                                                    <dt>Số tài khoản</dt>
+                                                    <dd>
+                                                        <%= bank.accountNumber %>
+                                                    </dd>
+
+                                                    <dt>Chủ tài khoản</dt>
+                                                    <dd>
+                                                        <%= bank.accountName %>
+                                                    </dd>
+
+                                                    <dt>Số tiền</dt>
+                                                    <dd><strong>
+                                                            <%= formatMoney(order.total_amount) %>
+                                                        </strong></dd>
+
+                                                    <dt>Nội dung chuyển khoản</dt>
+                                                    <dd><strong>
+                                                            <%= order.order_number %>
+                                                        </strong></dd>
+                                                </dl>
+                                                <% if (qrUrl) { %>
+                                                    <img class="bank-qr" src="<%= qrUrl %>"
+                                                        alt="Mã QR chuyển khoản cho đơn <%= order.order_number %>"
+                                                        width="220" height="220">
+                                                    <% } %>
+                                                        <p class="checkout-note">Sau khi cửa hàng nhận được tiền, tình
+                                                            trạng thanh toán sẽ chuyển thành "Đã thanh toán".</p>
+                                            </div>
+                                            <% } else { %>
+                                                <p class="checkout-note">Vui lòng liên hệ cửa hàng để nhận thông tin
+                                                    chuyển khoản cho đơn này.</p>
+                                                <% } %>
+                                                    <% } %>
+                                </section>
+
+                                <table class="cart-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Sản phẩm</th>
+                                            <th>Đơn giá</th>
+                                            <th>Số lượng</th>
+                                            <th>Thành tiền</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% order.items.forEach(item=> { %>
+                                            <tr>
+                                                <td>
+                                                    <%= item.product_name %>
+                                                </td>
+                                                <td>
+                                                    <%= formatMoney(item.unit_price) %>
+                                                </td>
+                                                <td>
+                                                    <%= item.quantity %>
+                                                </td>
+                                                <td>
+                                                    <%= formatMoney(item.line_total) %>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                    </tbody>
+                                </table>
+
+                                <div class="cart-summary">
+                                    <p>Tổng cộng: <strong>
+                                            <%= formatMoney(order.total_amount) %>
+                                        </strong></p>
+                                    <% if (canCancel) { %>
+                                        <form method="post" action="/orders/<%= order.order_number %>/cancel"
+                                            class="order-cancel-form"
+                                            data-confirm="Bạn chắc chắn muốn hủy đơn hàng này?">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <button type="submit" class="cart-btn cart-btn-danger">Hủy đơn hàng</button>
+                                        </form>
+                                        <% } else if (paidAndPending) { %>
+                                            <p class="checkout-note">Đơn đã thanh toán. Nếu muốn hủy, vui lòng liên hệ
+                                                cửa hàng để được hoàn tiền.</p>
+                                            <% } else if (order.status==="processing" || order.status==="shipped" ) { %>
+                                                <p class="checkout-note">Đơn đang được xử lý nên không thể tự hủy. Hãy
+                                                    liên hệ cửa hàng nếu cần hỗ trợ.</p>
+                                                <% } %>
+                                                    <a class="cart-btn cart-btn-secondary" href="/products">Tiếp tục mua
+                                                        sắm</a>
+                                </div>
+        </main>
+
+        <%- include("../partials/footer") %>
 </body>
 
 </html>
