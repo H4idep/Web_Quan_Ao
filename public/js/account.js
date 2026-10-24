@@ -1,12 +1,10 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const provinceSelect = document.getElementById("province");
-    const districtSelect = document.getElementById("district");
     const wardSelect = document.getElementById("ward");
 
-    if (!provinceSelect || !districtSelect || !wardSelect) return;
+    if (!provinceSelect || !wardSelect) return;
 
     const initialProvince = provinceSelect.dataset.selected || "";
-    const initialDistrict = districtSelect.dataset.selected || "";
     const initialWard = wardSelect.dataset.selected || "";
 
     function fillSelect(element, items, placeholder, selectedValue = "") {
@@ -23,36 +21,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!response.ok) throw new Error("Lỗi tải địa chỉ");
         const catalog = await response.json();
 
-        // Đổ danh sách Tỉnh/Thành
+        // 1. Đổ danh sách Tỉnh/Thành
         fillSelect(provinceSelect, Object.keys(catalog), "Chọn Tỉnh/Thành", initialProvince);
 
-        // Khởi tạo Quận/Huyện nếu đã có Tỉnh
-        if (initialProvince && catalog[initialProvince]) {
-            const districts = Object.keys(catalog[initialProvince]);
-            fillSelect(districtSelect, districts, "Chọn Quận/Huyện", initialDistrict);
-
-            // Khởi tạo Phường/Xã nếu đã có Huyện
-            if (initialDistrict && catalog[initialProvince][initialDistrict]) {
-                const wards = catalog[initialProvince][initialDistrict];
-                fillSelect(wardSelect, wards, "Chọn Phường/Xã", initialWard);
-            }
+        // 2. Điền sẵn danh sách Phường/Xã ban đầu nếu người dùng đã có tỉnh
+        if (initialProvince && Array.isArray(catalog[initialProvince])) {
+            fillSelect(wardSelect, catalog[initialProvince], "Chọn Phường/Xã", initialWard);
         }
 
-        // Sự kiện khi đổi Tỉnh
+        // 3. Khi đổi Tỉnh -> Đổ lại danh sách Phường/Xã tương ứng
         provinceSelect.addEventListener("change", () => {
             const curProvince = provinceSelect.value;
-            const districts = catalog[curProvince] ? Object.keys(catalog[curProvince]) : [];
-            fillSelect(districtSelect, districts, "Chọn Quận/Huyện");
-            fillSelect(wardSelect, [], "Chọn Phường/Xã");
-        });
-
-        // Sự kiện khi đổi Huyện
-        districtSelect.addEventListener("change", () => {
-            const curProvince = provinceSelect.value;
-            const curDistrict = districtSelect.value;
-            const wards = (catalog[curProvince] && catalog[curProvince][curDistrict])
-                ? catalog[curProvince][curDistrict]
-                : [];
+            const wards = Array.isArray(catalog[curProvince]) ? catalog[curProvince] : [];
             fillSelect(wardSelect, wards, "Chọn Phường/Xã");
         });
     } catch (err) {

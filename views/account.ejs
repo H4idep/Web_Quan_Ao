@@ -212,7 +212,7 @@
                         </div>
 
                         <div class="form-grid-3">
-                            <div class="form-group">
+                            <!-- <div class="form-group">
                                 <label for="province">Tỉnh / Thành phố *</label>
                                 <select id="province" name="province" data-selected="<%= user.province || '' %>"
                                     required>
@@ -224,6 +224,19 @@
                                 <select id="district" name="district" data-selected="<%= user.district || '' %>"
                                     required>
                                     <option value="">Chọn Quận/Huyện</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="ward">Phường / Xã *</label>
+                                <select id="ward" name="ward" data-selected="<%= user.ward || '' %>" required>
+                                    <option value="">Chọn Phường/Xã</option>
+                                </select>
+                            </div> -->
+                            <div class="form-group">
+                                <label for="province">Tỉnh / Thành phố *</label>
+                                <select id="province" name="province" data-selected="<%= user.province || '' %>"
+                                    required>
+                                    <option value="">Chọn Tỉnh/Thành</option>
                                 </select>
                             </div>
                             <div class="form-group">
