@@ -6,7 +6,8 @@
 
     <% const action=item.id ? `/admin/${kind}/${item.id}/update` : `/admin/${kind}`; %>
 
-        <form method="POST" action="<%= action %>" class="edit-form" id="adminEditForm">
+        <form method="POST" action="<%= action %>"
+            class="edit-form <%= kind === 'categories' ? 'category-edit-form' : '' %>" id="adminEditForm">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
             <div class="form-layout">

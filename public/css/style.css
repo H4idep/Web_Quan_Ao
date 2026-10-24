@@ -2293,3 +2293,106 @@ main.register-page:has(.register-heading) .register-heading {
     padding-top: 90px;
   }
 }
+/* Header dùng chung của cửa hàng */
+body > header {
+    background: #fff;
+    border-bottom: 1px solid #e6e6e6;
+    z-index: 100;
+}
+
+body > header .logo img {
+    display: block;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+body > header .menu > li:focus-within > .sub-menu {
+    visibility: visible;
+    top: 43px;
+}
+
+body > header .other > li:focus-within > .sub-menu {
+    visibility: visible;
+    top: 43px;
+}
+
+body > header a:focus-visible {
+    outline: 2px solid #555;
+    outline-offset: 5px;
+}
+
+@media (max-width: 1100px) {
+    body > header {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    body > header .menu > li {
+        padding: 0 12px;
+    }
+
+    body > header .menu > li > a {
+        font-size: 14px;
+    }
+
+    body > header .other > li {
+        padding: 0 10px;
+    }
+}
+
+@media (max-width: 760px) {
+    body > header {
+        height: 108px;
+        box-sizing: border-box;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: 48px 36px;
+        gap: 0 12px;
+        padding: 8px 16px;
+    }
+
+    body > header .logo {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    body > header .logo img {
+        width: 135px;
+        height: 38px;
+    }
+
+    body > header .other {
+        grid-column: 2;
+        grid-row: 1;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    /* Chỉ thu gọn ô tìm kiếm ở header trên màn hình nhỏ */
+    body > header .other > li:first-child {
+        display: none;
+    }
+
+    body > header .menu {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        justify-content: center;
+        align-items: center;
+    }
+
+    body > header .menu > li {
+        padding: 0 16px;
+    }
+
+    body > header .menu > li > a {
+        font-size: 13px;
+    }
+
+    body > header .sub-menu {
+        max-width: calc(100vw - 32px);
+    }
+
+    .register-page {
+        padding-top: 130px;
+    }
+}
