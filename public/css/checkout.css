@@ -24,3 +24,18 @@
     .checkout-layout { grid-template-columns: 1fr; }
     .order-info { grid-template-columns: 1fr; }
 }
+
+/* ===== Đặt hàng / thông tin đơn hàng ===== */
+.checkout-layout { margin-top: 28px; gap: 28px; }
+.checkout-form, .checkout-summary { padding: 24px; border: 1px solid #e6eae7; border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(20,40,30,.04); }
+.checkout-form h2, .checkout-summary h2 { font-size: 21px; line-height: 1.35; margin-bottom: 18px; }
+.field { margin-bottom: 18px; }
+.field label { margin-bottom: 7px; font-size: 14px; color: #303b34; }
+.field input, .field textarea, .field select { padding: 12px 13px; border: 1px solid #dce2de; border-radius: 7px; background: #fff; transition: border-color .15s, box-shadow .15s; }
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: #6d9a88; box-shadow: 0 0 0 3px rgba(36,87,71,.1); }
+.checkout-summary { position: sticky; top: 100px; }
+.checkout-summary li { padding: 11px 0; line-height: 1.5; border-color: #edf0ee; }
+.checkout-total { margin-top: 16px; font-size: 20px; font-weight: 700; }
+.order-info { margin-top: 18px; padding: 22px; gap: 12px 20px; border: 1px solid #e6eae7; border-radius: 12px; background: #fff; }
+.order-info dt { color: #4b5951; }
+@media (max-width: 760px) { .checkout-layout { margin-top: 18px; gap: 18px; } .checkout-form, .checkout-summary { padding: 18px; } .checkout-summary { position: static; } }
