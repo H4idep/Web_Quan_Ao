@@ -5,6 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <script src="/js/register.js"></script>
+  <script src="/js/password-toggle.js" defer></script>
   <link rel="stylesheet" href="/css/style.css" />
   <title>Đăng ký tài khoản - Routine</title>
 </head>
@@ -166,51 +168,76 @@
                         <% } %>
                     </div>
 
-                    <% const provinces=Object.keys(addressCatalog); const districtMap=Object.hasOwn( addressCatalog,
-                      form.province || "" ) ? addressCatalog[form.province] : {}; const
-                      districts=Object.keys(districtMap); const wards=Object.hasOwn( districtMap, form.district || "" )
-                      ? districtMap[form.district] : []; const addressFields=[ { name: "province" , label: "Tỉnh/TP" ,
-                      options: provinces, wide: false }, { name: "district" , label: "Quận/Huyện" , options: districts,
-                      wide: false }, { name: "ward" , label: "Phường/Xã" , options: wards, wide: true } ]; %>
+                    <% const provinces=Object.keys(addressCatalog); const wards=Object.hasOwn( addressCatalog,
+                      form.province || "" ) ? addressCatalog[form.province] : []; %>
 
-                      <% addressFields.forEach(field=> { %>
-                        <div class="register-field <%= field.wide ? 'full-width' : '' %>">
-                          <label for="<%= field.name %>">
-                            <%= field.label %>:<span>*</span>
-                          </label>
+                      <div class="register-field">
+                        <label for="province">
+                          Tỉnh/Thành phố:<span>*</span>
+                        </label>
 
-                          <select id="<%= field.name %>" name="<%= field.name %>" required>
-                            <option value="">Chọn <%= field.label %>
+                        <select id="province" name="province" required>
+                          <option value="">Chọn Tỉnh/Thành phố</option>
+
+                          <% provinces.forEach(provinceName=> { %>
+                            <option value="<%= provinceName %>" <%=form.province===provinceName ? "selected" : "" %>
+                              >
+                              <%= provinceName %>
                             </option>
+                            <% }) %>
+                        </select>
 
-                            <% field.options.forEach(value=> { %>
-                              <option value="<%= value %>" <%=form[field.name]===value ? "selected" : "" %>
-                                >
-                                <%= value %>
-                              </option>
-                              <% }) %>
-                          </select>
+                        <% if (errors.province) { %>
+                          <small class="field-error">
+                            <%= errors.province %>
+                          </small>
+                          <% } %>
+                      </div>
 
-                          <% if (errors[field.name]) { %>
-                            <small class="field-error">
-                              <%= errors[field.name] %>
-                            </small>
-                            <% } %>
-                        </div>
-                        <% }) %>
+                      <div class="register-field">
+                        <label for="ward">
+                          Phường/Xã/Đặc khu:<span>*</span>
+                        </label>
 
-                          <div class="register-field full-width">
-                            <label for="address">Địa chỉ:<span>*</span></label>
+                        <select id="ward" name="ward" required>
+                          <option value="">Chọn Phường/Xã/Đặc khu</option>
 
-                            <textarea id="address" name="address" rows="3" minlength="5" maxlength="255"
-                              required><%= form.address || "" %></textarea>
+                          <% wards.forEach(wardName=> { %>
+                            <option value="<%= wardName %>" <%=form.ward===wardName ? "selected" : "" %>
+                              >
+                              <%= wardName %>
+                            </option>
+                            <% }) %>
+                        </select>
 
-                            <% if (errors.address) { %>
-                              <small class="field-error">
-                                <%= errors.address %>
-                              </small>
-                              <% } %>
-                          </div>
+                        <% if (errors.ward) { %>
+                          <small class="field-error">
+                            <%= errors.ward %>
+                          </small>
+                          <% } %>
+                      </div>
+
+                      <div class="register-field full-width">
+                        <small>
+                          Chọn địa chỉ theo đơn vị hành chính mới.
+                          Nhập số nhà, tên đường hoặc thôn ở ô địa chỉ bên dưới.
+                        </small>
+
+                        <small id="addressLoadError" class="field-error" role="alert"></small>
+                      </div>
+
+                      <div class="register-field full-width">
+                        <label for="address">Địa chỉ:<span>*</span></label>
+
+                        <textarea id="address" name="address" rows="3" minlength="5" maxlength="255"
+                          required><%= form.address || "" %></textarea>
+
+                        <% if (errors.address) { %>
+                          <small class="field-error">
+                            <%= errors.address %>
+                          </small>
+                          <% } %>
+                      </div>
             </div>
           </section>
 

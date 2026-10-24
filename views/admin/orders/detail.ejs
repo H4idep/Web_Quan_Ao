@@ -1,0 +1,226 @@
+<%- include("../partials/header") %>
+
+    <div class="order-back">
+        <a href="/admin/orders" class="text-link">← Danh sách đơn hàng</a>
+    </div>
+
+    <% if (error) { %>
+        <div class="alert error" role="alert">
+            <%= error %>
+        </div>
+        <% } %>
+
+            <div class="order-detail-grid">
+                <section class="panel order-panel">
+                    <div class="order-section-heading">
+                        <h2>Thông tin giao hàng</h2>
+
+                        <span class="badge <%= order.status %>">
+                            <%= statuses[order.status] || order.status %>
+                        </span>
+                    </div>
+
+                    <dl class="order-facts">
+                        <dt>Mã đơn</dt>
+                        <dd><strong>
+                                <%= order.order_number %>
+                            </strong></dd>
+
+                        <dt>Ngày đặt</dt>
+                        <dd>
+                            <%= order.created_text %>
+                        </dd>
+
+                        <dt>Tài khoản đặt</dt>
+                        <dd>
+                            <%= order.user_id ? "#" + order.user_id : "Chưa liên kết" %>
+                        </dd>
+
+                        <dt>Người nhận</dt>
+                        <dd>
+                            <%= order.customer_name %>
+                        </dd>
+
+                        <dt>Điện thoại</dt>
+                        <dd>
+                            <%= order.customer_phone %>
+                        </dd>
+
+                        <dt>Email</dt>
+                        <dd>
+                            <%= order.customer_email || "—" %>
+                        </dd>
+
+                        <dt>Địa chỉ</dt>
+                        <dd>
+                            <%= order.shipping_address %>
+                        </dd>
+
+                        <dt>Ghi chú của khách</dt>
+                        <dd class="order-note">
+                            <%= order.notes || "Không có" %>
+                        </dd>
+                    </dl>
+                </section>
+
+                <section class="panel order-panel">
+                    <h2>Xử lý đơn hàng</h2>
+
+                    <% if (nextStatuses.length) { %>
+                        <p class="muted">
+                            Kiểm tra thông tin đơn trước khi cập nhật.
+                            Hủy đơn sẽ hoàn lại tồn kho.
+                        </p>
+
+                        <form method="POST" action="/admin/orders/<%= order.id %>/status" class="order-status-form"
+                            data-confirm="Bạn xác nhận cập nhật trạng thái đơn hàng này?">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" name="expected_status" value="<%= order.status %>">
+
+                            <label for="orderStatus">Chuyển trạng thái</label>
+
+                            <select id="orderStatus" name="status" required>
+                                <option value="">Chọn trạng thái</option>
+
+                                <% nextStatuses.forEach(status=> { %>
+                                    <option value="<%= status %>">
+                                        <%= statuses[status] %>
+                                    </option>
+                                    <% }) %>
+                            </select>
+
+                            <label for="orderReason">Ghi chú / lý do hủy</label>
+
+                            <textarea id="orderReason" name="reason" rows="4" maxlength="500"
+                                placeholder="Bắt buộc nhập từ 5 ký tự khi hủy đơn"><%= reason %></textarea>
+
+                            <small class="muted">
+                                Tối đa 500 ký tự. Nội dung được lưu trong lịch sử xử lý.
+                            </small>
+
+                            <button type="submit" class="btn primary">
+                                Cập nhật trạng thái
+                            </button>
+                        </form>
+                        <% } else { %>
+                            <p class="muted">
+                                Đơn đã <%= order.status==="completed" ? "hoàn thành" : "bị hủy" %>.
+                                    Không thể thay đổi trạng thái tiếp.
+                            </p>
+                            <% } %>
+                </section>
+            </div>
+
+            <section class="panel order-section">
+                <div class="panel-heading">
+                    <h2>Sản phẩm trong đơn</h2>
+                    <span class="muted">Giá tại thời điểm đặt hàng</span>
+                </div>
+
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Đơn giá</th>
+                                <th>Số lượng</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <% if (!order.items.length) { %>
+                                <tr>
+                                    <td colspan="4" class="empty">
+                                        Đơn cũ chưa có dữ liệu chi tiết sản phẩm.
+                                    </td>
+                                </tr>
+                                <% } %>
+
+                                    <% order.items.forEach(item=> { %>
+                                        <tr>
+                                            <td>
+                                                <strong>
+                                                    <%= item.product_name %>
+                                                </strong>
+
+                                                <small class="order-subtext">
+                                                    <%= item.product_id ? "Mã sản phẩm: #" + item.product_id
+                                                        : "Sản phẩm không còn trong danh mục" %>
+                                                </small>
+                                            </td>
+
+                                            <td class="nowrap">
+                                                <%= money(item.unit_price) %>
+                                            </td>
+                                            <td>
+                                                <%= item.quantity %>
+                                            </td>
+                                            <td class="nowrap">
+                                                <%= money(item.line_total) %>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="order-total">
+                    <span>Tổng giá trị đơn hàng</span>
+                    <strong>
+                        <%= money(order.total_amount) %>
+                    </strong>
+                </div>
+            </section>
+
+            <section class="panel order-section">
+                <div class="panel-heading">
+                    <h2>Lịch sử xử lý</h2>
+                </div>
+
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Người thực hiện</th>
+                                <th>Thay đổi</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <% if (!order.logs.length) { %>
+                                <tr>
+                                    <td colspan="4" class="empty">
+                                        Chưa có thao tác xử lý được ghi nhận.
+                                    </td>
+                                </tr>
+                                <% } %>
+
+                                    <% order.logs.forEach(log=> { %>
+                                        <tr>
+                                            <td class="nowrap">
+                                                <%= log.created_text %>
+                                            </td>
+                                            <td>
+                                                <%= log.admin_name %>
+                                            </td>
+
+                                            <td>
+                                                <%= statuses[log.previous_status] %>
+                                                    →
+                                                    <%= statuses[log.new_status] %>
+                                            </td>
+
+                                            <td class="order-note">
+                                                <%= log.reason || "—" %>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <%- include("../partials/footer") %>
