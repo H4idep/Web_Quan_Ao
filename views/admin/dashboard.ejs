@@ -1,0 +1,126 @@
+<%- include("partials/header") %>
+
+    <div class="dashboard-intro">
+        <p>Theo dõi hàng hóa và các đơn cần xử lý.</p>
+
+        <a class="btn primary" href="/admin/products/create">
+            + Thêm sản phẩm
+        </a>
+    </div>
+
+    <section class="stats-grid" aria-label="Thống kê cửa hàng">
+        <article class="stat-card">
+            <span>Sản phẩm</span>
+            <strong>
+                <%= stats.productCount %>
+            </strong>
+            <a href="/admin/products">Xem danh sách →</a>
+        </article>
+
+        <article class="stat-card">
+            <span>Danh mục</span>
+            <strong>
+                <%= stats.categoryCount %>
+            </strong>
+            <a href="/admin/categories">Quản lý danh mục →</a>
+        </article>
+
+        <article class="stat-card">
+            <span>Đơn chờ xử lý</span>
+            <strong>
+                <%= stats.pendingCount %>
+            </strong>
+            <a href="/admin/orders?status=pending">Xử lý đơn hàng →</a>
+        </article>
+
+        <article class="stat-card">
+            <span>Tổng giá trị đơn hoàn thành</span>
+            <strong class="revenue">
+                <%= money(stats.completedRevenue) %>
+            </strong>
+            <small>Toàn bộ thời gian</small>
+        </article>
+    </section>
+
+    <div class="dashboard-grid">
+        <section class="panel">
+            <div class="panel-heading">
+                <h2>Đơn hàng gần đây</h2>
+                <span class="muted">5 đơn mới nhất</span>
+            </div>
+
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <% if (!stats.recentOrders.length) { %>
+                            <tr>
+                                <td colspan="4" class="empty">
+                                    Chưa có đơn hàng.
+                                </td>
+                            </tr>
+                            <% } %>
+
+                                <% stats.recentOrders.forEach(order=> { %>
+                                    <tr>
+                                        <td>
+                                            <a class="order-number" href="/admin/orders/<%= order.id %>">
+                                                <%= order.order_number %>
+                                            </a>
+                                        </td>
+
+                                        <td>
+                                            <%= order.customer_name %>
+                                        </td>
+
+                                        <td class="nowrap">
+                                            <%= money(order.total_amount) %>
+                                        </td>
+
+                                        <td>
+                                            <span class="badge <%= order.status %>">
+                                                <%= orderStatuses[order.status] || order.status %>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-heading">
+                <h2>Cần bổ sung hàng</h2>
+            </div>
+
+            <% if (!stats.lowStock.length) { %>
+                <p class="empty">Không có sản phẩm tồn kho từ 5 trở xuống.</p>
+                <% } %>
+
+                    <% stats.lowStock.forEach(product=> { %>
+                        <a class="stock-item" href="/admin/products/<%= product.id %>/edit">
+                            <span>
+                                <strong>
+                                    <%= product.name %>
+                                </strong>
+                                <small>Mã SP: <%= product.id %></small>
+                            </span>
+
+                            <span class="badge <%= Number(product.stock) === 0 ? 'cancelled' : 'pending' %>">
+                                Còn <%= product.stock %>
+                            </span>
+                        </a>
+                        <% }) %>
+        </section>
+    </div>
+
+    <%- include("partials/footer") %>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Routine — Thời trang mỗi ngày</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/home.css">
+
+  <script src="/js/home.js" defer></script>
+</head>
+
+<body class="routine-home">
+  <%- include("partials/header") %>
+
+    <main class="fashion-home">
+
+      <!-- THANH ĐIỀU HƯỚNG NHANH -->
+      <div class="home-announcements">
+        <a href="#new-arrivals">KHÁM PHÁ SẢN PHẨM MỚI</a>
+        <a href="/products">PHONG CÁCH CHO MỖI NGÀY</a>
+        <a href="#collection">CẢM HỨNG PHỐI ĐỒ</a>
+      </div>
+
+      <!-- BANNER -->
+      <section class="home-hero" aria-label="Bộ sưu tập nổi bật">
+        <div class="home-hero-track">
+          <a class="home-slide is-active" href="/products">
+            <img src="/images/63d0bb09238edcf27af288aac6cac3b8.jpg" alt="Khám phá bộ sưu tập Routine"
+              fetchpriority="high">
+          </a>
+
+          <a class="home-slide" href="/products" hidden>
+            <img src="/images/c91a8e5ec50506042be29e6b4514586c.jpg" alt="Phong cách thời trang Routine">
+          </a>
+
+          <a class="home-slide" href="/products" hidden>
+            <img src="/images/b7fde7af0bb7b4d7011d9599baf4561e.jpg" alt="Trang phục cho mỗi ngày">
+          </a>
+        </div>
+
+        <button class="home-hero-arrow previous" id="previousSlide" type="button" aria-label="Banner trước">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <button class="home-hero-arrow next" id="nextSlide" type="button" aria-label="Banner tiếp theo">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <div class="home-hero-dots">
+          <button type="button" class="is-active" data-slide="0" aria-label="Banner 1" aria-pressed="true"></button>
+
+          <button type="button" data-slide="1" aria-label="Banner 2" aria-pressed="false"></button>
+
+          <button type="button" data-slide="2" aria-label="Banner 3" aria-pressed="false"></button>
+        </div>
+      </section>
+
+      <!-- SẢN PHẨM MỚI -->
+      <section class="home-arrivals" id="new-arrivals">
+        <div class="home-section-title">
+          <p>ROUTINE COLLECTION</p>
+          <h1>NEW ARRIVALS</h1>
+        </div>
+
+        <% const categoryNames=[ ...new Set(products.map(product=> product.category_name))
+          ];
+          %>
+
+          <div class="home-category-tabs" role="group" aria-label="Lọc sản phẩm theo danh mục">
+            <button type="button" class="is-active" data-category="" aria-pressed="true">
+              Tất cả
+            </button>
+
+            <% categoryNames.forEach(categoryName=> { %>
+              <button type="button" data-category="<%= categoryName %>" aria-pressed="false">
+                <%= categoryName %>
+              </button>
+              <% }) %>
+          </div>
+
+          <p class="home-result-count" id="productCount" aria-live="polite">
+            <%= products.length %> sản phẩm
+          </p>
+
+          <% if (products.length===0) { %>
+            <div class="home-empty">
+              <h2>Sản phẩm mới đang được cập nhật</h2>
+              <p>Bạn vui lòng quay lại sau.</p>
+            </div>
+            <% } else { %>
+              <div class="home-product-grid">
+                <% products.forEach(product=> { %>
+                  <article class="home-product-card" data-product-category="<%= product.category_name %>">
+                    <a class="home-product-photo" href="/products/<%= product.id %>">
+                      <% if (product.image_url) { %>
+                        <img src="<%= product.image_url %>" alt="<%= product.name %>" loading="lazy">
+                        <% } else { %>
+                          <span class="home-no-image">
+                            ROUTINE
+                            <small>Ảnh đang cập nhật</small>
+                          </span>
+                          <% } %>
+
+                            <% if (Number(product.stock)===0) { %>
+                              <span class="home-stock-label">Hết hàng</span>
+                              <% } %>
+
+                                <span class="home-product-overlay">
+                                  Xem chi tiết
+                                </span>
+                    </a>
+
+                    <div class="home-product-meta">
+                      <p class="home-product-category">
+                        <%= product.category_name %>
+                      </p>
+
+                      <h2>
+                        <a href="/products/<%= product.id %>">
+                          <%= product.name %>
+                        </a>
+                      </h2>
+
+                      <div class="home-product-bottom">
+                        <strong>
+                          <%= formatMoney(product.price) %>
+                        </strong>
+
+                        <a class="home-detail-button" href="/products/<%= product.id %>"
+                          aria-label="Xem chi tiết <%= product.name %>">
+                          <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </article>
+                  <% }) %>
+              </div>
+              <% } %>
+
+                <div class="home-view-all">
+                  <a href="/products">Xem tất cả sản phẩm</a>
+                </div>
+      </section>
+
+      <!-- BANNER BỘ SƯU TẬP -->
+      <section class="home-collection" id="collection">
+        <a class="home-collection-image" href="/products">
+          <img src="/images/b7fde7af0bb7b4d7011d9599baf4561e.jpg" alt="Cảm hứng thời trang Routine" loading="lazy">
+        </a>
+
+        <div class="home-collection-caption">
+          <div>
+            <p>EVERYDAY INSPIRATION</p>
+            <h2>Phong cách bắt đầu từ bạn</h2>
+          </div>
+
+          <a href="/products">
+            Khám phá ngay
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <%- include("partials/footer") %>
+</body>
+
+</html>

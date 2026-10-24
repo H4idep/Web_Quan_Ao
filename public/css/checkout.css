@@ -1,0 +1,41 @@
+.checkout-layout { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; align-items: start; }
+.checkout-form h2, .checkout-summary h2 { margin-bottom: 12px; font-size: 1.2rem; }
+
+.field { margin-bottom: 14px; }
+.field label { display: block; margin-bottom: 4px; font-weight: 600; }
+.field input, .field textarea { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; font: inherit; }
+.field-error { margin-top: 4px; color: #b71c1c; font-size: .9rem; }
+
+.checkout-summary { padding: 16px; border: 1px solid #e5e5e5; border-radius: 6px; }
+.checkout-summary ul { list-style: none; padding: 0; margin: 0 0 12px; }
+.checkout-summary li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+.checkout-total { font-size: 1.1rem; }
+.checkout-note { margin-top: 8px; color: #666; font-size: .85rem; }
+
+.order-info { display: grid; grid-template-columns: 160px 1fr; gap: 8px 16px; margin-bottom: 24px; }
+.order-info dt { font-weight: 600; }
+.order-info dd { margin: 0; }
+.order-status { padding: 2px 10px; border-radius: 10px; background: #eee; font-size: .9rem; }
+.order-status-pending { background: #fff8e1; color: #8a5a00; }
+.order-status-completed { background: #e8f5e9; color: #1b5e20; }
+.order-status-cancelled { background: #fdecea; color: #b71c1c; }
+
+@media (max-width: 760px) {
+    .checkout-layout { grid-template-columns: 1fr; }
+    .order-info { grid-template-columns: 1fr; }
+}
+
+/* ===== Đặt hàng / thông tin đơn hàng ===== */
+.checkout-layout { margin-top: 28px; gap: 28px; }
+.checkout-form, .checkout-summary { padding: 24px; border: 1px solid #e6eae7; border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(20,40,30,.04); }
+.checkout-form h2, .checkout-summary h2 { font-size: 21px; line-height: 1.35; margin-bottom: 18px; }
+.field { margin-bottom: 18px; }
+.field label { margin-bottom: 7px; font-size: 14px; color: #303b34; }
+.field input, .field textarea, .field select { padding: 12px 13px; border: 1px solid #dce2de; border-radius: 7px; background: #fff; transition: border-color .15s, box-shadow .15s; }
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: #6d9a88; box-shadow: 0 0 0 3px rgba(36,87,71,.1); }
+.checkout-summary { position: sticky; top: 100px; }
+.checkout-summary li { padding: 11px 0; line-height: 1.5; border-color: #edf0ee; }
+.checkout-total { margin-top: 16px; font-size: 20px; font-weight: 700; }
+.order-info { margin-top: 18px; padding: 22px; gap: 12px 20px; border: 1px solid #e6eae7; border-radius: 12px; background: #fff; }
+.order-info dt { color: #4b5951; }
+@media (max-width: 760px) { .checkout-layout { margin-top: 18px; gap: 18px; } .checkout-form, .checkout-summary { padding: 18px; } .checkout-summary { position: static; } }

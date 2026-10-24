@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đơn hàng <%= order.order_number %> - Routine</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/cart.css">
+    <link rel="stylesheet" href="/css/checkout.css">
+</head>
+
+<body class="cart-page">
+    <%- include("../partials/header") %>
+
+    <main class="cart-container">
+        <% if (justPlaced) { %>
+            <p class="cart-flash cart-flash-success" role="status">
+                Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại Routine.
+            </p>
+        <% } %>
+
+        <h1>Đơn hàng <%= order.order_number %></h1>
+
+        <dl class="order-info">
+            <dt>Trạng thái</dt>
+            <dd><span class="order-status order-status-<%= order.status %>"><%= statusLabel %></span></dd>
+
+            <dt>Ngày đặt</dt>
+            <dd><%= new Date(order.created_at).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }) %></dd>
+
+            <dt>Người nhận</dt>
+            <dd><%= order.customer_name %> · <%= order.customer_phone %></dd>
+
+            <dt>Địa chỉ giao hàng</dt>
+            <dd><%= order.shipping_address %></dd>
+
+            <% if (order.notes) { %>
+                <dt>Ghi chú</dt>
+                <dd><%= order.notes %></dd>
+            <% } %>
+        </dl>
+
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Đơn giá</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% order.items.forEach(item => { %>
+                    <tr>
+                        <td><%= item.product_name %></td>
+                        <td><%= formatMoney(item.unit_price) %></td>
+                        <td><%= item.quantity %></td>
+                        <td><%= formatMoney(item.line_total) %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+        <div class="cart-summary">
+            <p>Tổng cộng: <strong><%= formatMoney(order.total_amount) %></strong></p>
+            <a class="cart-btn cart-btn-secondary" href="/products">Tiếp tục mua sắm</a>
+        </div>
+    </main>
+
+    <%- include("../partials/footer") %>
+</body>
+
+</html>

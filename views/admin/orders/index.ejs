@@ -1,0 +1,133 @@
+<%- include("../partials/header") %>
+
+    <% function pageUrl(number) { const params=new URLSearchParams({ q: filters.q, status: filters.status, from:
+        filters.from, to: filters.to, page: String(number) }); return "/admin/orders?" + params.toString(); } %>
+
+        <section class="panel">
+            <form method="GET" action="/admin/orders" class="order-filters">
+                <label>
+                    Tìm đơn hàng
+                    <input name="q" value="<%= filters.q %>" maxlength="100"
+                        placeholder="Mã đơn, tên, email, số điện thoại">
+                </label>
+
+                <label>
+                    Trạng thái
+                    <select name="status">
+                        <option value="">Tất cả trạng thái</option>
+
+                        <% Object.entries(statuses).forEach(([value, label])=> { %>
+                            <option value="<%= value %>" <%=filters.status===value ? "selected" : "" %>
+                                >
+                                <%= label %>
+                            </option>
+                            <% }) %>
+                    </select>
+                </label>
+
+                <label>
+                    Từ ngày
+                    <input type="date" name="from" value="<%= filters.from %>">
+                </label>
+
+                <label>
+                    Đến ngày
+                    <input type="date" name="to" value="<%= filters.to %>">
+                </label>
+
+                <div class="order-filter-actions">
+                    <button type="submit" class="btn primary">Áp dụng</button>
+                    <a href="/admin/orders" class="btn">Bỏ lọc</a>
+                </div>
+            </form>
+
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã đơn</th>
+                            <th>Người nhận</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <% if (!rows.length) { %>
+                            <tr>
+                                <td colspan="7" class="empty">
+                                    Không có đơn hàng phù hợp.
+                                </td>
+                            </tr>
+                            <% } %>
+
+                                <% rows.forEach((order, index)=> { %>
+                                    <tr>
+                                        <td>
+                                            <%= (page - 1) * pageSize + index + 1 %>
+                                        </td>
+
+                                        <td>
+                                            <a class="order-number" href="/admin/orders/<%= order.id %>">
+                                                <%= order.order_number %>
+                                            </a>
+                                        </td>
+
+                                        <td>
+                                            <strong>
+                                                <%= order.customer_name %>
+                                            </strong>
+                                            <small class="order-subtext">
+                                                <%= order.customer_phone %>
+                                            </small>
+                                        </td>
+
+                                        <td class="nowrap">
+                                            <%= order.created_text %>
+                                        </td>
+                                        <td class="nowrap">
+                                            <%= money(order.total_amount) %>
+                                        </td>
+
+                                        <td>
+                                            <span class="badge <%= order.status %>">
+                                                <%= statuses[order.status] || order.status %>
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <a class="btn small" href="/admin/orders/<%= order.id %>">
+                                                Xem chi tiết
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <span class="muted">
+                    <%= total %> đơn hàng · Trang <%= page %>/<%= pages %>
+                </span>
+
+                <div class="row-actions">
+                    <% if (page> 1) { %>
+                        <a class="btn small" href="<%= pageUrl(page - 1) %>">
+                            ← Trước
+                        </a>
+                        <% } %>
+
+                            <% if (page < pages) { %>
+                                <a class="btn small" href="<%= pageUrl(page + 1) %>">
+                                    Sau →
+                                </a>
+                                <% } %>
+                </div>
+            </div>
+        </section>
+
+        <%- include("../partials/footer") %>

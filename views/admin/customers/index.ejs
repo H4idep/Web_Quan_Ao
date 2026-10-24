@@ -1,0 +1,130 @@
+<%- include("../partials/header") %>
+
+    <% function pageUrl(targetPage) { const params=new URLSearchParams({ q: filters.q, status: filters.status, from:
+        filters.from, to: filters.to, page: String(targetPage) }); return "/admin/customers?" + params.toString(); } %>
+
+        <section class="panel">
+            <form method="GET" action="/admin/customers" class="customer-filters">
+                <div class="field">
+                    <label for="customer-q">Tìm khách hàng</label>
+                    <input id="customer-q" name="q" value="<%= filters.q %>" maxlength="100"
+                        placeholder="Họ tên, email hoặc số điện thoại">
+                </div>
+
+                <div class="field">
+                    <label for="customer-status">Trạng thái</label>
+                    <select id="customer-status" name="status">
+                        <option value="">Tất cả</option>
+                        <option value="active" <%=filters.status==="active" ? "selected" : "" %>>
+                            Hoạt động
+                        </option>
+                        <option value="blocked" <%=filters.status==="blocked" ? "selected" : "" %>>
+                            Đang khóa
+                        </option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="customer-from">Đăng ký từ ngày</label>
+                    <input id="customer-from" type="date" name="from" value="<%= filters.from %>">
+                </div>
+
+                <div class="field">
+                    <label for="customer-to">Đến ngày</label>
+                    <input id="customer-to" type="date" name="to" value="<%= filters.to %>">
+                </div>
+
+                <div class="row-actions">
+                    <button class="btn primary" type="submit">Áp dụng</button>
+                    <a class="btn" href="/admin/customers">Bỏ lọc</a>
+                </div>
+            </form>
+
+            <% if (errors.length) { %>
+                <div class="alert error" role="alert">
+                    <% errors.forEach(message=> { %>
+                        <p>
+                            <%= message %>
+                        </p>
+                        <% }) %>
+                </div>
+                <% } %>
+
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Mã khách hàng</th>
+                                    <th>Họ tên</th>
+                                    <th>Email</th>
+                                    <th>Số điện thoại</th>
+                                    <th>Ngày đăng ký</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <% if (!rows.length) { %>
+                                    <tr>
+                                        <td colspan="7" class="empty">
+                                            Không có khách hàng phù hợp.
+                                        </td>
+                                    </tr>
+                                    <% } %>
+
+                                        <% rows.forEach(customer=> { %>
+                                            <tr>
+                                                <td>KH<%= customer.id %>
+                                                </td>
+                                                <td><strong>
+                                                        <%= customer.full_name %>
+                                                    </strong></td>
+                                                <td>
+                                                    <%= customer.email %>
+                                                </td>
+                                                <td class="nowrap">
+                                                    <%= customer.phone %>
+                                                </td>
+                                                <td class="nowrap">
+                                                    <%= customer.registered_at %>
+                                                </td>
+                                                <td>
+                                                    <span class="badge <%= customer.status === 'active'
+                                ? 'completed' : 'pending' %>">
+                                                        <%= customer.status==="active" ? "Hoạt động" : "Đang khóa" %>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <a class="btn small" href="/admin/customers/<%= customer.id %>">
+                                                        Chi tiết
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination">
+                        <span class="muted">
+                            <%= total %> khách hàng · Trang <%= page %>/<%= pages %>
+                        </span>
+
+                        <div class="row-actions">
+                            <% if (page> 1) { %>
+                                <a class="btn small" href="<%= pageUrl(page - 1) %>">
+                                    ← Trước
+                                </a>
+                                <% } %>
+
+                                    <% if (page < pages) { %>
+                                        <a class="btn small" href="<%= pageUrl(page + 1) %>">
+                                            Sau →
+                                        </a>
+                                        <% } %>
+                        </div>
+                    </div>
+        </section>
+
+        <%- include("../partials/footer") %>
