@@ -75,16 +75,27 @@ function validateUpdateProfile(body) {
     }
 
     // Kiểm tra địa chỉ theo danh mục
-    const districts = addressCatalog[data.province];
-    const wards = districts ? districts[data.district] : null;
+    // const districts = addressCatalog[data.province];
+    // const wards = districts ? districts[data.district] : null;
 
-    if (!districts || !wards || !wards.includes(data.ward)) {
-        errors.addressHierarchy = "Tỉnh/Thành, Quận/Huyện hoặc Phường/Xã không hợp lệ.";
+    // if (!districts || !wards || !wards.includes(data.ward)) {
+    //     errors.addressHierarchy = "Tỉnh/Thành, Quận/Huyện hoặc Phường/Xã không hợp lệ.";
+    // }
+
+    // if (!data.address || data.address.length < 5 || data.address.length > 255) {
+    //     errors.address = "Địa chỉ cụ thể từ 5 đến 255 ký tự.";
+    // }
+
+    // Kiểm tra địa chỉ theo danh mục 2 cấp (Tỉnh/Thành -> Phường/Xã)
+    const provinceExists = Object.hasOwn(addressCatalog, data.province);
+    const wards = provinceExists ? addressCatalog[data.province] : [];
+
+    if (!provinceExists) {
+        errors.addressHierarchy = "Vui lòng chọn Tỉnh/Thành phố trong danh mục.";
+    } else if (!wards.includes(data.ward)) {
+        errors.addressHierarchy = "Phường/Xã không thuộc Tỉnh/Thành phố đã chọn.";
     }
 
-    if (!data.address || data.address.length < 5 || data.address.length > 255) {
-        errors.address = "Địa chỉ cụ thể từ 5 đến 255 ký tự.";
-    }
 
     return { data, errors };
 }
