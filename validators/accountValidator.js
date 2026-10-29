@@ -74,18 +74,6 @@ function validateUpdateProfile(body) {
         errors.gender = "Vui lòng chọn giới tính hợp lệ.";
     }
 
-    // Kiểm tra địa chỉ theo danh mục
-    // const districts = addressCatalog[data.province];
-    // const wards = districts ? districts[data.district] : null;
-
-    // if (!districts || !wards || !wards.includes(data.ward)) {
-    //     errors.addressHierarchy = "Tỉnh/Thành, Quận/Huyện hoặc Phường/Xã không hợp lệ.";
-    // }
-
-    // if (!data.address || data.address.length < 5 || data.address.length > 255) {
-    //     errors.address = "Địa chỉ cụ thể từ 5 đến 255 ký tự.";
-    // }
-
     // Kiểm tra địa chỉ theo danh mục 2 cấp (Tỉnh/Thành -> Phường/Xã)
     const provinceExists = Object.hasOwn(addressCatalog, data.province);
     const wards = provinceExists ? addressCatalog[data.province] : [];

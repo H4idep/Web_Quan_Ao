@@ -34,10 +34,19 @@
                 </li>
     </div>
     <div class="other">
-        <li>
-            <input placeholder="Tìm kiếm" type="text" />
-            <i class="fa-solid fa-magnifying-glass"></i>
+        <li class="header-search-container">
+            <form action="/products" method="GET" class="header-search-form" id="headerSearchForm" autocomplete="off">
+                <input placeholder="Tìm kiếm..." type="text" name="q" id="headerSearchInput"
+                    value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" />
+                <button type="submit" class="search-submit-btn" aria-label="Tìm kiếm">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </form>
+
+            <!-- Hộp dropdown hiển thị gợi ý kết quả -->
+            <div class="search-suggest-dropdown" id="searchSuggestDropdown"></div>
         </li>
+
         <li>
             <a class="fa-solid fa-paw" href=""></a>
             <ul class="sub-menu sub-menu-social">
@@ -50,9 +59,11 @@
         <%- include("account-menu") %>
             <li class="cart-link">
                 <a class="fa-solid fa-cart-shopping" href="/cart" aria-label="Giỏ hàng"></a>
-                <% if (typeof cartCount !== "undefined" && cartCount > 0) { %>
-                    <span class="cart-badge"><%= cartCount %></span>
-                <% } %>
+                <% if (typeof cartCount !=="undefined" && cartCount> 0) { %>
+                    <span class="cart-badge">
+                        <%= cartCount %>
+                    </span>
+                    <% } %>
             </li>
     </div>
 </header>
