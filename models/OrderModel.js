@@ -1,3 +1,5 @@
+const CouponModel = require("./CouponModel");
+
 const crypto = require("node:crypto");
 const pool = require("../config/database");
 
@@ -35,7 +37,7 @@ const OrderModel = {
     //   { status: "changed" }  (có sản phẩm đã chọn không còn trong giỏ của user)
     //   { status: "stock", problems: [{ name, stock }] }
     //   { status: "ok", orderNumber }
-    async createFromCart(user, info, productIds) {
+    async createFromCart(user, info, productIds, couponCode) {
         const ids = [...new Set((productIds || []).map(String))];
 
         if (ids.length === 0) {
@@ -107,36 +109,62 @@ const OrderModel = {
                 0
             );
 
-            // Tạo đơn; nếu trùng mã (rất hiếm) thì sinh mã khác.
+            // 1. Kiểm tra mã giảm giá (nếu có)
+            let couponRecord = null;
+            let discountCents = 0;
+
+            if (info.couponCode) {
+                const subtotalNumber = Number(fromCents(totalCents));
+                const couponCheck = await CouponModel.validate(
+                    info.couponCode,
+                    subtotalNumber,
+                    connection
+                );
+
+                if (couponCheck.valid) {
+                    couponRecord = couponCheck.coupon;
+                    discountCents = toCents(couponCheck.discount);
+                }
+            }
+
+            // Tổng tiền sau giảm giá (không âm)
+            const payableCents = totalCents > discountCents ? totalCents - discountCents : 0;
+
+            // 2. Tạo đơn hàng lưu kèm thông tin coupon
             let orderId = null;
             let orderNumber = null;
-
-            for (let attempt = 0; attempt < 5 && orderId === null; attempt += 1) {
+            for (let attempt = 0; attempt < 5 && orderId === null; attempt++) {
                 orderNumber = generateOrderNumber();
 
                 try {
                     const [result] = await connection.execute(
                         `INSERT INTO orders (
                             user_id,
+                            coupon_id,
+                            coupon_code,
                             order_number,
                             customer_name,
                             customer_email,
                             customer_phone,
                             shipping_address,
+                            discount_amount,
                             total_amount,
                             payment_method,
                             status,
                             notes
                         )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
                         [
                             user.id,
+                            couponRecord ? couponRecord.id : null,
+                            couponRecord ? couponRecord.code : null,
                             orderNumber,
                             info.customerName,
                             user.email,
                             info.phone,
                             info.shippingAddress,
-                            fromCents(totalCents),
+                            fromCents(discountCents),
+                            fromCents(payableCents),
                             info.paymentMethod,
                             info.notes
                         ]
@@ -148,6 +176,14 @@ const OrderModel = {
                         throw error;
                     }
                 }
+            }
+
+            // 3. Tăng số lượt dùng của mã (used_count + 1)
+            if (couponRecord) {
+                await connection.execute(
+                    `UPDATE coupons SET used_count = used_count + 1 WHERE id = ?`,
+                    [couponRecord.id]
+                );
             }
 
             if (orderId === null) {
@@ -204,7 +240,7 @@ const OrderModel = {
             try {
                 await connection.rollback();
             } catch {
-                // Kết nối có thể đã mất; lỗi gốc quan trọng hơn.
+
             }
 
             throw error;
@@ -433,8 +469,8 @@ const OrderModel = {
     async findByNumberForUser(userId, orderNumber) {
         const [orders] = await pool.execute(
             `SELECT
-                id, order_number, customer_name, customer_email,
-                customer_phone, shipping_address, total_amount,
+                id, coupon_code, order_number, customer_name, customer_email,
+                customer_phone, shipping_address, discount_amount, total_amount,
                 payment_method, payment_status, paid_at,
                 status, notes, created_at
              FROM orders

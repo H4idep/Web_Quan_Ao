@@ -7,6 +7,7 @@ const {
 } = require("../validators/orderValidator");
 const { formatMoney, imagePath } = require("../utils/format");
 const { getPaymentConfig } = require("../config/payment");
+const CouponModel = require("../models/CouponModel");
 
 // Các phương thức thanh toán đang bật (chuyển khoản chỉ bật khi đã cấu hình).
 function getPaymentOptions() {
@@ -131,6 +132,42 @@ const CheckoutController = {
         }
     },
 
+    // API AJAX kiểm tra mã giảm giá
+    async applyCoupon(req, res, next) {
+        try {
+            const user = res.locals.currentUser;
+            const code = req.body.couponCode;
+            const selection = await resolveSelection(user.id, req.body.selected);
+
+            if (selection.error) {
+                return res.status(400).json({ success: false, message: selection.error });
+            }
+
+            const subtotal = selection.items.reduce(
+                (sum, item) => sum + Number(item.line_total),
+                0
+            );
+
+            const result = await CouponModel.validate(code, subtotal);
+
+            if (!result.valid) {
+                return res.status(400).json({ success: false, message: result.message });
+            }
+
+            return res.json({
+                success: true,
+                code: result.coupon.code,
+                discount: result.discount,
+                discountFormatted: formatMoney(result.discount),
+                finalTotal: result.finalTotal,
+                finalTotalFormatted: formatMoney(result.finalTotal),
+                message: result.message
+            });
+        } catch (error) {
+            return next(error);
+        }
+    },
+
     async place(req, res, next) {
         try {
             const user = res.locals.currentUser;
@@ -153,6 +190,8 @@ const CheckoutController = {
             if (Object.keys(errors).length > 0) {
                 return renderCheckout(res, selection.items, data, errors, 400);
             }
+
+            data.couponCode = typeof req.body.couponCode === "string" ? req.body.couponCode.trim() : "";
 
             // Kiểm tra tồn kho thật sự nằm trong transaction của OrderModel.
             const result = await OrderModel.createFromCart(

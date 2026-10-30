@@ -167,25 +167,49 @@
                                 </table>
 
                                 <div class="cart-summary">
-                                    <p>Tổng cộng: <strong>
-                                            <%= formatMoney(order.total_amount) %>
-                                        </strong></p>
-                                    <% if (canCancel) { %>
-                                        <form method="post" action="/orders/<%= order.order_number %>/cancel"
-                                            class="order-cancel-form"
-                                            data-confirm="Bạn chắc chắn muốn hủy đơn hàng này?">
-                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                            <button type="submit" class="cart-btn cart-btn-danger">Hủy đơn hàng</button>
-                                        </form>
-                                        <% } else if (paidAndPending) { %>
-                                            <p class="checkout-note">Đơn đã thanh toán. Nếu muốn hủy, vui lòng liên hệ
-                                                cửa hàng để được hoàn tiền.</p>
-                                            <% } else if (order.status==="processing" || order.status==="shipped" ) { %>
-                                                <p class="checkout-note">Đơn đang được xử lý nên không thể tự hủy. Hãy
-                                                    liên hệ cửa hàng nếu cần hỗ trợ.</p>
-                                                <% } %>
-                                                    <a class="cart-btn cart-btn-secondary" href="/products">Tiếp tục mua
-                                                        sắm</a>
+                                    <% const subtotal=order.items.reduce((sum, item)=> sum + Number(item.line_total),
+                                        0); %>
+
+                                        <% if (order.coupon_code && Number(order.discount_amount)> 0) { %>
+                                            <p style="font-size: 15px; color: #555; margin-bottom: 6px;">
+                                                Tạm tính: <span>
+                                                    <%= formatMoney(subtotal) %>
+                                                </span>
+                                            </p>
+                                            <p style="font-size: 15px; color: #2e7d32; margin-bottom: 8px;">
+                                                Giảm giá (<strong style="text-transform: uppercase;">
+                                                    <%= order.coupon_code %>
+                                                </strong>):
+                                                <strong>-<%= formatMoney(order.discount_amount) %></strong>
+                                            </p>
+                                            <% } %>
+
+                                                <p
+                                                    style="border-top: 1px dashed #ddd; padding-top: 8px; margin-top: 6px;">
+                                                    Tổng thanh toán: <strong>
+                                                        <%= formatMoney(order.total_amount) %>
+                                                    </strong>
+                                                </p>
+
+                                                <% if (canCancel) { %>
+                                                    <form method="post"
+                                                        action="/orders/<%= order.order_number %>/cancel"
+                                                        class="order-cancel-form"
+                                                        data-confirm="Bạn chắc chắn muốn hủy đơn hàng này?">
+                                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                        <button type="submit" class="cart-btn cart-btn-danger">Hủy đơn
+                                                            hàng</button>
+                                                    </form>
+                                                    <% } else if (paidAndPending) { %>
+                                                        <p class="checkout-note">Đơn đã thanh toán. Nếu muốn hủy, vui
+                                                            lòng liên hệ cửa hàng để được hoàn tiền.</p>
+                                                        <% } else if (order.status==="processing" ||
+                                                            order.status==="shipped" ) { %>
+                                                            <p class="checkout-note">Đơn đang được xử lý nên không thể
+                                                                tự hủy. Hãy liên hệ cửa hàng nếu cần hỗ trợ.</p>
+                                                            <% } %>
+                                                                <a class="cart-btn cart-btn-secondary"
+                                                                    href="/products">Tiếp tục mua sắm</a>
                                 </div>
         </main>
 

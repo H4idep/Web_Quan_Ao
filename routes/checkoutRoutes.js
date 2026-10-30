@@ -19,6 +19,7 @@ const placeOrderLimiter = rateLimit({
 router.use(requireLogin);
 
 router.get("/", CheckoutController.show);
+router.post("/apply-coupon", CheckoutController.applyCoupon);
 router.post("/", placeOrderLimiter, CheckoutController.place);
 
 module.exports = router;

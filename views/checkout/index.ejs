@@ -15,80 +15,215 @@
 <body class="cart-page">
     <%- include("../partials/header") %>
 
-    <main class="cart-container">
-        <h1>Đặt hàng</h1>
+        <main class="cart-container">
+            <h1>Đặt hàng</h1>
 
-        <div class="checkout-layout">
-            <form method="post" action="/checkout" class="checkout-form" novalidate>
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <% items.forEach(item => { %>
-                    <input type="hidden" name="selected" value="<%= item.product_id %>">
-                <% }) %>
+            <div class="checkout-layout">
+                <form method="post" action="/checkout" class="checkout-form" novalidate>
+                    <input type="hidden" name="couponCode" id="hiddenCouponCode" value="">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <% items.forEach(item=> { %>
+                        <input type="hidden" name="selected" value="<%= item.product_id %>">
+                        <% }) %>
 
-                <h2>Thông tin giao hàng</h2>
+                            <h2>Thông tin giao hàng</h2>
 
-                <div class="field">
-                    <label for="customerName">Họ và tên</label>
-                    <input id="customerName" name="customerName" type="text" maxlength="120" required
-                        value="<%= form.customerName %>">
-                    <% if (errors.customerName) { %><p class="field-error"><%= errors.customerName %></p><% } %>
-                </div>
+                            <div class="field">
+                                <label for="customerName">Họ và tên</label>
+                                <input id="customerName" name="customerName" type="text" maxlength="120" required
+                                    value="<%= form.customerName %>">
+                                <% if (errors.customerName) { %>
+                                    <p class="field-error">
+                                        <%= errors.customerName %>
+                                    </p>
+                                    <% } %>
+                            </div>
 
-                <div class="field">
-                    <label for="phone">Số điện thoại</label>
-                    <input id="phone" name="phone" type="tel" inputmode="numeric" maxlength="10" required
-                        value="<%= form.phone %>">
-                    <% if (errors.phone) { %><p class="field-error"><%= errors.phone %></p><% } %>
-                </div>
+                            <div class="field">
+                                <label for="phone">Số điện thoại</label>
+                                <input id="phone" name="phone" type="tel" inputmode="numeric" maxlength="10" required
+                                    value="<%= form.phone %>">
+                                <% if (errors.phone) { %>
+                                    <p class="field-error">
+                                        <%= errors.phone %>
+                                    </p>
+                                    <% } %>
+                            </div>
 
-                <div class="field">
-                    <label for="shippingAddress">Địa chỉ giao hàng</label>
-                    <textarea id="shippingAddress" name="shippingAddress" rows="3" maxlength="500"
-                        required><%= form.shippingAddress %></textarea>
-                    <% if (errors.shippingAddress) { %><p class="field-error"><%= errors.shippingAddress %></p><% } %>
-                </div>
+                            <div class="field">
+                                <label for="shippingAddress">Địa chỉ giao hàng</label>
+                                <textarea id="shippingAddress" name="shippingAddress" rows="3" maxlength="500"
+                                    required><%= form.shippingAddress %></textarea>
+                                <% if (errors.shippingAddress) { %>
+                                    <p class="field-error">
+                                        <%= errors.shippingAddress %>
+                                    </p>
+                                    <% } %>
+                            </div>
 
-                <div class="field">
-                    <label for="notes">Ghi chú (không bắt buộc)</label>
-                    <textarea id="notes" name="notes" rows="2" maxlength="1000"><%= form.notes %></textarea>
-                    <% if (errors.notes) { %><p class="field-error"><%= errors.notes %></p><% } %>
-                </div>
+                            <div class="field">
+                                <label for="notes">Ghi chú (không bắt buộc)</label>
+                                <textarea id="notes" name="notes" rows="2" maxlength="1000"><%= form.notes %></textarea>
+                                <% if (errors.notes) { %>
+                                    <p class="field-error">
+                                        <%= errors.notes %>
+                                    </p>
+                                    <% } %>
+                            </div>
 
-                <fieldset class="field payment-methods">
-                    <legend>Phương thức thanh toán</legend>
-                    <% paymentOptions.forEach(option => { %>
-                        <label class="payment-option">
-                            <input type="radio" name="paymentMethod" value="<%= option.value %>"
-                                <%= form.paymentMethod === option.value ? "checked" : "" %> required>
-                            <span>
-                                <strong><%= option.label %></strong>
-                                <small><%= option.hint %></small>
-                            </span>
-                        </label>
-                    <% }) %>
-                    <% if (errors.paymentMethod) { %><p class="field-error"><%= errors.paymentMethod %></p><% } %>
-                </fieldset>
+                            <fieldset class="field payment-methods">
+                                <legend>Phương thức thanh toán</legend>
+                                <% paymentOptions.forEach(option=> { %>
+                                    <label class="payment-option">
+                                        <input type="radio" name="paymentMethod" value="<%= option.value %>"
+                                            <%=form.paymentMethod===option.value ? "checked" : "" %> required>
+                                        <span>
+                                            <strong>
+                                                <%= option.label %>
+                                            </strong>
+                                            <small>
+                                                <%= option.hint %>
+                                            </small>
+                                        </span>
+                                    </label>
+                                    <% }) %>
+                                        <% if (errors.paymentMethod) { %>
+                                            <p class="field-error">
+                                                <%= errors.paymentMethod %>
+                                            </p>
+                                            <% } %>
+                            </fieldset>
 
-                <button type="submit" class="cart-btn">Xác nhận đặt hàng</button>
-                <a class="cart-btn cart-btn-secondary" href="/cart">Quay lại giỏ hàng</a>
-            </form>
+                            <button type="submit" class="cart-btn">Xác nhận đặt hàng</button>
+                            <a class="cart-btn cart-btn-secondary" href="/cart">Quay lại giỏ hàng</a>
+                </form>
 
-            <aside class="checkout-summary">
-                <h2>Đơn hàng của bạn</h2>
-                <ul>
-                    <% items.forEach(item => { %>
-                        <li>
-                            <span><%= item.name %> × <%= item.quantity %></span>
-                            <span><%= formatMoney(item.line_total) %></span>
-                        </li>
-                    <% }) %>
-                </ul>
-                <p class="checkout-total">Tổng cộng: <strong><%= formatMoney(subtotal) %></strong></p>
-            </aside>
-        </div>
-    </main>
+                <aside class="checkout-summary">
+                    <h2>Đơn hàng của bạn</h2>
+                    <ul>
+                        <% items.forEach(item=> { %>
+                            <li>
+                                <span>
+                                    <%= item.name %> × <%= item.quantity %>
+                                </span>
+                                <span>
+                                    <%= formatMoney(item.line_total) %>
+                                </span>
+                            </li>
+                            <% }) %>
+                    </ul>
 
-    <%- include("../partials/footer") %>
+                    <!-- KHUNG NHẬP MÃ GIẢM GIÁ -->
+                    <div class="coupon-box">
+                        <label for="couponInput">Mã giảm giá / Voucher</label>
+                        <div class="coupon-input-group">
+                            <input type="text" id="couponInput" placeholder="Ví dụ: ROUTINE10, GIAM50K"
+                                autocomplete="off" />
+                            <button type="button" id="btnApplyCoupon">Áp dụng</button>
+                        </div>
+                        <div id="couponMessage" class="coupon-msg"></div>
+                    </div>
+
+                    <div class="price-breakdown">
+                        <p>Tạm tính: <strong id="summarySubtotal">
+                                <%= formatMoney(subtotal) %>
+                            </strong></p>
+                        <p id="discountRow" class="discount-row" style="display: none;">
+                            Giảm giá: <strong id="summaryDiscount" style="color: #2e7d32;">-0 đ</strong>
+                            <button type="button" id="btnRemoveCoupon" class="btn-remove-coupon"
+                                title="Hủy mã">&times;</button>
+                        </p>
+                        <p class="checkout-total">
+                            Tổng thanh toán: <strong id="summaryFinalTotal">
+                                <%= formatMoney(subtotal) %>
+                            </strong>
+                        </p>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <%- include("../partials/footer") %>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                    const couponInput = document.getElementById("couponInput");
+                    const btnApply = document.getElementById("btnApplyCoupon");
+                    const btnRemove = document.getElementById("btnRemoveCoupon");
+                    const couponMsg = document.getElementById("couponMessage");
+                    const discountRow = document.getElementById("discountRow");
+                    const summaryDiscount = document.getElementById("summaryDiscount");
+                    const summaryFinalTotal = document.getElementById("summaryFinalTotal");
+                    const hiddenCoupon = document.getElementById("hiddenCouponCode");
+                    const originalTotal = document.getElementById("summarySubtotal").innerText;
+
+                    const selectedInputs = Array.from(document.querySelectorAll('input[name="selected"]'));
+                    const selectedIds = selectedInputs.map(input => input.value);
+                    const csrfToken = document.querySelector('input[name="_csrf"]')?.value || "";
+
+                    btnApply.addEventListener("click", async () => {
+                        const code = couponInput.value.trim();
+                        if (!code) {
+                            couponMsg.innerText = "Vui lòng nhập mã giảm giá.";
+                            couponMsg.className = "coupon-msg error";
+                            return;
+                        }
+
+                        btnApply.disabled = true;
+                        btnApply.innerText = "...";
+                        couponMsg.innerText = "";
+
+                        try {
+                            const response = await fetch("/checkout/apply-coupon", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-Token": csrfToken
+                                },
+                                body: JSON.stringify({
+                                    couponCode: code,
+                                    selected: selectedIds
+                                })
+                            });
+
+                            const data = await response.json();
+
+                            if (!response.ok || !data.success) {
+                                couponMsg.innerText = data.message || "Mã không hợp lệ.";
+                                couponMsg.className = "coupon-msg error";
+                            } else {
+                                couponMsg.innerText = data.message;
+                                couponMsg.className = "coupon-msg success";
+
+                                // Cập nhật giao diện
+                                summaryDiscount.innerText = "-" + data.discountFormatted;
+                                summaryFinalTotal.innerText = data.finalTotalFormatted;
+                                discountRow.style.display = "flex";
+                                hiddenCoupon.value = data.code;
+                                couponInput.disabled = true;
+                                btnApply.style.display = "none";
+                            }
+                        } catch (err) {
+                            couponMsg.innerText = "Lỗi kết nối khi áp dụng mã.";
+                            couponMsg.className = "coupon-msg error";
+                        } finally {
+                            btnApply.disabled = false;
+                            btnApply.innerText = "Áp dụng";
+                        }
+                    });
+
+                    // Hủy áp dụng mã
+                    btnRemove.addEventListener("click", () => {
+                        hiddenCoupon.value = "";
+                        couponInput.value = "";
+                        couponInput.disabled = false;
+                        btnApply.style.display = "inline-block";
+                        discountRow.style.display = "none";
+                        summaryFinalTotal.innerText = originalTotal;
+                        couponMsg.innerText = "";
+                    });
+                });
+            </script>
 </body>
 
 </html>

@@ -71,6 +71,8 @@ app.use(
   }),
 );
 
+app.use(express.json());
+
 app.use(
   session({
     name: "shop.sid",
