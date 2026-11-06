@@ -36,6 +36,10 @@
     .cart-table td { display: block; border: 0; padding: 4px 0; }
 }
 
+.cart-btn-disabled, .cart-btn:disabled { background: #ccc; color: #666; cursor: not-allowed; }
+.cart-select { width: 36px; text-align: center; }
+.cart-select input { width: 18px; height: 18px; cursor: pointer; }
+.cart-select input:disabled { cursor: not-allowed; }
 .cart-btn-disabled { background: #ccc; color: #666; cursor: not-allowed; }
 
 .cart-select-col { width: 32px; text-align: center; }

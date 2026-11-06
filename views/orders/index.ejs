@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đơn hàng của tôi - Routine</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/cart.css">
+    <link rel="stylesheet" href="/css/checkout.css">
+</head>
+
+<body class="cart-page">
+    <%- include("../partials/header") %>
+
+        <main class="cart-container">
+            <h1>Đơn hàng của tôi</h1>
+
+            <nav class="order-filters" aria-label="Lọc theo trạng thái">
+                <a href="/orders" class="<%= status === "" ? " active" : "" %>">Tất cả</a>
+                <% statusFilters.forEach(key=> { %>
+                    <a href="<%= listUrl(key, 1) %>" class="<%= status === key ? " active" : "" %>"><%=
+                            statusLabels[key] %></a>
+                    <% }) %>
+            </nav>
+
+            <% if (orders.length===0) { %>
+                <div class="cart-empty">
+                    <p>
+                        <%= status ? "Không có đơn hàng nào ở trạng thái này." : "Bạn chưa có đơn hàng nào." %>
+                    </p>
+                    <a class="cart-btn" href="/products">Mua sắm ngay</a>
+                </div>
+                <% } else { %>
+                    <ul class="order-list">
+                        <% orders.forEach(order=> { %>
+                            <li class="order-card">
+                                <div class="order-card-head">
+                                    <a href="/orders/<%= order.order_number %>"><strong>
+                                            <%= order.order_number %>
+                                        </strong></a>
+                                    <span class="order-status order-status-<%= order.status %>">
+                                        <%= statusLabels[order.status] || order.status %>
+                                    </span>
+                                </div>
+                                <p class="order-card-items">
+                                    <%= order.first_item %>
+                                        <% if (Number(order.line_count)> 1) { %> và <%= Number(order.line_count) - 1 %>
+                                                sản phẩm khác<% } %>
+                                                    <small>(<%= order.item_count %> sản phẩm)</small>
+                                </p>
+                                <div class="order-card-foot">
+                                    <span>
+                                        <%= new Date(order.created_at).toLocaleDateString("vi-VN", {
+                                            timeZone: "Asia/Ho_Chi_Minh" }) %>
+                                    </span>
+                                    <span>
+                                        <span class="order-status order-status-pay-<%= order.payment_status %>">
+                                            <%= paymentStatusLabels[order.payment_status] %>
+                                        </span>
+                                        <strong>
+                                            <%= formatMoney(order.total_amount) %>
+                                        </strong>
+                                    </span>
+                                </div>
+                            </li>
+                            <% }) %>
+                    </ul>
+
+                    <% if (totalPages> 1) { %>
+                        <nav class="order-pager" aria-label="Phân trang">
+                            <% if (page> 1) { %>
+                                <a class="cart-btn cart-btn-secondary" href="<%= listUrl(status, page - 1) %>">&larr;
+                                    Trước</a>
+                                <% } %>
+                                    <span>Trang <%= page %> / <%= totalPages %></span>
+                                    <% if (page < totalPages) { %>
+                                        <a class="cart-btn cart-btn-secondary"
+                                            href="<%= listUrl(status, page + 1) %>">Sau &rarr;</a>
+                                        <% } %>
+                        </nav>
+                        <% } %>
+                            <% } %>
+        </main>
+
+        <%- include("../partials/footer") %>
+</body>
+
+</html>

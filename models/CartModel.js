@@ -1,40 +1,37 @@
 const pool = require("../config/database");
 
-// Tối đa mỗi sản phẩm trong giỏ (khớp CHECK trong bảng cart_items).
 const MAX_PER_ITEM = 99;
 
 const CartModel = {
     MAX_PER_ITEM,
 
-    // Giá và tồn kho luôn lấy từ bảng products, không lưu trong giỏ,
-    // nên admin đổi giá thì giỏ cập nhật theo.
-    //
-    // productIds (tuỳ chọn): chỉ lấy các sản phẩm được chọn để đặt hàng.
-    // Bỏ trống/null = lấy cả giỏ (dùng cho trang giỏ hàng).
-    async getItems(userId, productIds = null) {
+    // Lấy danh sách sản phẩm trong giỏ kèm biến thể (Màu, Size, tồn kho của biến thể)
+    async getItems(userId, cartItemIds = null) {
         const params = [userId];
         let filter = "";
 
-        if (productIds !== null) {
-            if (productIds.length === 0) {
-                return [];
-            }
-
-            filter = `AND ci.product_id IN (${productIds.map(() => "?").join(",")})`;
-            params.push(...productIds);
+        if (cartItemIds !== null) {
+            if (cartItemIds.length === 0) return [];
+            filter = `AND ci.id IN (${cartItemIds.map(() => "?").join(",")})`;
+            params.push(...cartItemIds);
         }
 
         const [rows] = await pool.execute(
             `SELECT
+                ci.id,
                 ci.product_id,
+                ci.variant_id,
                 ci.quantity,
                 p.name,
-                p.price,
-                p.stock,
                 p.image_url,
-                (ci.quantity * p.price) AS line_total
+                COALESCE(pv.price, p.price) AS price,
+                COALESCE(pv.stock, p.stock) AS stock,
+                pv.color,
+                pv.size,
+                (ci.quantity * COALESCE(pv.price, p.price)) AS line_total
              FROM cart_items ci
              JOIN products p ON p.id = ci.product_id
+             LEFT JOIN product_variants pv ON pv.id = ci.variant_id
              WHERE ci.user_id = ? ${filter}
              ORDER BY ci.updated_at DESC, ci.id DESC`,
             params
@@ -43,7 +40,6 @@ const CartModel = {
         return rows;
     },
 
-    // Tổng số lượng sản phẩm, hiển thị cạnh biểu tượng giỏ hàng.
     async countItems(userId) {
         const [rows] = await pool.execute(
             `SELECT COALESCE(SUM(quantity), 0) AS total
@@ -51,45 +47,48 @@ const CartModel = {
              WHERE user_id = ?`,
             [userId]
         );
-
         return Number(rows[0].total);
     },
 
-    // Thêm sản phẩm. Nếu đã có thì cộng dồn, nhưng không vượt tồn kho.
-    // Trả về { status: "not_found" | "out_of_stock" | "ok", quantity, capped }
-    async addItem(userId, productId, quantity) {
-        const [products] = await pool.execute(
-            "SELECT stock FROM products WHERE id = ? LIMIT 1",
-            [productId]
-        );
+    // Thêm sản phẩm kèm biến thể vào giỏ hàng
+    async addItem(userId, productId, variantId, quantity) {
+        let stock = 0;
 
-        if (products.length === 0) {
-            return { status: "not_found" };
+        if (variantId) {
+            const [variants] = await pool.execute(
+                "SELECT stock FROM product_variants WHERE id = ? AND product_id = ? LIMIT 1",
+                [variantId, productId]
+            );
+            if (variants.length === 0) return { status: "not_found" };
+            stock = Number(variants[0].stock);
+        } else {
+            const [products] = await pool.execute(
+                "SELECT stock FROM products WHERE id = ? LIMIT 1",
+                [productId]
+            );
+            if (products.length === 0) return { status: "not_found" };
+            stock = Number(products[0].stock);
         }
 
-        const stock = Number(products[0].stock);
-
-        if (stock <= 0) {
-            return { status: "out_of_stock" };
-        }
+        if (stock <= 0) return { status: "out_of_stock" };
 
         const limit = Math.min(stock, MAX_PER_ITEM);
 
         const [current] = await pool.execute(
-            `SELECT quantity FROM cart_items
-             WHERE user_id = ? AND product_id = ?
+            `SELECT id, quantity FROM cart_items
+             WHERE user_id = ? AND product_id = ? AND (variant_id <=> ?)
              LIMIT 1`,
-            [userId, productId]
+            [userId, productId, variantId || null]
         );
 
         const wanted = (current[0] ? Number(current[0].quantity) : 0) + quantity;
         const finalQuantity = Math.min(wanted, limit);
 
         await pool.execute(
-            `INSERT INTO cart_items (user_id, product_id, quantity)
-             VALUES (?, ?, ?)
+            `INSERT INTO cart_items (user_id, product_id, variant_id, quantity)
+             VALUES (?, ?, ?, ?)
              ON DUPLICATE KEY UPDATE quantity = ?`,
-            [userId, productId, finalQuantity, finalQuantity]
+            [userId, productId, variantId || null, finalQuantity, finalQuantity]
         );
 
         return {
@@ -99,32 +98,26 @@ const CartModel = {
         };
     },
 
-    // Đặt số lượng mới. Số lượng bị giới hạn bởi tồn kho.
-    // Trả về { found, quantity, capped }
-    async setQuantity(userId, productId, quantity) {
+    // Cập nhật số lượng theo cart_item_id
+    async setQuantity(userId, cartItemId, quantity) {
         const [rows] = await pool.execute(
-            `SELECT p.stock
+            `SELECT ci.id, COALESCE(pv.stock, p.stock) AS stock
              FROM cart_items ci
              JOIN products p ON p.id = ci.product_id
-             WHERE ci.user_id = ? AND ci.product_id = ?
+             LEFT JOIN product_variants pv ON pv.id = ci.variant_id
+             WHERE ci.user_id = ? AND ci.id = ?
              LIMIT 1`,
-            [userId, productId]
+            [userId, cartItemId]
         );
 
-        if (rows.length === 0) {
-            return { found: false };
-        }
+        if (rows.length === 0) return { found: false };
 
         const limit = Math.min(Number(rows[0].stock), MAX_PER_ITEM);
-
-        // Sản phẩm hết hàng: giữ 1 để khách thấy và tự xóa.
         const finalQuantity = Math.max(1, Math.min(quantity, limit));
 
         await pool.execute(
-            `UPDATE cart_items
-             SET quantity = ?
-             WHERE user_id = ? AND product_id = ?`,
-            [finalQuantity, userId, productId]
+            `UPDATE cart_items SET quantity = ? WHERE user_id = ? AND id = ?`,
+            [finalQuantity, userId, cartItemId]
         );
 
         return {
@@ -134,13 +127,12 @@ const CartModel = {
         };
     },
 
-    async removeItem(userId, productId) {
+    // Xóa sản phẩm khỏi giỏ theo cart_item_id
+    async removeItem(userId, cartItemId) {
         const [result] = await pool.execute(
-            `DELETE FROM cart_items
-             WHERE user_id = ? AND product_id = ?`,
-            [userId, productId]
+            `DELETE FROM cart_items WHERE user_id = ? AND id = ?`,
+            [userId, cartItemId]
         );
-
         return result.affectedRows > 0;
     }
 };

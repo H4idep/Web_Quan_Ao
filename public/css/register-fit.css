@@ -1,0 +1,403 @@
+/* ===== ĐĂNG KÝ: BỐ CỤC RỘNG NHƯ ẢNH THAM CHIẾU ===== */
+
+main.register-page.register-page-fit {
+    box-sizing: border-box;
+    width: 89%;
+    max-width: 1720px;
+    margin: 0 auto;
+    padding: 104px 0 60px;
+    background: #fff;
+    color: #222;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.register-page-fit *,
+.register-page-fit *::before,
+.register-page-fit *::after {
+    box-sizing: border-box;
+}
+
+/* Tiêu đề đen, giữa trang */
+.register-page-fit .register-heading {
+    margin: 0 0 36px;
+    padding: 24px 0 0;
+    border: 0;
+    border-top: 1px solid #e5e5e5;
+    color: #221f20;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* Hai cột bằng nhau, không khung, không nền màu */
+.register-page-fit form.register-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 36px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.register-page-fit .customer-info,
+.register-page-fit .password-info {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.register-page-fit .customer-info h2,
+.register-page-fit .password-info h2 {
+    margin: 0 0 20px;
+    padding: 0;
+    border: 0;
+    color: #221f20;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+/* Các cặp Họ/Tên, Email/Điện thoại... */
+.register-page-fit .customer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 36px;
+}
+
+.register-page-fit .register-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.register-page-fit .register-field.full-width {
+    grid-column: 1 / -1;
+}
+
+.register-page-fit .register-field label {
+    display: block;
+    margin: 0 0 7px;
+    color: #707070;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.register-page-fit .register-field label span {
+    margin-left: 2px;
+    color: #e52323;
+}
+
+/* Ô nhập rộng, cao giống ảnh mẫu */
+.register-page-fit .register-field input,
+.register-page-fit .register-field select,
+.register-page-fit .register-field textarea {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 56px;
+    margin: 0;
+    padding: 0 18px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background: #fff;
+    color: #444;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: normal;
+    box-shadow: none;
+}
+
+.register-page-fit .register-field select {
+    padding-right: 32px;
+    cursor: pointer;
+}
+
+.register-page-fit .register-field textarea {
+    height: 110px;
+    min-height: 90px;
+    padding: 14px 18px;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+.register-page-fit .register-field input::placeholder,
+.register-page-fit .register-field textarea::placeholder {
+    color: #999;
+    opacity: 1;
+}
+
+.register-page-fit .register-field input:focus,
+.register-page-fit .register-field select:focus,
+.register-page-fit .register-field textarea:focus {
+    border-color: #777;
+    outline: 2px solid #ececec;
+    outline-offset: 1px;
+}
+
+.register-page-fit .register-field select:disabled {
+    background: #fafafa;
+    color: #888;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+.register-page-fit .register-field small {
+    display: block;
+    margin-top: 6px;
+    color: #666;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.register-page-fit .field-error,
+.register-page-fit .register-field small.field-error {
+    color: #b42318;
+}
+
+.register-page-fit #addressLoadError:empty {
+    display: none;
+}
+
+/* Cột mật khẩu */
+.register-page-fit .password-info > .register-field {
+    margin-bottom: 24px;
+}
+
+/* Giữ nút hiện/ẩn mật khẩu */
+.register-page-fit .password-toggle-wrap {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+.register-page-fit .password-toggle-wrap > input {
+    padding-right: 52px;
+}
+
+.register-page-fit .password-toggle-wrap > .password-toggle-button {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+}
+
+.register-page-fit .password-toggle-button:hover {
+    background: #f4f4f4;
+}
+
+/* CAPTCHA: ô nhập ở trên, ảnh ở dưới như ảnh mẫu */
+.register-page-fit .captcha-field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+}
+
+.register-page-fit .captcha-field > input {
+    margin-bottom: 24px;
+}
+
+.register-page-fit .captcha-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 64px;
+    margin: 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 0;
+    background: #fff;
+    overflow: hidden;
+}
+
+.register-page-fit .captcha-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.register-page-fit .captcha-refresh {
+    align-self: flex-start;
+    margin: 8px 0 0;
+    padding: 4px 0;
+    border: 0;
+    background: transparent;
+    color: #666;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.register-page-fit .captcha-refresh:hover {
+    color: #222;
+    text-decoration: underline;
+}
+
+.register-page-fit .captcha-refresh:disabled {
+    opacity: .5;
+    cursor: wait;
+}
+
+/* Điều khoản */
+.register-page-fit .register-options {
+    margin: 22px 0 26px;
+}
+
+.register-page-fit .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 0 12px;
+    color: #777;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.register-page-fit .checkbox-row input {
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    margin: 3px 0 0;
+    accent-color: #221f20;
+}
+
+.register-page-fit .checkbox-row a {
+    color: #e52323;
+    text-decoration: none;
+}
+
+.register-page-fit .checkbox-row a:hover {
+    text-decoration: underline;
+}
+
+/* Nút đen, bo góc chéo như ảnh 2 */
+.register-page-fit .register-button {
+    display: block;
+    width: 100%;
+    height: 58px;
+    margin: 0;
+    padding: 12px 20px;
+    border: 1px solid #221f20;
+    border-radius: 20px 0 20px 0;
+    background: #221f20;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.register-page-fit .register-button:hover {
+    border: 1px solid #221f20;
+    background: #fff;
+    color: #221f20;
+}
+
+.register-page-fit .login-link {
+    margin: 18px 0 0;
+    text-align: center;
+    color: #777;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.register-page-fit .login-link a {
+    color: #222;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.register-page-fit button:focus-visible,
+.register-page-fit a:focus-visible,
+.register-page-fit input[type="checkbox"]:focus-visible {
+    outline: 2px solid #555;
+    outline-offset: 3px;
+}
+
+/* Máy tính nhỏ */
+@media (max-width: 1100px) {
+    main.register-page.register-page-fit {
+        width: 92%;
+    }
+
+    .register-page-fit form.register-form {
+        gap: 28px;
+    }
+
+    .register-page-fit .customer-grid {
+        gap: 20px;
+    }
+
+    .register-page-fit .register-field label {
+        font-size: 16px;
+    }
+}
+
+/* Điện thoại */
+@media (max-width: 760px) {
+    main.register-page.register-page-fit {
+        width: calc(100% - 32px);
+        padding: 130px 0 40px;
+    }
+
+    .register-page-fit .register-heading {
+        margin-bottom: 28px;
+        padding-top: 20px;
+        font-size: 25px;
+    }
+
+    .register-page-fit form.register-form {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .register-page-fit .password-info {
+        padding-top: 24px;
+        border-top: 1px solid #e5e5e5;
+    }
+
+    .register-page-fit .register-field input,
+    .register-page-fit .register-field select {
+        height: 48px;
+    }
+}
+
+@media (max-width: 420px) {
+    .register-page-fit .customer-grid {
+        grid-template-columns: 1fr;
+    }
+}

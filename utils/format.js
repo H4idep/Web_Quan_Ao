@@ -54,4 +54,20 @@ const ORDER_STATUS_LABELS = {
     cancelled: "Đã hủy"
 };
 
-module.exports = { formatMoney, imagePath, ORDER_STATUS_LABELS };
+const PAYMENT_METHOD_LABELS = {
+    cod: "Thanh toán khi nhận hàng (COD)",
+    bank_transfer: "Chuyển khoản ngân hàng"
+};
+
+const PAYMENT_STATUS_LABELS = {
+    unpaid: "Chưa thanh toán",
+    paid: "Đã thanh toán"
+};
+
+module.exports = {
+    formatMoney,
+    imagePath,
+    ORDER_STATUS_LABELS,
+    PAYMENT_METHOD_LABELS,
+    PAYMENT_STATUS_LABELS
+};

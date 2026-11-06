@@ -9,108 +9,134 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="/css/cart.css">
+    <script src="/js/cart.js" defer></script>
 </head>
 
 <body class="cart-page">
     <%- include("../partials/header") %>
 
-    <main class="cart-container">
-        <h1>Giỏ hàng của bạn</h1>
+        <main class="cart-container">
+            <h1>Giỏ hàng của bạn</h1>
 
-        <% if (flash) { %>
-            <p class="cart-flash cart-flash-<%= flash.type %>" role="status"><%= flash.message %></p>
-        <% } %>
-
-        <% if (items.length === 0) { %>
-            <div class="cart-empty">
-                <p>Giỏ hàng đang trống.</p>
-                <a class="cart-btn" href="/products">Tiếp tục mua sắm</a>
-            </div>
-        <% } else { %>
-            <table class="cart-table">
-                <thead>
-                    <tr>
-                        <th class="cart-select-col">
-                            <input type="checkbox" id="select-all" aria-label="Chọn tất cả sản phẩm">
-                        </th>
-                        <th>Sản phẩm</th>
-                        <th>Đơn giá</th>
-                        <th>Số lượng</th>
-                        <th>Thành tiền</th>
-                        <th><span class="visually-hidden">Xóa</span></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% items.forEach(item => {
-                        const image = imagePath(item.image_url);
-                        const soldOut = Number(item.stock) <= 0;
-                        const overStock = !soldOut && Number(item.quantity) > Number(item.stock);
-                    %>
-                        <tr>
-                            <td class="cart-select-col">
-                                <%# Checkbox nằm ngoài form đặt hàng nên gắn vào bằng thuộc tính form=. %>
-                                <input type="checkbox" class="cart-select" name="selected"
-                                    value="<%= item.product_id %>" form="select-form"
-                                    data-line-total="<%= Number(item.line_total) %>"
-                                    <%= (soldOut || overStock) ? "disabled" : "checked" %>
-                                    aria-label="Chọn <%= item.name %> để đặt hàng">
-                            </td>
-                            <td class="cart-product">
-                                <% if (image) { %>
-                                    <img src="<%= image %>" alt="" width="72" height="72">
-                                <% } %>
-                                <div>
-                                    <a href="/products/<%= item.product_id %>"><%= item.name %></a>
-                                    <% if (soldOut) { %>
-                                        <small class="cart-warn">Đã hết hàng, không thể chọn để đặt. Hãy xóa khỏi giỏ.</small>
-                                    <% } else if (overStock) { %>
-                                        <small class="cart-warn">Chỉ còn <%= item.stock %> sản phẩm, hãy giảm số lượng rồi mới chọn được.</small>
-                                    <% } %>
-                                </div>
-                            </td>
-                            <td><%= formatMoney(item.price) %></td>
-                            <td>
-                                <form method="post" action="/cart/update" class="cart-qty-form">
-                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                    <input type="hidden" name="productId" value="<%= item.product_id %>">
-                                    <input type="number" name="quantity" value="<%= item.quantity %>"
-                                        min="0" max="<%= maxPerItem %>" required
-                                        aria-label="Số lượng của <%= item.name %>">
-                                    <button type="submit" class="cart-btn cart-btn-small">Cập nhật</button>
-                                </form>
-                            </td>
-                            <td><%= formatMoney(item.line_total) %></td>
-                            <td>
-                                <form method="post" action="/cart/remove">
-                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                    <input type="hidden" name="productId" value="<%= item.product_id %>">
-                                    <button type="submit" class="cart-remove" aria-label="Xóa <%= item.name %>">
-                                        <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
-
-            <form id="select-form" class="cart-summary" method="get" action="/checkout">
-                <p>
-                    Đã chọn <strong id="selected-count">0</strong> sản phẩm.
-                    Tạm tính: <strong id="selected-subtotal"><%= formatMoney(0) %></strong>
+            <% if (flash) { %>
+                <p class="cart-flash cart-flash-<%= flash.type %>" role="status">
+                    <%= flash.message %>
                 </p>
-                <p class="cart-note">Tổng giá trị cả giỏ: <%= formatMoney(subtotal) %></p>
-                <% if (hasProblem) { %>
-                    <p class="cart-warn">Sản phẩm hết hàng hoặc vượt tồn kho sẽ không thể chọn. Hãy điều chỉnh số lượng hoặc xóa khỏi giỏ.</p>
                 <% } %>
-                <a class="cart-btn cart-btn-secondary" href="/products">Tiếp tục mua sắm</a>
-                <button type="submit" id="checkout-btn" class="cart-btn" disabled>Đặt hàng</button>
-            </form>
-        <% } %>
-    </main>
 
-    <%- include("../partials/footer") %>
-    <script src="/js/cart.js"></script>
+                    <% if (items.length===0) { %>
+                        <div class="cart-empty">
+                            <p>Giỏ hàng đang trống.</p>
+                            <a class="cart-btn" href="/products">Tiếp tục mua sắm</a>
+                        </div>
+                        <% } else { %>
+                            <%# Form chọn sản phẩm để đặt. Các ô tích và nút Đặt hàng nằm ngoài form này nhưng gắn vào
+                                nó bằng thuộc tính form="select-form" , vì HTML không cho lồng form (mỗi dòng đã có form
+                                cập nhật/xóa riêng). %>
+                                <form id="select-form" method="get" action="/checkout"></form>
+
+                                <table class="cart-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="cart-select">
+                                                <input type="checkbox" id="select-all" aria-label="Chọn tất cả sản phẩm"
+                                                    <%=orderableCount> 0 ? "checked" : "disabled" %>>
+                                            </th>
+                                            <th>Sản phẩm</th>
+                                            <th>Đơn giá</th>
+                                            <th>Số lượng</th>
+                                            <th>Thành tiền</th>
+                                            <th><span class="visually-hidden">Xóa</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% items.forEach(item=> {
+                                            const image = imagePath(item.image_url);
+                                            const soldOut = Number(item.stock) <= 0; const overStock=!soldOut &&
+                                                Number(item.quantity)> Number(item.stock);
+                                                const canOrder = isOrderable(item);
+                                                %>
+                                                <tr>
+                                                    <!-- Dòng 60-64 trong views/cart/index.ejs -->
+                                                    <td class="cart-select">
+                                                        <input type="checkbox" name="selected" form="select-form"
+                                                            value="<%= item.id %>"
+                                                            data-line-total="<%= item.line_total %>" <%=canOrder
+                                                            ? "checked" : "disabled" %>
+                                                        aria-label="Chọn <%= item.name %>">
+                                                    </td>
+                                                    <td class="cart-product">
+                                                        <img src="<%= image %>" alt="<%= item.name %>" width="80"
+                                                            height="100">
+                                                        <div>
+                                                            <a href="/products/<%= item.product_id %>"><strong>
+                                                                    <%= item.name %>
+                                                                </strong></a>
+                                                            <% if (item.color || item.size) { %>
+                                                                <p style="font-size: 13px; color: #555; margin: 4px 0;">
+                                                                    Phân loại:
+                                                                    <strong>
+                                                                        <%= [item.color,
+                                                                            item.size].filter(Boolean).join(" - ") %></strong>
+            </p>
+        <% } %>
+        <% if (soldOut) { %>
+            <small class=" cart-note">Hết hàng</small>
+                                                                            <% } %>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <%= formatMoney(item.price) %>
+                                                    </td>
+                                                    <td>
+                                                        <form method="post" action="/cart/update" class="cart-qty-form">
+                                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                            <input type="hidden" name="cartItemId"
+                                                                value="<%= item.id %>">
+                                                            <input type="number" name="quantity"
+                                                                value="<%= item.quantity %>" min="1"
+                                                                max="<%= maxPerItem %>">
+                                                            <button type="submit">Cập nhật</button>
+                                                        </form>
+                                                    </td>
+                                                    <td>
+                                                        <%= formatMoney(item.line_total) %>
+                                                    </td>
+                                                    <td>
+                                                        <form method="post" action="/cart/remove">
+                                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                            <input type="hidden" name="cartItemId"
+                                                                value="<%= item.id %>">
+                                                            <button type="submit" class="cart-remove-btn"
+                                                                title="Xóa">&times;</button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                                <% }) %>
+                                    </tbody>
+                                </table>
+
+                                <div class="cart-summary">
+                                    <p>
+                                        Đã chọn <span id="selected-count">
+                                            <%= orderableCount %>
+                                        </span> sản phẩm:
+                                        <strong id="selected-total">
+                                            <%= formatMoney(orderableTotal) %>
+                                        </strong>
+                                    </p>
+                                    <% if (hasUnavailable) { %>
+                                        <p class="cart-warn">Sản phẩm không đủ hàng không thể chọn. Hãy giảm số lượng
+                                            hoặc xóa khỏi giỏ.</p>
+                                        <% } %>
+                                            <a class="cart-btn cart-btn-secondary" href="/products">Tiếp tục mua sắm</a>
+                                            <button type="submit" form="select-form" id="checkout-btn" class="cart-btn"
+                                                <%=orderableCount===0 ? "disabled" : "" %>>Đặt hàng</button>
+                                </div>
+                                <% } %>
+        </main>
+
+        <%- include("../partials/footer") %>
 </body>
 
 </html>

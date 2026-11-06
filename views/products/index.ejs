@@ -20,7 +20,12 @@
             <div class="store-products-heading">
                 <div>
                     <p>
-                        <a href="/">Trang chủ</a> / Sản phẩm
+                        <a href="/">Trang chủ</a> /
+                        <% if (typeof searchQuery !=='undefined' && searchQuery) { %>
+                            <a href="/products">Sản phẩm</a> / Tìm kiếm
+                            <% } else { %>
+                                Sản phẩm
+                                <% } %>
                     </p>
 
                     <h1>
@@ -34,10 +39,22 @@
             </div>
 
             <% if (products.length===0) { %>
-                <p class="store-empty">
-                    Cửa hàng đang cập nhật sản phẩm.
-                    Bạn vui lòng quay lại sau.
-                </p>
+                <div class="store-empty-search" style="text-align: center; padding: 50px 20px;">
+                    <% if (typeof searchQuery !=='undefined' && searchQuery) { %>
+                        <i class="fa-solid fa-magnifying-glass"
+                            style="font-size: 40px; color: #ccc; margin-bottom: 15px;"></i>
+                        <p style="font-size: 17px; color: #555;">Không tìm thấy sản phẩm nào phù hợp với từ khóa
+                            <strong>"<%= searchQuery %>"</strong>.
+                        </p>
+                        <p style="font-size: 14px; color: #888; margin-top: 8px;">Vui lòng thử lại với từ khóa khác hoặc
+                            duyệt theo danh mục sản phẩm.</p>
+                        <a href="/products"
+                            style="display: inline-block; margin-top: 20px; padding: 10px 25px; background: #000; color: #fff; text-decoration: none; border-radius: 4px; font-weight: 500;">Xem
+                            tất cả sản phẩm</a>
+                        <% } else { %>
+                            <p class="store-empty">Cửa hàng đang cập nhật sản phẩm. Bạn vui lòng quay lại sau.</p>
+                            <% } %>
+                </div>
                 <% } %>
 
                     <div class="store-product-grid">

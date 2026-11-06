@@ -21,6 +21,7 @@ const ProductController = {
     async index(req, res, next) {
         try {
             const rawCategoryId = req.query.category;
+            const searchQuery = typeof req.query.q === "string" ? req.query.q.trim() : "";
 
             let categoryId = null;
             let selectedCategory = null;
@@ -41,16 +42,41 @@ const ProductController = {
                 categoryId = rawCategoryId;
             }
 
-            const products = await ProductModel.findAll(categoryId);
+            const products = await ProductModel.findAll(categoryId, searchQuery);
+
+            let pageTitle = "Tất cả sản phẩm";
+            if (searchQuery) {
+                pageTitle = `Kết quả tìm kiếm cho: "${searchQuery}"`;
+            } else if (selectedCategory) {
+                pageTitle = selectedCategory.name;
+            }
 
             return res.render("products/index", {
                 products,
                 formatMoney,
                 selectedCategory,
-                pageTitle: selectedCategory
-                    ? selectedCategory.name
-                    : "Tất cả sản phẩm"
+                searchQuery,
+                pageTitle
             });
+        } catch (error) {
+            return next(error);
+        }
+    },
+
+    async suggest(req, res, next) {
+        try {
+            const query = typeof req.query.q === "string" ? req.query.q.trim() : "";
+            if (!query || query.length < 1) {
+                return res.json([]);
+            }
+            const items = await ProductModel.searchSuggestions(query, 5);
+            const result = items.map(p => ({
+                id: p.id,
+                name: p.name,
+                priceFormatted: formatMoney(p.price),
+                image_url: p.image_url || "/images/no-image.png"
+            }));
+            return res.json(result);
         } catch (error) {
             return next(error);
         }

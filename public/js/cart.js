@@ -1,58 +1,67 @@
-// Chọn sản phẩm để đặt hàng trong giỏ.
-// Chỉ cập nhật giao diện (tạm tính, nút Đặt hàng); server luôn kiểm tra lại
-// sản phẩm được chọn, giá và tồn kho khi đặt hàng.
+// Giỏ hàng: chọn sản phẩm để đặt, cập nhật số lượng và tổng tiền đã chọn.
+// Đây chỉ là tiện ích giao diện. Server luôn kiểm tra lại danh sách chọn.
 (function () {
-    const selectAll = document.getElementById("select-all");
-    const checkboxes = Array.from(document.querySelectorAll(".cart-select"));
-    const countEl = document.getElementById("selected-count");
-    const subtotalEl = document.getElementById("selected-subtotal");
-    const button = document.getElementById("checkout-btn");
+    var boxes = Array.prototype.slice.call(
+        document.querySelectorAll('input[name="selected"]')
+    );
 
-    if (!checkboxes.length || !countEl || !subtotalEl || !button) {
+    if (boxes.length === 0) {
         return;
     }
 
-    function formatMoney(value) {
-        return Number(value).toLocaleString("vi-VN", { maximumFractionDigits: 2 }) + " đ";
-    }
+    var selectAll = document.getElementById("select-all");
+    var count = document.getElementById("selected-count");
+    var total = document.getElementById("selected-total");
+    var button = document.getElementById("checkout-btn");
 
-    function selectable() {
-        return checkboxes.filter(box => !box.disabled);
+    function formatMoney(value) {
+        return value.toLocaleString("vi-VN", { maximumFractionDigits: 2 }) + " đ";
     }
 
     function refresh() {
-        const checked = checkboxes.filter(box => box.checked && !box.disabled);
-        const total = checked.reduce(
-            (sum, box) => sum + Number(box.dataset.lineTotal || 0),
-            0
-        );
+        var enabled = 0;
+        var selected = 0;
+        var sum = 0;
 
-        countEl.textContent = checked.length;
-        subtotalEl.textContent = formatMoney(total);
-        button.disabled = checked.length === 0;
+        boxes.forEach(function (box) {
+            if (box.disabled) {
+                return;
+            }
+
+            enabled += 1;
+
+            if (box.checked) {
+                selected += 1;
+                sum += Number(box.getAttribute("data-line-total"));
+            }
+        });
+
+        count.textContent = String(selected);
+        total.textContent = formatMoney(sum);
+        button.disabled = selected === 0;
 
         if (selectAll) {
-            const all = selectable();
-
-            selectAll.disabled = all.length === 0;
-            selectAll.checked = all.length > 0 && checked.length === all.length;
-            selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+            selectAll.checked = enabled > 0 && selected === enabled;
+            selectAll.indeterminate = selected > 0 && selected < enabled;
         }
     }
 
-    checkboxes.forEach(box => box.addEventListener("change", refresh));
+    boxes.forEach(function (box) {
+        box.addEventListener("change", refresh);
+    });
 
     if (selectAll) {
-        selectAll.addEventListener("change", () => {
-            selectable().forEach(box => {
-                box.checked = selectAll.checked;
+        selectAll.addEventListener("change", function () {
+            boxes.forEach(function (box) {
+                if (!box.disabled) {
+                    box.checked = selectAll.checked;
+                }
             });
 
             refresh();
         });
     }
 
-    // Trình duyệt có thể khôi phục trạng thái tick cũ khi bấm Back.
-    window.addEventListener("pageshow", refresh);
+    // Trình duyệt có thể khôi phục trạng thái ô tích khi bấm Back.
     refresh();
 })();
