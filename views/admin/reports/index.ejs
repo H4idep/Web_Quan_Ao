@@ -1,0 +1,54 @@
+<%- include("../partials/header") %>
+
+<section class="panel report-filter-panel">
+    <form method="GET" action="/admin/reports" class="order-filters">
+        <label>Từ ngày<input type="date" name="from" value="<%= from %>" required></label>
+        <label>Đến ngày<input type="date" name="to" value="<%= to %>" required></label>
+        <div class="order-filter-actions">
+            <button type="submit" class="btn primary">Xem báo cáo</button>
+            <a class="btn" href="/admin/reports">Tháng này</a>
+            <a class="btn" href="/admin/reports/export?from=<%= encodeURIComponent(from) %>&to=<%= encodeURIComponent(to) %>">Xuất Excel</a>
+        </div>
+    </form>
+    <p class="muted report-note">Doanh thu chỉ bao gồm các đơn hàng có trạng thái <strong>Hoàn thành</strong>, tính theo ngày đặt đơn.</p>
+</section>
+
+<section class="report-stats">
+    <article class="report-stat-card"><span>TỔNG DOANH THU</span><strong><%= money(revenue) %></strong><small>Từ <%= from %> đến <%= to %></small></article>
+    <article class="report-stat-card"><span>SỐ ĐƠN HÀNG HOÀN THÀNH</span><strong><%= completedCount.toLocaleString("vi-VN") %></strong><small>Đơn hàng có trạng thái hoàn thành</small></article>
+</section>
+
+<section class="panel report-chart-panel">
+    <div class="panel-heading"><div><h2>Doanh thu theo ngày</h2><p class="muted">Biểu đồ dựa trên các đơn hàng hoàn thành trong khoảng thời gian đã chọn.</p></div></div>
+    <% if (!dailyRows.length) { %>
+        <p class="empty">Không có dữ liệu doanh thu trong khoảng thời gian này.</p>
+    <% } else { %>
+        <div class="report-chart">
+            <% dailyRows.forEach(row => { %>
+                <div class="report-bar-item" title="<%= row.date %>: <%= money(row.revenue) %> · <%= row.orderCount %> đơn">
+                    <strong><%= row.revenue.toLocaleString("vi-VN", { maximumFractionDigits: 0 }) %></strong>
+                    <div class="report-bar-track"><div class="report-bar" style="height:<%= Math.max(3, row.revenue / maxRevenue * 100) %>%"></div></div>
+                    <small><%= new Date(`${row.date}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" }) %></small>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+</section>
+
+<section class="panel">
+    <div class="panel-heading"><div><h2>Chi tiết doanh thu</h2><p class="muted"><%= orderRows.length %> đơn hàng hoàn thành</p></div></div>
+    <div class="table-scroll"><table><thead><tr><th>STT</th><th>Mã đơn hàng</th><th>Khách hàng</th><th>Ngày đặt</th><th>Doanh thu</th></tr></thead>
+    <tbody>
+        <% if (!orderRows.length) { %><tr><td colspan="5" class="empty">Không có đơn hàng phù hợp.</td></tr><% } %>
+        <% orderRows.forEach((order, index) => { %>
+            <tr><td><%= index + 1 %></td><td><%= order.order_number %></td><td><%= order.customer_name %></td>
+            <td><%= new Date(order.created_at).toLocaleString("vi-VN") %></td><td class="nowrap"><%= money(order.total_amount) %></td></tr>
+        <% }) %>
+    </tbody></table></div>
+</section>
+
+<style>
+.report-filter-panel{margin-bottom:20px}.report-note{margin:14px 0 0}.report-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:20px}.report-stat-card{background:#fff;border:1px solid #e9e9e9;border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:10px}.report-stat-card span{font-size:12px;font-weight:700;letter-spacing:.06em;color:#777}.report-stat-card strong{font-size:clamp(22px,3vw,32px);color:#202020}.report-stat-card small{color:#888}.report-chart-panel{margin-bottom:20px}.report-chart{display:flex;align-items:stretch;gap:10px;overflow-x:auto;min-height:245px;padding:20px 4px 4px}.report-bar-item{flex:1 0 58px;max-width:100px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;min-height:220px}.report-bar-item>strong{font-size:10px;color:#666;white-space:nowrap}.report-bar-track{height:155px;width:28px;display:flex;align-items:flex-end;background:#f2f2f2;border-radius:7px 7px 3px 3px;overflow:hidden}.report-bar{width:100%;min-height:3px;background:#252525;border-radius:6px 6px 0 0}.report-bar-item small{font-size:11px;color:#777}.panel-heading h2{margin:0}.panel-heading p{margin:6px 0 0}@media(max-width:650px){.report-stats{grid-template-columns:1fr}.report-filter-panel .order-filters{display:flex;flex-direction:column}}
+</style>
+
+<%- include("../partials/footer") %>
