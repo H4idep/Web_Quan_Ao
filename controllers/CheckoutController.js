@@ -46,30 +46,23 @@ async function resolveSelection(userId, rawSelected) {
     }
 
     const cart = await CartModel.getItems(userId);
-    const byId = new Map(cart.map(item => [String(item.product_id), item]));
+    // Ánh xạ theo cart item id:
+    const byId = new Map(cart.map(item => [String(item.id), item]));
     const items = [];
 
     for (const id of ids) {
         const item = byId.get(id);
-
         if (!item) {
-            return {
-                error: "Có sản phẩm đã chọn không còn trong giỏ hàng. Hãy chọn lại."
-            };
+            return { error: "Có sản phẩm đã chọn không còn trong giỏ hàng. Hãy chọn lại." };
         }
-
         items.push(item);
     }
 
-    const lacking = items.filter(
-        item => Number(item.stock) < Number(item.quantity)
-    );
+    const lacking = items.filter(item => Number(item.stock) < Number(item.quantity));
 
     if (lacking.length > 0) {
         return {
-            error: `Không đủ hàng cho: ${lacking
-                .map(item => item.name)
-                .join(", ")}. Hãy giảm số lượng hoặc bỏ chọn sản phẩm này.`
+            error: `Không đủ hàng cho: ${lacking.map(item => item.name).join(", ")}. Hãy giảm số lượng hoặc bỏ chọn sản phẩm này.`
         };
     }
 
@@ -197,7 +190,7 @@ const CheckoutController = {
             const result = await OrderModel.createFromCart(
                 user,
                 data,
-                selection.items.map(item => String(item.product_id))
+                selection.items.map(item => String(item.id)) // Cart item ID
             );
 
             if (result.status === "changed") {

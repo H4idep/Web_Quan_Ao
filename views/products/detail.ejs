@@ -106,74 +106,127 @@
                         </strong>
                     </div>
 
-                    <% if (inStock) { %>
-                        <form class="pd-cart-form" method="post" action="/cart/add">
+                    <!-- KHUNG CHỌN MÀU SẮC & KÍCH CỠ -->
+                    <% const variants=product.variants || []; const uniqueColors=[...new Set(variants.map(v=>
+                        v.color))];
+                        const uniqueSizes = [...new Set(variants.map(v => v.size))];
+                        %>
+
+                        <form class="pd-cart-form" id="addToCartForm" method="post" action="/cart/add">
                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                             <input type="hidden" name="productId" value="<%= product.id %>">
-                            <label for="pd-quantity">Số lượng</label>
-                            <input id="pd-quantity" type="number" name="quantity" value="1" min="1"
-                                max="<%= Math.min(Number(product.stock), 99) %>" required>
-                            <button type="submit" class="pd-add-btn">Thêm vào giỏ hàng</button>
+                            <input type="hidden" name="variantId" id="selectedVariantId" value="">
+
+                            <% if (variants.length> 0) { %>
+                                <!-- Chọn Màu sắc -->
+                                <div class="variant-group">
+                                    <label class="variant-label">Màu sắc: <strong id="selectedColorText">Chọn
+                                            màu</strong></label>
+                                    <div class="variant-options">
+                                        <% uniqueColors.forEach(color=> { %>
+                                            <button type="button" class="variant-btn btn-color"
+                                                data-color="<%= color %>">
+                                                <%= color %>
+                                            </button>
+                                            <% }) %>
+                                    </div>
+                                </div>
+
+                                <!-- Chọn Kích cỡ -->
+                                <div class="variant-group">
+                                    <label class="variant-label">Kích thước: <strong id="selectedSizeText">Chọn
+                                            size</strong></label>
+                                    <div class="variant-options">
+                                        <% uniqueSizes.forEach(size=> { %>
+                                            <button type="button" class="variant-btn btn-size" data-size="<%= size %>">
+                                                <%= size %>
+                                            </button>
+                                            <% }) %>
+                                    </div>
+                                </div>
+                                <% } %>
+
+                                    <!-- Chọn số lượng -->
+                                    <div class="pd-quantity-row">
+                                        <label for="pd-quantity">Số lượng</label>
+                                        <input id="pd-quantity" type="number" name="quantity" value="1" min="1" max="99"
+                                            required>
+                                    </div>
+                                    <br>
+
+                                    <!-- Nút đặt hàng và thông báo phía dưới -->
+                                    <div class="pd-action-row">
+                                        <button type="submit" id="btnAddToCart" class="pd-add-btn">
+                                            Đặt hàng
+                                        </button>
+                                        <p id="variantStockNotice" class="pd-variant-notice">
+                                            <%= variants.length> 0 ? "Vui lòng chọn size & màu" : "" %>
+                                        </p>
+                                    </div>
                         </form>
-                    <% } %>
 
-                    <a class="pd-shop-link" href="/products">
-                        Khám phá thêm sản phẩm
-                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                    </a>
+                        <!-- Nhúng dữ liệu biến thể vào thẻ script JSON để Client xử lý mượt mà -->
+                        <script id="productVariantsData" type="application/json">
+                        <%- JSON.stringify(variants) %>
+                    </script>
 
-                    <div class="pd-details">
-                        <div class="pd-tabs" role="tablist" aria-label="Thông tin sản phẩm">
-                            <button id="pd-description-tab" type="button" class="pd-tab is-active" role="tab"
-                                aria-selected="true" aria-controls="pd-description-panel" tabindex="0">
-                                Giới thiệu
-                            </button>
+                        <a class="pd-shop-link" href="/products">
+                            Khám phá thêm sản phẩm
+                            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                        </a>
 
-                            <button id="pd-specs-tab" type="button" class="pd-tab" role="tab" aria-selected="false"
-                                aria-controls="pd-specs-panel" tabindex="-1">
-                                Chi tiết sản phẩm
-                            </button>
+                        <div class="pd-details">
+                            <div class="pd-tabs" role="tablist" aria-label="Thông tin sản phẩm">
+                                <button id="pd-description-tab" type="button" class="pd-tab is-active" role="tab"
+                                    aria-selected="true" aria-controls="pd-description-panel" tabindex="0">
+                                    Giới thiệu
+                                </button>
+
+                                <button id="pd-specs-tab" type="button" class="pd-tab" role="tab" aria-selected="false"
+                                    aria-controls="pd-specs-panel" tabindex="-1">
+                                    Chi tiết sản phẩm
+                                </button>
+                            </div>
+
+                            <div id="pd-description-panel" class="pd-panel" role="tabpanel"
+                                aria-labelledby="pd-description-tab" tabindex="0">
+                                <p class="pd-description">
+                                    <%= product.description || "Thông tin sản phẩm đang được cập nhật." %>
+                                </p>
+                            </div>
+
+                            <div id="pd-specs-panel" class="pd-panel" role="tabpanel" aria-labelledby="pd-specs-tab"
+                                tabindex="0" hidden>
+                                <dl class="pd-specs">
+                                    <div>
+                                        <dt>Mã sản phẩm</dt>
+                                        <dd>SP<%= product.id %>
+                                        </dd>
+                                    </div>
+
+                                    <div>
+                                        <dt>Danh mục</dt>
+                                        <dd>
+                                            <%= product.category_name %>
+                                        </dd>
+                                    </div>
+
+                                    <div>
+                                        <dt>Giá bán</dt>
+                                        <dd>
+                                            <%= formatMoney(product.price) %>
+                                        </dd>
+                                    </div>
+
+                                    <div>
+                                        <dt>Tình trạng</dt>
+                                        <dd>
+                                            <%= inStock ? "Còn hàng" : "Tạm hết hàng" %>
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </div>
                         </div>
-
-                        <div id="pd-description-panel" class="pd-panel" role="tabpanel"
-                            aria-labelledby="pd-description-tab" tabindex="0">
-                            <p class="pd-description">
-                                <%= product.description || "Thông tin sản phẩm đang được cập nhật." %>
-                            </p>
-                        </div>
-
-                        <div id="pd-specs-panel" class="pd-panel" role="tabpanel" aria-labelledby="pd-specs-tab"
-                            tabindex="0" hidden>
-                            <dl class="pd-specs">
-                                <div>
-                                    <dt>Mã sản phẩm</dt>
-                                    <dd>SP<%= product.id %>
-                                    </dd>
-                                </div>
-
-                                <div>
-                                    <dt>Danh mục</dt>
-                                    <dd>
-                                        <%= product.category_name %>
-                                    </dd>
-                                </div>
-
-                                <div>
-                                    <dt>Giá bán</dt>
-                                    <dd>
-                                        <%= formatMoney(product.price) %>
-                                    </dd>
-                                </div>
-
-                                <div>
-                                    <dt>Tình trạng</dt>
-                                    <dd>
-                                        <%= inStock ? "Còn hàng" : "Tạm hết hàng" %>
-                                    </dd>
-                                </div>
-                            </dl>
-                        </div>
-                    </div>
                 </section>
             </div>
         </main>
@@ -182,3 +235,97 @@
 </body>
 
 </html>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const variantsDataEl = document.getElementById("productVariantsData");
+        if (!variantsDataEl) return;
+
+        const variants = JSON.parse(variantsDataEl.textContent || "[]");
+        if (variants.length === 0) return;
+
+        let selectedColor = "";
+        let selectedSize = "";
+
+        const form = document.getElementById("addToCartForm");
+        const colorBtns = document.querySelectorAll(".btn-color");
+        const sizeBtns = document.querySelectorAll(".btn-size");
+        const hiddenVariantId = document.getElementById("selectedVariantId");
+        const colorText = document.getElementById("selectedColorText");
+        const sizeText = document.getElementById("selectedSizeText");
+        const stockNotice = document.getElementById("variantStockNotice");
+        const quantityInput = document.getElementById("pd-quantity");
+
+        function updateState() {
+            if (!selectedColor || !selectedSize) {
+                stockNotice.innerText = "Vui lòng chọn size & màu";
+                stockNotice.style.color = "#d32f2f";
+                hiddenVariantId.value = "";
+                return;
+            }
+
+            const match = variants.find(v => v.color === selectedColor && v.size === selectedSize);
+
+            if (!match) {
+                stockNotice.innerText = "Phiên bản màu/size này hiện không khả dụng.";
+                stockNotice.style.color = "#d32f2f";
+                hiddenVariantId.value = "";
+            } else if (match.stock <= 0) {
+                stockNotice.innerText = "Phân loại này hiện đã hết hàng.";
+                stockNotice.style.color = "#d32f2f";
+                hiddenVariantId.value = "";
+            } else {
+                stockNotice.innerText = `Còn ${match.stock} sản phẩm trong kho.`;
+                stockNotice.style.color = "#2e7d32";
+                hiddenVariantId.value = match.id;
+                quantityInput.max = Math.min(match.stock, 99);
+            }
+        }
+
+        colorBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                colorBtns.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                selectedColor = btn.dataset.color;
+                colorText.innerText = selectedColor;
+                updateState();
+            });
+        });
+
+        sizeBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                sizeBtns.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                selectedSize = btn.dataset.size;
+                sizeText.innerText = selectedSize;
+                updateState();
+            });
+        });
+
+        if (form) {
+            form.addEventListener("submit", (e) => {
+                if (!selectedColor || !selectedSize) {
+                    e.preventDefault();
+                    stockNotice.innerText = "Vui lòng chọn size & màu";
+                    stockNotice.style.color = "#d32f2f";
+                    return;
+                }
+
+                const match = variants.find(v => v.color === selectedColor && v.size === selectedSize);
+                if (!match) {
+                    e.preventDefault();
+                    stockNotice.innerText = "Phiên bản màu/size này hiện không khả dụng.";
+                    stockNotice.style.color = "#d32f2f";
+                    return;
+                }
+
+                if (match.stock <= 0) {
+                    e.preventDefault();
+                    stockNotice.innerText = "Phân loại này hiện đã hết hàng.";
+                    stockNotice.style.color = "#d32f2f";
+                    return;
+                }
+            });
+        }
+    });
+</script>

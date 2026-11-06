@@ -23,7 +23,7 @@
                     <input type="hidden" name="couponCode" id="hiddenCouponCode" value="">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <% items.forEach(item=> { %>
-                        <input type="hidden" name="selected" value="<%= item.product_id %>">
+                        <input type="hidden" name="selected" value="<%= item.id %>">
                         <% }) %>
 
                             <h2>Thông tin giao hàng</h2>
@@ -104,42 +104,45 @@
                         <% items.forEach(item=> { %>
                             <li>
                                 <span>
-                                    <%= item.name %> × <%= item.quantity %>
+                                    <%= item.name %>
+                                        <% if (item.color || item.size) { %>
+                                            <small style="color: #666;">(<%= [item.color,
+                                                    item.size].filter(Boolean).join(", ") %>)</small>
+                                                <% } %>
+                                    × <%= item.quantity %>
                                 </span>
-                                <span>
-                                    <%= formatMoney(item.line_total) %>
-                                </span>
+                                <span><%= formatMoney(item.line_total) %></span>
                             </li>
-                            <% }) %>
+                        <% }) %>
                     </ul>
 
                     <!-- KHUNG NHẬP MÃ GIẢM GIÁ -->
-                    <div class="coupon-box">
-                        <label for="couponInput">Mã giảm giá / Voucher</label>
-                        <div class="coupon-input-group">
-                            <input type="text" id="couponInput" placeholder="Ví dụ: ROUTINE10, GIAM50K"
-                                autocomplete="off" />
-                            <button type="button" id="btnApplyCoupon">Áp dụng</button>
-                        </div>
-                        <div id="couponMessage" class="coupon-msg"></div>
-                    </div>
+                    <div class=" coupon-box">
+                                                    <label for="couponInput">Mã giảm giá / Voucher</label>
+                                                    <div class="coupon-input-group">
+                                                        <input type="text" id="couponInput"
+                                                            placeholder="Ví dụ: ROUTINE10, GIAM50K"
+                                                            autocomplete="off" />
+                                                        <button type="button" id="btnApplyCoupon">Áp dụng</button>
+                                                    </div>
+                                                    <div id="couponMessage" class="coupon-msg"></div>
+            </div>
 
-                    <div class="price-breakdown">
-                        <p>Tạm tính: <strong id="summarySubtotal">
-                                <%= formatMoney(subtotal) %>
-                            </strong></p>
-                        <p id="discountRow" class="discount-row" style="display: none;">
-                            Giảm giá: <strong id="summaryDiscount" style="color: #2e7d32;">-0 đ</strong>
-                            <button type="button" id="btnRemoveCoupon" class="btn-remove-coupon"
-                                title="Hủy mã">&times;</button>
-                        </p>
-                        <p class="checkout-total">
-                            Tổng thanh toán: <strong id="summaryFinalTotal">
-                                <%= formatMoney(subtotal) %>
-                            </strong>
-                        </p>
-                    </div>
-                </aside>
+            <div class="price-breakdown">
+                <p>Tạm tính: <strong id="summarySubtotal">
+                        <%= formatMoney(subtotal) %>
+                    </strong></p>
+                <p id="discountRow" class="discount-row" style="display: none;">
+                    Giảm giá: <strong id="summaryDiscount" style="color: #2e7d32;">-0 đ</strong>
+                    <button type="button" id="btnRemoveCoupon" class="btn-remove-coupon" title="Hủy mã">&times;</button>
+                </p>
+                <p class="checkout-total">
+                    Tổng thanh toán: <strong id="summaryFinalTotal">
+                        <%= formatMoney(subtotal) %>
+                    </strong>
+                </p>
+            </div>
+            </aside>
             </div>
         </main>
 

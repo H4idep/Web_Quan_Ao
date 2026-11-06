@@ -73,6 +73,17 @@ const ProductModel = {
         return rows[0];
     },
 
+    async findVariants(productId) {
+        const [rows] = await pool.execute(
+            `SELECT id, color, size, sku, stock, price
+             FROM product_variants
+             WHERE product_id = ?
+             ORDER BY color ASC, id ASC`,
+            [productId]
+        );
+        return rows;
+    },
+
     async findById(id) {
         const [rows] = await pool.execute(
             `SELECT
@@ -91,7 +102,11 @@ const ProductModel = {
             [id]
         );
 
-        return rows[0];
+        if (!rows[0]) return null;
+
+        const product = rows[0];
+        product.variants = await this.findVariants(id);
+        return product;
     }
 };
 

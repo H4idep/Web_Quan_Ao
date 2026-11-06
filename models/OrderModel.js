@@ -37,12 +37,9 @@ const OrderModel = {
     //   { status: "changed" }  (có sản phẩm đã chọn không còn trong giỏ của user)
     //   { status: "stock", problems: [{ name, stock }] }
     //   { status: "ok", orderNumber }
-    async createFromCart(user, info, productIds, couponCode) {
-        const ids = [...new Set((productIds || []).map(String))];
-
-        if (ids.length === 0) {
-            return { status: "changed" };
-        }
+    async createFromCart(user, info, cartItemIds) {
+        const ids = [...new Set((cartItemIds || []).map(String))];
+        if (ids.length === 0) return { status: "changed" };
 
         const placeholders = ids.map(() => "?").join(", ");
         const connection = await pool.getConnection();
@@ -50,76 +47,70 @@ const OrderModel = {
         try {
             await connection.beginTransaction();
 
-            // FOR UPDATE khóa các dòng sản phẩm trong giỏ. Sắp xếp theo
-            // p.id để hai đơn cùng lúc khóa theo cùng thứ tự (tránh deadlock).
-            // Từ lúc này, người khác phải chờ transaction này xong mới
-            // mua được cùng sản phẩm.
-            const [items] = await connection.execute(
-                `SELECT
+            // Khóa các dòng trong giỏ hàng
+            const [cartRows] = await connection.execute(
+                `SELECT 
+                    ci.id AS cart_item_id,
                     ci.product_id,
+                    ci.variant_id,
                     ci.quantity,
                     p.name,
-                    p.price,
-                    p.stock
+                    COALESCE(pv.price, p.price) AS price,
+                    COALESCE(pv.stock, p.stock) AS stock,
+                    pv.color,
+                    pv.size
                  FROM cart_items ci
                  JOIN products p ON p.id = ci.product_id
-                 WHERE ci.user_id = ? AND ci.product_id IN (${placeholders})
-                 ORDER BY p.id
+                 LEFT JOIN product_variants pv ON pv.id = ci.variant_id
+                 WHERE ci.user_id = ? AND ci.id IN (${placeholders})
                  FOR UPDATE`,
                 [user.id, ...ids]
             );
 
-            // Điều kiện user_id ở trên đảm bảo không bao giờ đặt hộ giỏ người khác.
-            // Thiếu dòng nào nghĩa là sản phẩm đó không (còn) trong giỏ của user.
-            if (items.length !== ids.length) {
+            if (cartRows.length !== ids.length) {
                 await connection.rollback();
-
                 return { status: "changed" };
             }
 
-            const problems = items
-                .filter(item => Number(item.stock) < Number(item.quantity))
-                .map(item => ({
-                    name: item.name,
-                    stock: Number(item.stock)
-                }));
-
-            if (problems.length > 0) {
-                await connection.rollback();
-
-                return { status: "stock", problems };
-            }
-
-            // Giá lấy từ database tại thời điểm này, không tin client.
-            const lines = items.map(item => {
-                const unitCents = toCents(item.price);
+            // Kiểm tra tồn kho từng biến thể
+            const outOfStockItems = [];
+            const lines = cartRows.map(item => {
+                const stock = Number(item.stock);
                 const quantity = Number(item.quantity);
 
+                if (stock < quantity) {
+                    const label = item.color && item.size ? `${item.name} (${item.color} - ${item.size})` : item.name;
+                    outOfStockItems.push({ name: label, stock });
+                }
+
+                const unitCents = toCents(item.price);
                 return {
+                    cartItemId: item.cart_item_id,
                     productId: item.product_id,
+                    variantId: item.variant_id,
                     name: item.name,
+                    color: item.color,
+                    size: item.size,
                     quantity,
                     unitCents,
                     lineCents: unitCents * quantity
                 };
             });
 
-            const totalCents = lines.reduce(
-                (sum, line) => sum + line.lineCents,
-                0
-            );
+            if (outOfStockItems.length > 0) {
+                await connection.rollback();
+                return { status: "stock", problems: outOfStockItems };
+            }
 
-            // 1. Kiểm tra mã giảm giá (nếu có)
+            const totalCents = lines.reduce((sum, line) => sum + line.lineCents, 0);
+
+            // Kiểm tra mã giảm giá (nếu có)
             let couponRecord = null;
             let discountCents = 0;
 
             if (info.couponCode) {
                 const subtotalNumber = Number(fromCents(totalCents));
-                const couponCheck = await CouponModel.validate(
-                    info.couponCode,
-                    subtotalNumber,
-                    connection
-                );
+                const couponCheck = await CouponModel.validate(info.couponCode, subtotalNumber, connection);
 
                 if (couponCheck.valid) {
                     couponRecord = couponCheck.coupon;
@@ -127,33 +118,23 @@ const OrderModel = {
                 }
             }
 
-            // Tổng tiền sau giảm giá (không âm)
             const payableCents = totalCents > discountCents ? totalCents - discountCents : 0;
 
-            // 2. Tạo đơn hàng lưu kèm thông tin coupon
+            // Tạo mã đơn và lưu đơn hàng
             let orderId = null;
             let orderNumber = null;
+
             for (let attempt = 0; attempt < 5 && orderId === null; attempt++) {
                 orderNumber = generateOrderNumber();
 
                 try {
                     const [result] = await connection.execute(
                         `INSERT INTO orders (
-                            user_id,
-                            coupon_id,
-                            coupon_code,
-                            order_number,
-                            customer_name,
-                            customer_email,
-                            customer_phone,
-                            shipping_address,
-                            discount_amount,
-                            total_amount,
-                            payment_method,
-                            status,
-                            notes
-                        )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
+                            user_id, coupon_id, coupon_code, order_number,
+                            customer_name, customer_email, customer_phone,
+                            shipping_address, discount_amount, total_amount,
+                            payment_method, status, notes
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
                         [
                             user.id,
                             couponRecord ? couponRecord.id : null,
@@ -169,16 +150,17 @@ const OrderModel = {
                             info.notes
                         ]
                     );
-
                     orderId = result.insertId;
                 } catch (error) {
-                    if (error.code !== "ER_DUP_ENTRY") {
-                        throw error;
-                    }
+                    if (error.code !== "ER_DUP_ENTRY") throw error;
                 }
             }
 
-            // 3. Tăng số lượt dùng của mã (used_count + 1)
+            if (orderId === null) {
+                throw new Error("Không tạo được mã đơn hàng duy nhất.");
+            }
+
+            // Tăng số lượt dùng coupon
             if (couponRecord) {
                 await connection.execute(
                     `UPDATE coupons SET used_count = used_count + 1 WHERE id = ?`,
@@ -186,19 +168,19 @@ const OrderModel = {
                 );
             }
 
-            if (orderId === null) {
-                throw new Error("Không tạo được mã đơn hàng duy nhất.");
-            }
-
+            // Lưu order_items (kèm màu và size)
             await connection.query(
                 `INSERT INTO order_items
-                    (order_id, product_id, product_name, unit_price, quantity, line_total)
+                    (order_id, product_id, variant_id, product_name, color, size, unit_price, quantity, line_total)
                  VALUES ?`,
                 [
                     lines.map(line => [
                         orderId,
                         line.productId,
+                        line.variantId,
                         line.name,
+                        line.color,
+                        line.size,
                         fromCents(line.unitCents),
                         line.quantity,
                         fromCents(line.lineCents)
@@ -206,43 +188,40 @@ const OrderModel = {
                 ]
             );
 
-            // Trừ kho. Điều kiện stock >= ? là lớp bảo vệ thứ hai:
-            // nếu vì lý do nào đó không đủ hàng thì không trừ và hủy đơn.
+            // Trừ kho biến thể
             for (const line of lines) {
-                const [update] = await connection.execute(
-                    `UPDATE products
-                     SET stock = stock - ?
-                     WHERE id = ? AND stock >= ?`,
-                    [line.quantity, line.productId, line.quantity]
-                );
+                if (line.variantId) {
+                    const [updateVariant] = await connection.execute(
+                        `UPDATE product_variants SET stock = stock - ? WHERE id = ? AND stock >= ?`,
+                        [line.quantity, line.variantId, line.quantity]
+                    );
 
-                if (update.affectedRows !== 1) {
-                    await connection.rollback();
-
-                    return {
-                        status: "stock",
-                        problems: [{ name: line.name, stock: 0 }]
-                    };
+                    if (updateVariant.affectedRows !== 1) {
+                        await connection.rollback();
+                        return { status: "stock", problems: [{ name: line.name, stock: 0 }] };
+                    }
+                } else {
+                    const [updateProduct] = await connection.execute(
+                        `UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?`,
+                        [line.quantity, line.productId, line.quantity]
+                    );
+                    if (updateProduct.affectedRows !== 1) {
+                        await connection.rollback();
+                        return { status: "stock", problems: [{ name: line.name, stock: 0 }] };
+                    }
                 }
             }
 
-            // Chỉ xóa những dòng đã đặt, giữ lại phần còn lại của giỏ.
+            // Xóa các mặt hàng đã đặt khỏi giỏ
             await connection.execute(
-                `DELETE FROM cart_items
-                 WHERE user_id = ? AND product_id IN (${placeholders})`,
+                `DELETE FROM cart_items WHERE user_id = ? AND id IN (${placeholders})`,
                 [user.id, ...ids]
             );
 
             await connection.commit();
-
             return { status: "ok", orderNumber };
         } catch (error) {
-            try {
-                await connection.rollback();
-            } catch {
-
-            }
-
+            try { await connection.rollback(); } catch { }
             throw error;
         } finally {
             connection.release();
@@ -484,7 +463,7 @@ const OrderModel = {
         }
 
         const [items] = await pool.execute(
-            `SELECT product_id, product_name, unit_price, quantity, line_total
+            `SELECT product_id, variant_id, product_name, color, size, unit_price, quantity, line_total
              FROM order_items
              WHERE order_id = ?
              ORDER BY id`,

@@ -89,7 +89,7 @@ const AdminOrderModel = {
         const [[items], [logs]] = await Promise.all([
             pool.execute(
                 `SELECT
-                    id, product_id, product_name,
+                    id, product_id, product_name, color, size,
                     unit_price, quantity, line_total
                  FROM order_items
                  WHERE order_id = ?
