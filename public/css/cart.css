@@ -48,7 +48,7 @@
 .cart-note { color: #666; font-size: .9rem !important; }
 button.cart-btn:disabled { background: #ccc; color: #666; cursor: not-allowed; }
 
-/* ===== Giỏ hàng: thoáng, rõ ràng, đồng bộ giao diện Routine ===== */
+/* ===== Giỏ hàng: thoáng, rõ ràng, đồng bộ giao diện Zody ===== */
 .cart-container { max-width: 1180px; margin: 112px auto 60px; padding: 0 24px; }
 .cart-container h1 { color: #202820; font-size: clamp(28px, 3vw, 36px); line-height: 1.25; letter-spacing: -.4px; margin-bottom: 28px; }
 .cart-table { overflow: hidden; border: 1px solid #e6e9e7; border-radius: 12px; background: #fff; border-collapse: separate; border-spacing: 0; box-shadow: 0 8px 24px rgba(20,40,30,.04); }
