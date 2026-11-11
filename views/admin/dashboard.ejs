@@ -1,126 +1,150 @@
 <%- include("partials/header") %>
 
-    <div class="dashboard-intro">
-        <p>Theo dõi hàng hóa và các đơn cần xử lý.</p>
-
-        <a class="btn primary" href="/admin/products/create">
-            + Thêm sản phẩm
-        </a>
-    </div>
-
     <section class="stats-grid" aria-label="Thống kê cửa hàng">
         <article class="stat-card">
-            <span>Sản phẩm</span>
-            <strong>
-                <%= stats.productCount %>
-            </strong>
-            <a href="/admin/products">Xem danh sách →</a>
+            <div class="stat-card-top">
+                <span class="stat-icon tone-green" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M4 8.5 12 4l8 4.5v9L12 22l-8-4.5v-9Z"/><path d="m4.5 8.7 7.5 4.2 7.5-4.2M12 13v8.5M8 6.2l8 4.6"/></svg>
+                </span>
+                <span class="stat-label">Sản phẩm</span>
+            </div>
+            <strong><%= stats.productCount %></strong>
+            <a href="/admin/products">Xem danh sách <span aria-hidden="true">→</span></a>
         </article>
 
         <article class="stat-card">
-            <span>Danh mục</span>
-            <strong>
-                <%= stats.categoryCount %>
-            </strong>
-            <a href="/admin/categories">Quản lý danh mục →</a>
+            <div class="stat-card-top">
+                <span class="stat-icon tone-blue" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
+                </span>
+                <span class="stat-label">Danh mục</span>
+            </div>
+            <strong><%= stats.categoryCount %></strong>
+            <a href="/admin/categories">Quản lý danh mục <span aria-hidden="true">→</span></a>
         </article>
 
         <article class="stat-card">
-            <span>Đơn chờ xử lý</span>
-            <strong>
-                <%= stats.pendingCount %>
-            </strong>
-            <a href="/admin/orders?status=pending">Xử lý đơn hàng →</a>
+            <div class="stat-card-top">
+                <span class="stat-icon tone-amber" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M5 5h14v14H5z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg>
+                </span>
+                <span class="stat-label">Đơn chờ xử lý</span>
+            </div>
+            <strong><%= stats.pendingCount %></strong>
+            <a href="/admin/orders?status=pending">Xử lý đơn hàng <span aria-hidden="true">→</span></a>
         </article>
 
         <article class="stat-card">
-            <span>Tổng giá trị đơn hoàn thành</span>
-            <strong class="revenue">
-                <%= money(stats.completedRevenue) %>
-            </strong>
-            <small>Toàn bộ thời gian</small>
+            <div class="stat-card-top">
+                <span class="stat-icon tone-violet" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 3v18M17 7.5c0-1.7-2.2-3-5-3s-5 1.3-5 3 2 2.7 5 3.2 5 1.5 5 3.3-2.2 3-5 3-5-1.3-5-3"/></svg>
+                </span>
+                <span class="stat-label">Doanh thu hoàn thành</span>
+            </div>
+            <strong class="revenue"><%= money(stats.completedRevenue) %></strong>
+            <small>Giá trị đơn hoàn thành · toàn thời gian</small>
         </article>
     </section>
 
     <div class="dashboard-grid">
-        <section class="panel">
+        <section class="panel revenue-panel" aria-labelledby="revenueHeading">
             <div class="panel-heading">
-                <h2>Đơn hàng gần đây</h2>
-                <span class="muted">5 đơn mới nhất</span>
+                <div>
+                    <h2 id="revenueHeading">Doanh thu từ đơn gần đây</h2>
+                    <p class="panel-subtitle">Đơn hoàn thành trong 5 đơn mới nhất</p>
+                </div>
+                <a class="panel-action" href="/admin/reports">Báo cáo doanh thu <span aria-hidden="true">→</span></a>
             </div>
-
-            <div class="table-scroll">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Mã đơn</th>
-                            <th>Khách hàng</th>
-                            <th>Tổng tiền</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <% if (!stats.recentOrders.length) { %>
-                            <tr>
-                                <td colspan="4" class="empty">
-                                    Chưa có đơn hàng.
-                                </td>
-                            </tr>
-                            <% } %>
-
-                                <% stats.recentOrders.forEach(order=> { %>
-                                    <tr>
-                                        <td>
-                                            <a class="order-number" href="/admin/orders/<%= order.id %>">
-                                                <%= order.order_number %>
-                                            </a>
-                                        </td>
-
-                                        <td>
-                                            <%= order.customer_name %>
-                                        </td>
-
-                                        <td class="nowrap">
-                                            <%= money(order.total_amount) %>
-                                        </td>
-
-                                        <td>
-                                            <span class="badge <%= order.status %>">
-                                                <%= orderStatuses[order.status] || order.status %>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <% }) %>
-                    </tbody>
-                </table>
+            <div class="revenue-summary">
+                <strong id="recentRevenueTotal">—</strong>
+                <span>Trong các đơn đang hiển thị</span>
+            </div>
+            <div class="revenue-chart" id="revenueChart" role="region" aria-label="Biểu đồ doanh thu các đơn hoàn thành trong 5 đơn gần nhất">
+                <p class="sr-only" id="revenueChartStatus" aria-live="polite"></p>
             </div>
         </section>
 
-        <section class="panel">
+        <section class="panel stock-panel" aria-labelledby="stockHeading">
             <div class="panel-heading">
-                <h2>Cần bổ sung hàng</h2>
+                <div>
+                    <h2 id="stockHeading">Cần bổ sung hàng</h2>
+                    <p class="panel-subtitle">Sản phẩm còn tối đa 5 chiếc</p>
+                </div>
+                <a class="panel-action" href="/admin/products">Kho hàng <span aria-hidden="true">→</span></a>
             </div>
 
             <% if (!stats.lowStock.length) { %>
-                <p class="empty">Không có sản phẩm tồn kho từ 5 trở xuống.</p>
-                <% } %>
-
+                <div class="stock-empty">
+                    <span class="stock-empty-icon" aria-hidden="true">
+                        <svg viewBox="0 0 48 48"><path d="M8 17.5 24 9l16 8.5v18L24 44l-16-8.5v-18Z"/><path d="m8.5 17.8 15.5 8.4 15.5-8.4M24 26v17M17 12.8l16 8.7"/></svg>
+                        <span>✓</span>
+                    </span>
+                    <h3>Kho hàng ổn định</h3>
+                    <p>Hiện chưa có sản phẩm nào cần bổ sung. Chúng tôi sẽ hiển thị mặt hàng sắp hết ở đây.</p>
+                </div>
+            <% } else { %>
+                <div class="stock-list">
                     <% stats.lowStock.forEach(product=> { %>
-                        <a class="stock-item" href="/admin/products/<%= product.id %>/edit">
-                            <span>
-                                <strong>
-                                    <%= product.name %>
-                                </strong>
-                                <small>Mã SP: <%= product.id %></small>
+                        <article class="stock-item">
+                            <span class="stock-product-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><path d="m4 8 8-4 8 4v9l-8 4-8-4V8Z"/><path d="m4.5 8.2 7.5 4 7.5-4M12 12.5V21"/></svg>
                             </span>
-
-                            <span class="badge <%= Number(product.stock) === 0 ? 'cancelled' : 'pending' %>">
-                                Còn <%= product.stock %>
-                            </span>
-                        </a>
-                        <% }) %>
+                            <div class="stock-product-info">
+                                <a class="stock-product-name" href="/admin/products/<%= product.id %>/edit"><%= product.name %></a>
+                                <span class="stock-product-count">Còn <strong><%= product.stock %></strong> / 5 chiếc</span>
+                                <span class="stock-progress" role="progressbar" aria-label="Tồn kho <%= product.name %>" aria-valuemin="0" aria-valuemax="5" aria-valuenow="<%= product.stock %>">
+                                    <span class="<%= Number(product.stock) <= 2 ? 'is-danger' : 'is-warning' %>" style="width: <%= Math.min(100, Math.max(0, Number(product.stock) / 5 * 100)) %>%"></span>
+                                </span>
+                            </div>
+                            <a class="stock-restock" href="/admin/products/<%= product.id %>/edit" aria-label="Cập nhật tồn kho: <%= product.name %>">Cập nhật</a>
+                        </article>
+                    <% }) %>
+                </div>
+            <% } %>
         </section>
     </div>
 
-    <%- include("partials/footer") %>
+    <section class="panel orders-panel" aria-labelledby="ordersHeading">
+        <div class="panel-heading">
+            <div>
+                <h2 id="ordersHeading">Đơn hàng gần đây</h2>
+                <p class="panel-subtitle">Theo dõi và xử lý các đơn hàng mới nhất</p>
+            </div>
+            <a class="panel-action" href="/admin/orders">Xem tất cả <span aria-hidden="true">→</span></a>
+        </div>
+
+        <div class="table-scroll">
+            <table class="recent-orders-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Mã đơn</th>
+                        <th scope="col">Khách hàng</th>
+                        <th scope="col">Thời gian</th>
+                        <th scope="col" class="amount-heading">Tổng tiền</th>
+                        <th scope="col">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (!stats.recentOrders.length) { %>
+                        <tr><td colspan="5" class="empty">Chưa có đơn hàng.</td></tr>
+                    <% } %>
+                    <% stats.recentOrders.forEach(order=> { %>
+                        <tr data-order-date="<%= new Date(order.created_at).toISOString() %>" data-order-amount="<%= order.total_amount %>" data-order-status="<%= order.status %>">
+                            <td>
+                                <a class="order-number" href="/admin/orders/<%= order.id %>"><%= order.order_number %></a>
+                            </td>
+                            <td>
+                                <span class="customer-cell">
+                                    <span class="customer-avatar" aria-hidden="true"><%= order.customer_name.trim().charAt(0).toUpperCase() %></span>
+                                    <span class="customer-name"><%= order.customer_name %></span>
+                                </span>
+                            </td>
+                            <td>                            <time class="relative-time" datetime="<%= new Date(order.created_at).toISOString() %>"><%= new Date(order.created_at).toLocaleString('vi-VN') %></time></td>
+                            <td class="amount-cell"><%= money(order.total_amount) %></td>
+                            <td><span class="badge <%= order.status %>"><%= orderStatuses[order.status] || order.status %></span></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </section>

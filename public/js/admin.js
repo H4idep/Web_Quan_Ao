@@ -456,3 +456,250 @@ if (imageFile) {
         }
     });
 }
+
+(() => {
+    const sidebar = document.getElementById("adminSidebar");
+    const menuToggle = document.querySelector(".menu-toggle");
+    const sidebarBackdrop = document.querySelector(".sidebar-backdrop");
+    const adminSearch = document.querySelector(".admin-search input");
+    const searchToggle = document.querySelector(".search-toggle");
+    const adminSearchForm = document.querySelector(".admin-search");
+
+    function setSidebarOpen(isOpen) {
+        if (!sidebar || !menuToggle || !sidebarBackdrop) return;
+
+        sidebar.classList.toggle("is-open", isOpen);
+        sidebarBackdrop.classList.toggle("is-visible", isOpen);
+        menuToggle.setAttribute("aria-expanded", String(isOpen));
+        menuToggle.setAttribute("aria-label", isOpen ? "Đóng điều hướng" : "Mở điều hướng");
+        document.body.classList.toggle("sidebar-open", isOpen);
+
+        if (isOpen) {
+            sidebar.querySelector("nav a")?.focus();
+        } else {
+            menuToggle.focus();
+        }
+    }
+
+    menuToggle?.addEventListener("click", () => {
+        setSidebarOpen(menuToggle.getAttribute("aria-expanded") !== "true");
+    });
+
+    sidebarBackdrop?.addEventListener("click", () => setSidebarOpen(false));
+    sidebar?.querySelectorAll("nav a").forEach(link => {
+        link.addEventListener("click", () => {
+            if (menuToggle?.getAttribute("aria-expanded") === "true") setSidebarOpen(false);
+        });
+    });
+
+    searchToggle?.addEventListener("click", () => {
+        adminSearchForm?.classList.add("is-open");
+        adminSearch?.focus();
+    });
+
+    adminSearch?.addEventListener("focus", () => adminSearchForm?.classList.add("is-open"));
+
+    document.addEventListener("keydown", event => {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+            event.preventDefault();
+            adminSearchForm?.classList.add("is-open");
+            adminSearch?.focus();
+        }
+
+        if (event.key === "Escape" && menuToggle?.getAttribute("aria-expanded") === "true") {
+            setSidebarOpen(false);
+        }
+
+        if (event.key === "Escape" && adminSearchForm?.classList.contains("is-open")) {
+            adminSearchForm.classList.remove("is-open");
+            adminSearch?.blur();
+            searchToggle?.focus();
+        }
+    });
+
+    window.matchMedia("(min-width: 901px)").addEventListener?.("change", event => {
+        if (event.matches && menuToggle?.getAttribute("aria-expanded") === "true") {
+            sidebar?.classList.remove("is-open");
+            sidebarBackdrop?.classList.remove("is-visible");
+            menuToggle.setAttribute("aria-expanded", "false");
+            document.body.classList.remove("sidebar-open");
+        }
+    });
+
+    const chart = document.getElementById("revenueChart");
+
+    if (chart) {
+        const renderRevenueChart = () => {
+        const svgNamespace = "http://www.w3.org/2000/svg";
+        const numberFormat = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 0 });
+        const compactFormat = new Intl.NumberFormat("vi-VN", {
+            notation: "compact",
+            maximumFractionDigits: 1
+        });
+        const dateFormat = new Intl.DateTimeFormat("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+        const points = [];
+
+        document.querySelectorAll(".recent-orders-table tbody tr[data-order-status='completed']").forEach(row => {
+            const date = new Date(row.dataset.orderDate);
+            const amount = Number(row.dataset.orderAmount);
+            if (Number.isNaN(date.getTime()) || !Number.isFinite(amount)) return;
+            points.push({ date, amount });
+        });
+
+        points.sort((first, second) => first.date - second.date);
+        const total = points.reduce((sum, point) => sum + point.amount, 0);
+        const totalElement = document.getElementById("recentRevenueTotal");
+        const status = document.getElementById("revenueChartStatus");
+
+        if (totalElement) totalElement.textContent = `${numberFormat.format(total)} đ`;
+        if (points.length === 0) {
+            const empty = document.createElement("div");
+            empty.className = "chart-empty";
+
+            const icon = document.createElementNS(svgNamespace, "svg");
+            icon.setAttribute("viewBox", "0 0 24 24");
+            icon.setAttribute("fill", "none");
+            icon.setAttribute("stroke", "currentColor");
+            icon.setAttribute("stroke-width", "1.5");
+            icon.setAttribute("aria-hidden", "true");
+            const path = document.createElementNS(svgNamespace, "path");
+            path.setAttribute("d", "M4 19V5m0 14h17M7 15l4-4 3 2 6-7");
+            icon.append(path);
+
+            const title = document.createElement("strong");
+            title.textContent = "Chưa có doanh thu hoàn thành";
+            const description = document.createElement("span");
+            description.textContent = "Biểu đồ sẽ cập nhật khi có đơn hàng hoàn thành trong danh sách gần đây.";
+            empty.append(icon, title, description);
+            chart.append(empty);
+            if (status) status.textContent = title.textContent;
+            return;
+        }
+
+        const width = 680;
+        const height = 220;
+        const margin = { top: 14, right: 12, bottom: 34, left: 58 };
+        const plotWidth = width - margin.left - margin.right;
+        const plotHeight = height - margin.top - margin.bottom;
+        const maxValue = Math.max(1, ...points.map(point => point.amount));
+        const tickCount = 4;
+        const svg = document.createElementNS(svgNamespace, "svg");
+        svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+        svg.setAttribute("preserveAspectRatio", "none");
+        svg.setAttribute("role", "img");
+        svg.setAttribute("aria-label", `Doanh thu ${points.length} đơn hoàn thành trong 5 đơn gần nhất`);
+
+        const defs = document.createElementNS(svgNamespace, "defs");
+        const gradient = document.createElementNS(svgNamespace, "linearGradient");
+        gradient.setAttribute("id", "revenueArea");
+        gradient.setAttribute("x1", "0");
+        gradient.setAttribute("x2", "0");
+        gradient.setAttribute("y1", "0");
+        gradient.setAttribute("y2", "1");
+        const stopTop = document.createElementNS(svgNamespace, "stop");
+        stopTop.setAttribute("offset", "0%");
+        stopTop.setAttribute("stop-color", "#4b9468");
+        stopTop.setAttribute("stop-opacity", ".18");
+        const stopBottom = document.createElementNS(svgNamespace, "stop");
+        stopBottom.setAttribute("offset", "100%");
+        stopBottom.setAttribute("stop-color", "#4b9468");
+        stopBottom.setAttribute("stop-opacity", "0");
+        gradient.append(stopTop, stopBottom);
+        defs.append(gradient);
+        svg.append(defs);
+
+        const createSvgElement = (name, attributes, text) => {
+            const element = document.createElementNS(svgNamespace, name);
+            Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+            if (text) element.textContent = text;
+            return element;
+        };
+
+        for (let index = 0; index <= tickCount; index += 1) {
+            const y = margin.top + (plotHeight * index) / tickCount;
+            const value = maxValue * (1 - index / tickCount);
+            svg.append(
+                createSvgElement("line", {
+                    x1: margin.left,
+                    x2: width - margin.right,
+                    y1: y,
+                    y2: y,
+                    class: "chart-grid-line"
+                }),
+                createSvgElement("text", {
+                    x: margin.left - 9,
+                    y: y + 3,
+                    "text-anchor": "end",
+                    class: "chart-axis-label"
+                }, compactFormat.format(value))
+            );
+        }
+
+        const getX = index => points.length === 1
+            ? margin.left + plotWidth / 2
+            : margin.left + (plotWidth * index) / (points.length - 1);
+        const getY = amount => margin.top + plotHeight * (1 - amount / maxValue);
+        const pathData = points.map((point, index) =>
+            `${index === 0 ? "M" : "L"} ${getX(index)} ${getY(point.amount)}`
+        ).join(" ");
+
+        if (points.length > 1) {
+            svg.append(createSvgElement("path", {
+                d: `${pathData} L ${getX(points.length - 1)} ${margin.top + plotHeight} L ${getX(0)} ${margin.top + plotHeight} Z`,
+                class: "chart-area"
+            }));
+        }
+
+        svg.append(createSvgElement("path", { d: pathData, class: "chart-line" }));
+
+        points.forEach((point, index) => {
+            const label = `${point.date.toLocaleString("vi-VN")}: ${numberFormat.format(point.amount)} đ`;
+            const circle = createSvgElement("circle", {
+                cx: getX(index),
+                cy: getY(point.amount),
+                r: 4,
+                class: "chart-point",
+                tabindex: 0,
+                "aria-label": label
+            });
+            const title = createSvgElement("title", {}, label);
+            circle.append(title);
+            svg.append(circle);
+            svg.append(createSvgElement("text", {
+                x: getX(index),
+                y: height - 11,
+                "text-anchor": "middle",
+                class: "chart-axis-label"
+            }, dateFormat.format(point.date)));
+        });
+
+        chart.append(svg);
+        if (status) status.textContent = `Biểu đồ gồm ${points.length} đơn hoàn thành, tổng ${numberFormat.format(total)} đồng.`;
+        };
+
+        renderRevenueChart();
+    }
+
+    document.querySelectorAll(".relative-time").forEach(element => {
+        const date = new Date(element.dateTime);
+        if (Number.isNaN(date.getTime())) return;
+
+        const minutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        let relative;
+
+        if (minutes < 1) relative = "Vừa xong";
+        else if (minutes < 60) relative = `${minutes} phút trước`;
+        else if (hours < 24) relative = `${hours} giờ trước`;
+        else if (days < 7) relative = `${days} ngày trước`;
+        else relative = new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+
+        element.textContent = relative;
+    });
+})();
