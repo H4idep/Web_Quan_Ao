@@ -55,7 +55,7 @@ const OrderModel = {
                     ci.variant_id,
                     ci.quantity,
                     p.name,
-                    COALESCE(pv.price, p.price) AS price,
+                    p.price AS price,
                     COALESCE(pv.stock, p.stock) AS stock,
                     pv.color,
                     pv.size
