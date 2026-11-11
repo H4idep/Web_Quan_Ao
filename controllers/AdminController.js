@@ -35,6 +35,12 @@ async function renderForm(res, kind, item, errors = {}, status = 200) {
         ? await AdminModel.categoryOptions()
         : [];
 
+    if (kind === "products" && !Array.isArray(item.variants)) {
+        item.variants = item.id
+            ? await AdminModel.findProductVariants(item.id)
+            : [];
+    }
+
     const parentCategories = kind === "categories"
         ? await AdminModel.parentOptions()
         : [];
@@ -102,7 +108,8 @@ const AdminController = {
                     category_id: "",
                     price: "",
                     stock: "0",
-                    image_url: ""
+                    image_url: "",
+                    variants: []
                 });
             } catch (error) {
                 return next(error);
@@ -238,9 +245,12 @@ const AdminController = {
                 let formErrors = null;
 
                 if (error.code === "ER_DUP_ENTRY") {
-                    formErrors = {
-                        name: "Tên đã được sử dụng. Vui lòng chọn tên khác."
-                    };
+                    const duplicateVariant = String(error.message).includes(
+                        "uq_product_color_size"
+                    );
+                    formErrors = duplicateVariant
+                        ? { variants: "Mỗi tổ hợp màu và size chỉ được khai báo một lần." }
+                        : { name: "Tên đã được sử dụng. Vui lòng chọn tên khác." };
                 }
 
                 if (error.code === "ER_NO_REFERENCED_ROW_2") {
@@ -253,12 +263,48 @@ const AdminController = {
                     };
                 }
 
+                if (error.code === "VARIANT_IN_CART") {
+                    formErrors = {
+                        variants:
+                            "Không thể xóa phân loại đang nằm trong giỏ hàng. Dòng đó đã được khôi phục; hãy giữ lại hoặc thử xóa sau khi khách bỏ sản phẩm khỏi giỏ."
+                    };
+                }
+
+                if (error.code === "INVALID_VARIANT_REFERENCE") {
+                    formErrors = {
+                        variants:
+                            "Có phân loại không thuộc sản phẩm này. Vui lòng tải lại trang và thử lại."
+                    };
+                }
+
                 if (formErrors) {
                     try {
+                        let formData = { ...data, id };
+
+                        if (
+                            error.code === "VARIANT_IN_CART" &&
+                            id &&
+                            Array.isArray(error.variantIds)
+                        ) {
+                            const referencedVariants =
+                                await AdminModel.findProductVariants(id);
+                            const submittedIds = new Set(
+                                (data.variants || [])
+                                    .map(variant => String(variant.id || ""))
+                            );
+                            formData.variants = [
+                                ...(data.variants || []),
+                                ...referencedVariants.filter(variant =>
+                                    error.variantIds.includes(String(variant.id)) &&
+                                    !submittedIds.has(String(variant.id))
+                                )
+                            ];
+                        }
+
                         return await renderForm(
                             res,
                             kind,
-                            { ...data, id },
+                            formData,
                             formErrors,
                             409
                         );

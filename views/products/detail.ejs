@@ -24,8 +24,11 @@
         if (imageUrl.startsWith("public/")) { imageUrl=imageUrl.slice(7); } if ( imageUrl.startsWith("images/") ||
         imageUrl.startsWith("uploads/") ) { return "/" + imageUrl; } return "" ; } const
         extraImages=Array.isArray(product.images) ? product.images : []; const galleryImages=Array.from( new Set(
-        [product.image_url] .concat(extraImages) .map(imagePath) .filter(Boolean) ) ); const
-        inStock=Number(product.stock)> 0;
+        [product.image_url] .concat(extraImages) .map(imagePath) .filter(Boolean) ) );
+        const variants=product.variants || [];
+        const inStock=variants.length
+            ? variants.some(variant => Number(variant.stock) > 0)
+            : Number(product.stock) > 0;
         %>
 
         <main class="pd-container">
@@ -85,18 +88,20 @@
                         Mã sản phẩm: SP<%= product.id %>
                     </p>
 
-                    <p class="pd-price">
+                    <p class="pd-price" id="pd-price" data-base-price="<%= product.price %>">
                         <%= formatMoney(product.price) %>
                     </p>
 
-                    <p class="pd-stock <%= inStock ? '' : 'is-sold-out' %>">
-                        <span class="pd-stock-dot" aria-hidden="true"></span>
+                    <p id="pd-stock-status" class="pd-stock <%= inStock ? '' : 'is-sold-out' %>"
+                        data-stock="<%= product.stock %>">
+                        <span class="pd-stock-dot" aria-hidden="true"></span><span id="pd-stock-text">
 
                         <% if (inStock) { %>
                             Còn hàng · <%= product.stock %> sản phẩm
                                 <% } else { %>
                                     Tạm hết hàng
                                     <% } %>
+                        </span>
                     </p>
 
                     <div class="pd-summary">
@@ -107,7 +112,7 @@
                     </div>
 
                     <!-- KHUNG CHỌN MÀU SẮC & KÍCH CỠ -->
-                    <% const variants=product.variants || []; const uniqueColors=[...new Set(variants.map(v=>
+                    <% const uniqueColors=[...new Set(variants.map(v=>
                         v.color))];
                         const uniqueSizes = [...new Set(variants.map(v => v.size))];
                         %>
@@ -117,15 +122,14 @@
                             <input type="hidden" name="productId" value="<%= product.id %>">
                             <input type="hidden" name="variantId" id="selectedVariantId" value="">
 
-                            <% if (variants.length> 0) { %>
+                            <% if (variants.length > 0) { %>
                                 <!-- Chọn Màu sắc -->
                                 <div class="variant-group">
-                                    <label class="variant-label">Màu sắc: <strong id="selectedColorText">Chọn
-                                            màu</strong></label>
-                                    <div class="variant-options">
+                                    <label class="variant-label" id="colorLabel">Màu sắc: <strong id="selectedColorText">Chọn màu</strong></label>
+                                    <div class="variant-options" role="group" aria-labelledby="colorLabel">
                                         <% uniqueColors.forEach(color=> { %>
                                             <button type="button" class="variant-btn btn-color"
-                                                data-color="<%= color %>">
+                                                data-color="<%= color %>" aria-pressed="false">
                                                 <%= color %>
                                             </button>
                                             <% }) %>
@@ -134,11 +138,11 @@
 
                                 <!-- Chọn Kích cỡ -->
                                 <div class="variant-group">
-                                    <label class="variant-label">Kích thước: <strong id="selectedSizeText">Chọn
-                                            size</strong></label>
-                                    <div class="variant-options">
+                                    <label class="variant-label" id="sizeLabel">Kích thước: <strong id="selectedSizeText">Chọn size</strong></label>
+                                    <div class="variant-options" id="sizeOptions" role="group" aria-labelledby="sizeLabel">
                                         <% uniqueSizes.forEach(size=> { %>
-                                            <button type="button" class="variant-btn btn-size" data-size="<%= size %>">
+                                            <button type="button" class="variant-btn btn-size" data-size="<%= size %>"
+                                                aria-pressed="false" hidden>
                                                 <%= size %>
                                             </button>
                                             <% }) %>
@@ -149,15 +153,16 @@
                                     <!-- Chọn số lượng -->
                                     <div class="pd-quantity-row">
                                         <label for="pd-quantity">Số lượng</label>
-                                        <input id="pd-quantity" type="number" name="quantity" value="1" min="1" max="99"
-                                            required>
+                                        <input id="pd-quantity" type="number" name="quantity" value="1" min="1"
+                                            max="<%= variants.length ? 99 : Math.min(Number(product.stock), 99) %>" required>
                                     </div>
                                     <br>
 
                                     <!-- Nút đặt hàng và thông báo phía dưới -->
                                     <div class="pd-action-row">
-                                        <button type="submit" id="btnAddToCart" class="pd-add-btn">
-                                            Đặt hàng
+                                        <button type="submit" id="btnAddToCart" class="pd-add-btn"
+                                            <%= variants.length || inStock ? "" : "disabled" %>>
+                                            Thêm vào giỏ hàng
                                         </button>
                                         <p id="variantStockNotice" class="pd-variant-notice">
                                             <%= variants.length> 0 ? "Vui lòng chọn size & màu" : "" %>
@@ -167,7 +172,7 @@
 
                         <!-- Nhúng dữ liệu biến thể vào thẻ script JSON để Client xử lý mượt mà -->
                         <script id="productVariantsData" type="application/json">
-                        <%- JSON.stringify(variants) %>
+                        <%- JSON.stringify(variants).replace(/</g, "\\u003c") %>
                     </script>
 
                         <a class="pd-shop-link" href="/products">
@@ -235,97 +240,3 @@
 </body>
 
 </html>
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const variantsDataEl = document.getElementById("productVariantsData");
-        if (!variantsDataEl) return;
-
-        const variants = JSON.parse(variantsDataEl.textContent || "[]");
-        if (variants.length === 0) return;
-
-        let selectedColor = "";
-        let selectedSize = "";
-
-        const form = document.getElementById("addToCartForm");
-        const colorBtns = document.querySelectorAll(".btn-color");
-        const sizeBtns = document.querySelectorAll(".btn-size");
-        const hiddenVariantId = document.getElementById("selectedVariantId");
-        const colorText = document.getElementById("selectedColorText");
-        const sizeText = document.getElementById("selectedSizeText");
-        const stockNotice = document.getElementById("variantStockNotice");
-        const quantityInput = document.getElementById("pd-quantity");
-
-        function updateState() {
-            if (!selectedColor || !selectedSize) {
-                stockNotice.innerText = "Vui lòng chọn size & màu";
-                stockNotice.style.color = "#d32f2f";
-                hiddenVariantId.value = "";
-                return;
-            }
-
-            const match = variants.find(v => v.color === selectedColor && v.size === selectedSize);
-
-            if (!match) {
-                stockNotice.innerText = "Phiên bản màu/size này hiện không khả dụng.";
-                stockNotice.style.color = "#d32f2f";
-                hiddenVariantId.value = "";
-            } else if (match.stock <= 0) {
-                stockNotice.innerText = "Phân loại này hiện đã hết hàng.";
-                stockNotice.style.color = "#d32f2f";
-                hiddenVariantId.value = "";
-            } else {
-                stockNotice.innerText = `Còn ${match.stock} sản phẩm trong kho.`;
-                stockNotice.style.color = "#2e7d32";
-                hiddenVariantId.value = match.id;
-                quantityInput.max = Math.min(match.stock, 99);
-            }
-        }
-
-        colorBtns.forEach(btn => {
-            btn.addEventListener("click", () => {
-                colorBtns.forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                selectedColor = btn.dataset.color;
-                colorText.innerText = selectedColor;
-                updateState();
-            });
-        });
-
-        sizeBtns.forEach(btn => {
-            btn.addEventListener("click", () => {
-                sizeBtns.forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                selectedSize = btn.dataset.size;
-                sizeText.innerText = selectedSize;
-                updateState();
-            });
-        });
-
-        if (form) {
-            form.addEventListener("submit", (e) => {
-                if (!selectedColor || !selectedSize) {
-                    e.preventDefault();
-                    stockNotice.innerText = "Vui lòng chọn size & màu";
-                    stockNotice.style.color = "#d32f2f";
-                    return;
-                }
-
-                const match = variants.find(v => v.color === selectedColor && v.size === selectedSize);
-                if (!match) {
-                    e.preventDefault();
-                    stockNotice.innerText = "Phiên bản màu/size này hiện không khả dụng.";
-                    stockNotice.style.color = "#d32f2f";
-                    return;
-                }
-
-                if (match.stock <= 0) {
-                    e.preventDefault();
-                    stockNotice.innerText = "Phân loại này hiện đã hết hàng.";
-                    stockNotice.style.color = "#d32f2f";
-                    return;
-                }
-            });
-        }
-    });
-</script>

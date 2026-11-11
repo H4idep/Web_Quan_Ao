@@ -75,7 +75,7 @@ const ProductModel = {
 
     async findVariants(productId) {
         const [rows] = await pool.execute(
-            `SELECT id, color, size, sku, stock, price
+            `SELECT id, color, size, sku, stock
              FROM product_variants
              WHERE product_id = ?
              ORDER BY color ASC, id ASC`,

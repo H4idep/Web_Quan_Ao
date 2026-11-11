@@ -120,6 +120,18 @@ const AdminModel = {
         return rows[0];
     },
 
+    async findProductVariants(productId) {
+        const [rows] = await pool.execute(
+            `SELECT id, color, size, sku, stock
+             FROM product_variants
+             WHERE product_id = ?
+             ORDER BY color ASC, size ASC, id ASC`,
+            [productId]
+        );
+
+        return rows;
+    },
+
     async categoryOptions() {
     const [rows] = await pool.query(`
         SELECT
@@ -186,6 +198,7 @@ const AdminModel = {
     },
 
     async saveProduct(id, data) {
+        const connection = await pool.getConnection();
         const values = [
             data.category_id,
             data.name,
@@ -195,22 +208,194 @@ const AdminModel = {
             data.image_url
         ];
 
-        if (id) {
-            return pool.execute(
-                `UPDATE products
-                 SET category_id = ?, name = ?, description = ?,
-                     price = ?, stock = ?, image_url = ?
-                 WHERE id = ?`,
-                [...values, id]
-            );
-        }
+        try {
+            await connection.beginTransaction();
 
-        return pool.execute(
-            `INSERT INTO products
-                (category_id, name, description, price, stock, image_url)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            values
-        );
+            let productId = id;
+            if (productId) {
+                await connection.execute(
+                    `UPDATE products
+                     SET category_id = ?, name = ?, description = ?,
+                         price = ?, stock = ?, image_url = ?
+                     WHERE id = ?`,
+                    [...values, productId]
+                );
+            } else {
+                const [result] = await connection.execute(
+                    `INSERT INTO products
+                        (category_id, name, description, price, stock, image_url)
+                     VALUES (?, ?, ?, ?, ?, ?)`,
+                    values
+                );
+                productId = result.insertId;
+            }
+
+            const [existingVariants] = await connection.execute(
+                `SELECT id, color, size, sku, stock
+                 FROM product_variants
+                 WHERE product_id = ?
+                 FOR UPDATE`,
+                [productId]
+            );
+            const normalize = value => value
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/gu, "")
+                .replace(/[đĐ]/gu, "d")
+                .toLocaleLowerCase("vi");
+            const existingByKey = new Map(
+                existingVariants.map(variant => [
+                    `${normalize(variant.color)}\u0000${normalize(variant.size)}`,
+                    variant
+                ])
+            );
+            const existingById = new Map(
+                existingVariants.map(variant => [String(variant.id), variant])
+            );
+            const retainedIds = new Set();
+            const variantsToSave = [];
+
+            for (const variant of data.variants) {
+                const key = `${normalize(variant.color)}\u0000${normalize(variant.size)}`;
+                let existing = null;
+
+                if (variant.id) {
+                    existing = existingById.get(String(variant.id));
+                    if (!existing) {
+                        const error = new Error(
+                            "Biến thể không thuộc sản phẩm đang được chỉnh sửa."
+                        );
+                        error.code = "INVALID_VARIANT_REFERENCE";
+                        throw error;
+                    }
+                    if (retainedIds.has(String(existing.id))) {
+                        const error = new Error("Biến thể bị gửi trùng.");
+                        error.code = "INVALID_VARIANT_REFERENCE";
+                        throw error;
+                    }
+                } else {
+                    existing = existingByKey.get(key);
+                    if (existing && retainedIds.has(String(existing.id))) {
+                        existing = null;
+                    }
+                }
+
+                if (existing) {
+                    retainedIds.add(String(existing.id));
+                    variantsToSave.push({ ...variant, existingId: existing.id });
+                } else {
+                    variantsToSave.push({ ...variant, existingId: null });
+                }
+            }
+
+            const removedIds = existingVariants
+                .filter(variant => !retainedIds.has(String(variant.id)))
+                .map(variant => variant.id);
+
+            if (removedIds.length > 0) {
+                const [cartReferences] = await connection.execute(
+                    `SELECT variant_id
+                     FROM cart_items
+                     WHERE variant_id IN (${removedIds.map(() => "?").join(", ")})
+                     LIMIT 1
+                     FOR UPDATE`,
+                    removedIds
+                );
+
+                if (cartReferences.length > 0) {
+                    const error = new Error(
+                        "Không thể xóa phân loại đang có trong giỏ hàng."
+                    );
+                    error.code = "VARIANT_IN_CART";
+                    error.variantIds = [
+                        ...new Set(cartReferences.map(row => String(row.variant_id)))
+                    ];
+                    throw error;
+                }
+
+                await connection.execute(
+                    `DELETE FROM product_variants
+                     WHERE product_id = ?
+                       AND id IN (${removedIds.map(() => "?").join(", ")})`,
+                    [productId, ...removedIds]
+                );
+            }
+
+            const retainedExistingIds = variantsToSave
+                .filter(variant => variant.existingId !== null)
+                .map(variant => variant.existingId);
+
+            if (retainedExistingIds.length > 0) {
+                await connection.execute(
+                    `UPDATE product_variants
+                     SET color = CONCAT(CHAR(1), id), size = ''
+                     WHERE product_id = ?
+                       AND id IN (${retainedExistingIds.map(() => "?").join(", ")})`,
+                    [productId, ...retainedExistingIds]
+                );
+            }
+
+            for (const variant of variantsToSave) {
+                if (variant.existingId !== null) {
+                    await connection.execute(
+                        `UPDATE product_variants
+                         SET color = ?, size = ?, sku = ?, price = NULL, stock = ?
+                         WHERE id = ? AND product_id = ?`,
+                        [
+                            variant.color,
+                            variant.size,
+                            variant.sku,
+                            variant.stock,
+                            variant.existingId,
+                            productId
+                        ]
+                    );
+                } else {
+                    await connection.execute(
+                        `INSERT INTO product_variants
+                            (product_id, color, size, sku, price, stock)
+                         VALUES (?, ?, ?, ?, NULL, ?)`,
+                        [
+                            productId,
+                            variant.color,
+                            variant.size,
+                            variant.sku,
+                            variant.stock
+                        ]
+                    );
+                }
+            }
+
+            await connection.execute(
+                "UPDATE product_variants SET price = NULL WHERE product_id = ?",
+                [productId]
+            );
+
+            if (data.variants.length === 0) {
+                await connection.execute(
+                    "UPDATE products SET stock = ? WHERE id = ?",
+                    [data.stock, productId]
+                );
+            } else {
+                await connection.execute(
+                    `UPDATE products
+                     SET stock = (
+                         SELECT COALESCE(SUM(stock), 0)
+                         FROM product_variants
+                         WHERE product_id = ?
+                     )
+                     WHERE id = ?`,
+                    [productId, productId]
+                );
+            }
+
+            await connection.commit();
+            return productId;
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
     },
 
     async remove(kind, id) {

@@ -66,8 +66,8 @@ app.use("/payments", paymentRoutes);
 app.use(
   express.urlencoded({
     extended: false,
-    limit: "16kb",
-    parameterLimit: 30,
+    limit: "48kb",
+    parameterLimit: 620,
   }),
 );
 

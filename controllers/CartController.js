@@ -73,6 +73,15 @@ const CartController = {
                 return res.redirect("/cart");
             }
 
+            if (
+                variantId !== undefined &&
+                variantId !== "" &&
+                !validId(variantId)
+            ) {
+                setFlash(req, "error", "Phân loại sản phẩm không hợp lệ.");
+                return res.redirect("/cart");
+            }
+
             const cleanVariantId = validId(variantId) ? variantId : null;
 
             const result = await CartModel.addItem(
@@ -84,6 +93,8 @@ const CartController = {
 
             if (result.status === "not_found") {
                 setFlash(req, "error", "Sản phẩm hoặc phân loại không tồn tại.");
+            } else if (result.status === "variant_required") {
+                setFlash(req, "error", "Vui lòng chọn màu sắc và kích cỡ.");
             } else if (result.status === "out_of_stock") {
                 setFlash(req, "error", "Phân loại sản phẩm này đã hết hàng.");
             } else if (result.capped) {
@@ -122,6 +133,8 @@ const CartController = {
 
             if (!result.found) {
                 setFlash(req, "error", "Sản phẩm không có trong giỏ hàng.");
+            } else if (result.unavailable) {
+                setFlash(req, "error", "Sản phẩm đã hết hàng. Vui lòng xóa khỏi giỏ hàng.");
             } else if (result.capped) {
                 setFlash(req, "warning", `Số lượng được giới hạn ở ${result.quantity} theo tồn kho.`);
             } else {

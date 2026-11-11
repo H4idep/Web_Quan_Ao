@@ -5,6 +5,8 @@
     </a>
 
     <% const action=item.id ? `/admin/${kind}/${item.id}/update` : `/admin/${kind}`; %>
+    <% const productVariants = Array.isArray(item.variants) ? item.variants : []; %>
+    <% const variantBuilderState = { variants: productVariants }; %>
 
         <form method="POST" action="<%= action %>"
             class="edit-form <%= kind === 'categories' ? 'category-edit-form' : '' %>" id="adminEditForm">
@@ -113,7 +115,14 @@
                                                 <label for="stock">Tồn kho *</label>
 
                                                 <input id="stock" name="stock" type="number" min="0" max="4294967295"
-                                                    step="1" value="<%= item.stock ?? 0 %>" required>
+                                                    step="1" value="<%= item.stock ?? 0 %>" required
+                                                    <%= productVariants.length ? "readonly" : "" %>>
+
+                                                <small id="variantStockHelp">
+                                                    <%= productVariants.length
+                                                        ? "Tổng tồn kho được tính từ các phân loại bên dưới."
+                                                        : "Nếu không khai báo phân loại, số lượng này áp dụng cho toàn sản phẩm." %>
+                                                </small>
 
                                                 <% if (errors.stock) { %>
                                                     <small class="field-error">
@@ -122,6 +131,96 @@
                                                     <% } %>
                                             </div>
                                         </div>
+
+                                        <section class="variant-editor" aria-labelledby="variantEditorTitle">
+                                            <h3 id="variantEditorTitle">Màu sắc và kích cỡ</h3>
+                                            <p class="muted">
+                                                Thêm nhiều màu và size, sau đó tạo ma trận tổ hợp. Tất cả phân loại dùng
+                                                chung giá sản phẩm; SKU có thể để trống.
+                                                Phân loại đang có trong giỏ sẽ không thể xóa; đơn đã đặt giữ nguyên
+                                                thông tin lịch sử.
+                                            </p>
+
+                                            <div class="variant-builder">
+                                                <div class="variant-picker">
+                                                    <div class="variant-picker-block">
+                                                        <label for="variantColorInput">Màu sắc</label>
+                                                        <div class="variant-entry">
+                                                            <input id="variantColorInput" maxlength="50"
+                                                                placeholder="Nhập màu, ví dụ: Xanh navy">
+                                                            <button class="btn small" id="addVariantColor"
+                                                                type="button">Thêm màu</button>
+                                                        </div>
+                                                        <div class="variant-chips" id="variantColorChips"
+                                                            aria-label="Màu sắc đã chọn"></div>
+                                                    </div>
+
+                                                    <div class="variant-picker-block">
+                                                        <label>Kích thước</label>
+                                                        <div class="variant-presets" aria-label="Chọn size phổ biến">
+                                                            <% ["S", "M", "L", "XL", "XXL"].forEach(size => { %>
+                                                                <button class="btn small variant-size-preset"
+                                                                    type="button" data-size="<%= size %>"
+                                                                    aria-pressed="false"><%= size %></button>
+                                                            <% }) %>
+                                                        </div>
+                                                        <div class="variant-entry">
+                                                            <input id="variantSizeInput" maxlength="20"
+                                                                placeholder="Hoặc nhập size khác">
+                                                            <button class="btn small" id="addVariantSize"
+                                                                type="button">Thêm size</button>
+                                                        </div>
+                                                        <div class="variant-chips" id="variantSizeChips"
+                                                            aria-label="Kích thước đã chọn"></div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="variant-generate-actions">
+                                                    <button class="btn primary" id="generateVariants"
+                                                        type="button">Tạo phân loại</button>
+                                                    <span id="variantCount" class="muted"></span>
+                                                </div>
+                                                <p id="variantBuilderStatus" class="variant-builder-status"
+                                                    role="status" aria-live="polite"></p>
+
+                                                <div class="variant-bulk-stock">
+                                                    <div class="field">
+                                                        <label for="bulkVariantStock">Tồn kho áp dụng hàng loạt</label>
+                                                        <input id="bulkVariantStock" type="number" min="0"
+                                                            max="4294967295" step="1" value="0">
+                                                    </div>
+                                                    <button class="btn small" id="applyBulkVariantStock"
+                                                        type="button">Áp dụng cho tất cả</button>
+                                                </div>
+
+                                                <div class="variant-table-wrap">
+                                                    <table class="variant-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Màu sắc</th>
+                                                                <th>Size</th>
+                                                                <th>SKU</th>
+                                                                <th>Tồn kho</th>
+                                                                <th>Thao tác</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="variantRows"></tbody>
+                                                    </table>
+                                                    <p id="variantEmpty" class="variant-empty">
+                                                        Chưa có phân loại. Hãy chọn màu và size rồi nhấn “Tạo phân loại”.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <% if (errors.variants) { %>
+                                                <small class="field-error" role="alert">
+                                                    <%= errors.variants %>
+                                                </small>
+                                            <% } %>
+                                            <script id="variantBuilderState" type="application/json">
+                                                <%- JSON.stringify(variantBuilderState).replace(/</g, "\\u003c") %>
+                                            </script>
+                                        </section>
                                         <% } %>
 
                                             <div class="field">

@@ -534,3 +534,21 @@
   background: #000;
   color: #fff;
 }
+
+.variant-btn[hidden] {
+  display: none;
+}
+
+.variant-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.pd-variant-notice.is-available {
+  color: #2e7d32;
+}
+
+.pd-add-btn:disabled {
+  background: #999;
+  cursor: not-allowed;
+}

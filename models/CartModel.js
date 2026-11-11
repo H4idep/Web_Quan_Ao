@@ -24,11 +24,11 @@ const CartModel = {
                 ci.quantity,
                 p.name,
                 p.image_url,
-                COALESCE(pv.price, p.price) AS price,
+                p.price AS price,
                 COALESCE(pv.stock, p.stock) AS stock,
                 pv.color,
                 pv.size,
-                (ci.quantity * COALESCE(pv.price, p.price)) AS line_total
+                (ci.quantity * p.price) AS line_total
              FROM cart_items ci
              JOIN products p ON p.id = ci.product_id
              LEFT JOIN product_variants pv ON pv.id = ci.variant_id
@@ -63,10 +63,19 @@ const CartModel = {
             stock = Number(variants[0].stock);
         } else {
             const [products] = await pool.execute(
-                "SELECT stock FROM products WHERE id = ? LIMIT 1",
+                `SELECT p.stock,
+                        EXISTS (
+                            SELECT 1
+                            FROM product_variants pv
+                            WHERE pv.product_id = p.id
+                        ) AS has_variants
+                 FROM products p
+                 WHERE p.id = ?
+                 LIMIT 1`,
                 [productId]
             );
             if (products.length === 0) return { status: "not_found" };
+            if (products[0].has_variants) return { status: "variant_required" };
             stock = Number(products[0].stock);
         }
 
@@ -113,6 +122,7 @@ const CartModel = {
         if (rows.length === 0) return { found: false };
 
         const limit = Math.min(Number(rows[0].stock), MAX_PER_ITEM);
+        if (limit < 1) return { found: true, unavailable: true };
         const finalQuantity = Math.max(1, Math.min(quantity, limit));
 
         await pool.execute(
