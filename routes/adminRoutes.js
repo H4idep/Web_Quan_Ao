@@ -4,6 +4,7 @@ const { rateLimit } = require("express-rate-limit");
 const adminCustomerRoutes = require("./adminCustomerRoutes");
 const adminOrderRoutes = require("./adminOrderRoutes");
 const AdminController = require("../controllers/AdminController");
+const AdminCouponController = require("../controllers/AdminCouponController");
 const AdminReportController = require("../controllers/AdminReportController");
 const { requireAdmin } = require("../middleware/authMiddleware");
 const { parseImage, saveImage } = require("../middleware/adminUpload");
@@ -57,6 +58,13 @@ router.post("/upload-image", uploadLimiter, parseImage, saveImage);
 router.get("/", AdminController.dashboard);
 router.get("/reports", AdminReportController.index);
 router.get("/reports/export", AdminReportController.exportExcel);
+router.get("/coupons", AdminCouponController.index);
+router.get("/coupons/create", AdminCouponController.createForm);
+router.post("/coupons", AdminCouponController.create);
+router.get("/coupons/:id", AdminCouponController.detail);
+router.put("/coupons/:id", AdminCouponController.update);
+router.patch("/coupons/:id/toggle", AdminCouponController.toggle);
+router.delete("/coupons/:id", AdminCouponController.remove);
 
 // kind do lập trình viên chỉ định, không lấy tên bảng từ người dùng.
 for (const kind of ["categories", "products"]) {

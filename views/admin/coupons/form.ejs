@@ -1,0 +1,117 @@
+<%- include("../partials/header") %>
+
+<a class="back-link" href="/admin/coupons">← Quay lại danh sách mã giảm giá</a>
+
+<% const editing = Boolean(item.id); %>
+<form class="edit-form" id="couponForm" method="POST"
+    action="<%= editing ? `/admin/coupons/${item.id}` : '/admin/coupons' %>"
+    <%= editing ? 'data-api-method="PUT"' : '' %>>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <% if (errors.form) { %>
+        <div class="alert error" role="alert"><%= errors.form %></div>
+    <% } %>
+    <div id="couponNotice" class="alert" role="status" aria-live="polite" hidden></div>
+
+    <section class="panel form-panel">
+        <h2><%= editing ? "Thông tin mã giảm giá" : "Tạo mã giảm giá" %></h2>
+        <p class="muted">Chỉ nhập các thông tin đang có trong bảng coupons.</p>
+
+        <div class="field">
+            <label for="couponCode">Mã giảm giá *</label>
+            <input id="couponCode" name="code" maxlength="50" value="<%= item.code || '' %>"
+                autocomplete="off" required aria-describedby="codeError">
+            <small>Mã sẽ được chuyển thành chữ hoa và loại bỏ khoảng trắng.</small>
+            <small class="field-error" id="codeError" data-coupon-error="code"><%= errors.code || '' %></small>
+        </div>
+
+        <div class="field">
+            <label for="couponDescription">Mô tả</label>
+            <textarea id="couponDescription" name="description" rows="3" maxlength="255"
+                aria-describedby="descriptionError"><%= item.description || '' %></textarea>
+            <small class="field-error" id="descriptionError" data-coupon-error="description"><%= errors.description || '' %></small>
+        </div>
+
+        <div class="two-columns">
+            <div class="field">
+                <label for="discountType">Loại giảm giá *</label>
+                <select id="discountType" name="discount_type" required>
+                    <option value="percentage" <%= item.discount_type === "percentage" ? "selected" : "" %>>Theo phần trăm</option>
+                    <option value="fixed" <%= item.discount_type === "fixed" ? "selected" : "" %>>Số tiền cố định</option>
+                </select>
+                <small class="field-error" data-coupon-error="discount_type"><%= errors.discount_type || '' %></small>
+            </div>
+            <div class="field">
+                <label for="discountValue">Giá trị giảm *</label>
+                <input id="discountValue" name="discount_value" type="number" min="0.01"
+                    max="<%= item.discount_type === 'percentage' ? '100' : '9999999999.99' %>"
+                    step="0.01" value="<%= item.discount_value ?? '' %>" required>
+                <small class="field-error" data-coupon-error="discount_value"><%= errors.discount_value || '' %></small>
+            </div>
+        </div>
+
+        <div class="two-columns">
+            <div class="field">
+                <label for="maxDiscount">Mức giảm tối đa (đ, tùy chọn)</label>
+                <input id="maxDiscount" name="max_discount_amount" type="number" min="0.01"
+                    max="9999999999.99" step="0.01"
+                    value="<%= item.max_discount_amount ?? '' %>"
+                    <%= item.discount_type === "fixed" ? "disabled" : "" %>>
+                <small class="field-error" data-coupon-error="max_discount_amount"><%= errors.max_discount_amount || '' %></small>
+            </div>
+            <div class="field">
+                <label for="minOrderValue">Đơn hàng tối thiểu (đ) *</label>
+                <input id="minOrderValue" name="min_order_value" type="number" min="0"
+                    max="9999999999.99" step="0.01" value="<%= item.min_order_value ?? '0.00' %>" required>
+                <small class="field-error" data-coupon-error="min_order_value"><%= errors.min_order_value || '' %></small>
+            </div>
+        </div>
+
+        <div class="two-columns">
+            <div class="field">
+                <label for="usageLimit">Tổng lượt dùng (để trống = không giới hạn)</label>
+                <input id="usageLimit" name="usage_limit" type="number" min="0"
+                    max="4294967295" step="1" value="<%= item.usage_limit ?? '' %>">
+                <small class="field-error" data-coupon-error="usage_limit"><%= errors.usage_limit || '' %></small>
+            </div>
+            <div class="field">
+                <label for="isActive">Trạng thái *</label>
+                <select id="isActive" name="is_active" required>
+                    <option value="1" <%= Number(item.is_active) === 1 ? "selected" : "" %>>Đang bật</option>
+                    <option value="0" <%= Number(item.is_active) === 0 ? "selected" : "" %>>Đang tắt</option>
+                </select>
+                <small class="field-error" data-coupon-error="is_active"><%= errors.is_active || '' %></small>
+            </div>
+        </div>
+
+        <div class="two-columns">
+            <div class="field">
+                <label for="startDate">Bắt đầu (để trống = không giới hạn)</label>
+                <input id="startDate" name="start_date" type="datetime-local"
+                    value="<%= item.start_date_input || '' %>">
+                <small class="field-error" data-coupon-error="start_date"><%= errors.start_date || '' %></small>
+            </div>
+            <div class="field">
+                <label for="endDate">Kết thúc (để trống = không giới hạn)</label>
+                <input id="endDate" name="end_date" type="datetime-local"
+                    value="<%= item.end_date_input || '' %>">
+                <small class="field-error" data-coupon-error="end_date"><%= errors.end_date || '' %></small>
+            </div>
+        </div>
+
+        <% if (editing) { %>
+            <div class="field">
+                <label for="usedCount">Lượt đã sử dụng (do hệ thống cập nhật)</label>
+                <input id="usedCount" value="<%= item.used_count %>" readonly>
+            </div>
+        <% } %>
+
+        <div class="form-actions">
+            <a class="btn" href="/admin/coupons">Hủy</a>
+            <button class="btn primary" type="submit"><%= editing ? "Lưu thay đổi" : "Tạo mã giảm giá" %></button>
+        </div>
+    </section>
+</form>
+
+<script src="/js/admin-coupons.js" defer></script>
+<%- include("../partials/footer") %>

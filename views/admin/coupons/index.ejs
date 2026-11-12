@@ -1,0 +1,123 @@
+<%- include("../partials/header") %>
+
+<section class="panel">
+    <div class="toolbar">
+        <form method="GET" action="/admin/coupons" class="search-form">
+            <label class="sr-only" for="couponQuery">Tìm mã giảm giá</label>
+            <input id="couponQuery" name="q" value="<%= filters.q %>" maxlength="100"
+                placeholder="Tìm mã hoặc mô tả...">
+            <label class="sr-only" for="couponStatus">Lọc trạng thái</label>
+            <select id="couponStatus" name="status" class="btn">
+                <option value="" <%= filters.status === "" ? "selected" : "" %>>Tất cả trạng thái</option>
+                <option value="running" <%= filters.status === "running" ? "selected" : "" %>>Đang chạy</option>
+                <option value="upcoming" <%= filters.status === "upcoming" ? "selected" : "" %>>Sắp diễn ra</option>
+                <option value="expired" <%= filters.status === "expired" ? "selected" : "" %>>Hết hạn</option>
+                <option value="exhausted" <%= filters.status === "exhausted" ? "selected" : "" %>>Hết lượt</option>
+                <option value="disabled" <%= filters.status === "disabled" ? "selected" : "" %>>Đã tắt</option>
+            </select>
+            <button class="btn" type="submit">Lọc</button>
+            <% if (filters.q || filters.status) { %>
+                <a class="text-link" href="/admin/coupons">Bỏ lọc</a>
+            <% } %>
+        </form>
+
+        <a class="btn primary" href="/admin/coupons/create">+ Thêm mã giảm giá</a>
+    </div>
+
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã giảm giá</th>
+                    <th>Loại / Giá trị</th>
+                    <th>Đơn tối thiểu</th>
+                    <th>Thời gian</th>
+                    <th>Lượt dùng</th>
+                    <th>Trạng thái</th>
+                    <th class="align-right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (!rows.length) { %>
+                    <tr><td colspan="7" class="empty">Không tìm thấy mã giảm giá phù hợp.</td></tr>
+                <% } %>
+                <% rows.forEach(row => { %>
+                    <tr>
+                        <td>
+                            <strong><%= row.code %></strong>
+                            <div class="description-cell"><%= row.description || "—" %></div>
+                        </td>
+                        <td class="nowrap">
+                            <% if (row.discount_type === "percentage") { %>
+                                <%= row.discount_value %>%
+                                <% if (row.max_discount_amount !== null) { %>
+                                    <small class="muted">Tối đa <%= money(row.max_discount_amount) %></small>
+                                <% } %>
+                            <% } else { %>
+                                <%= money(row.discount_value) %>
+                            <% } %>
+                        </td>
+                        <td class="nowrap"><%= money(row.min_order_value) %></td>
+                        <td class="nowrap">
+                            <%= row.start_date_display || "Không giới hạn" %>
+                            <span class="muted">—</span>
+                            <%= row.end_date_display || "Không giới hạn" %>
+                        </td>
+                        <td class="nowrap">
+                            <%= row.used_count %> /
+                            <%= row.usage_limit === null ? "Không giới hạn" : row.usage_limit %>
+                        </td>
+                        <td>
+                            <% const statusLabels = {
+                                running: ["Đang chạy", "active"],
+                                upcoming: ["Sắp diễn ra", "processing"],
+                                expired: ["Hết hạn", "cancelled"],
+                                exhausted: ["Hết lượt", "pending"],
+                                disabled: ["Đã tắt", "blocked"]
+                            }; %>
+                            <% const status = statusLabels[row.coupon_status] || ["Không xác định", "blocked"]; %>
+                            <span class="badge <%= status[1] %>"><%= status[0] %></span>
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <a class="btn small" href="/admin/coupons/<%= row.id %>">Sửa</a>
+                                <form action="/admin/coupons/<%= row.id %>/toggle" method="POST"
+                                    data-api-method="PATCH">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <button class="btn small" type="submit">
+                                        <%= Number(row.is_active) === 1 ? "Tắt" : "Bật" %>
+                                    </button>
+                                </form>
+                                <form action="/admin/coupons/<%= row.id %>" method="POST"
+                                    data-api-method="DELETE"
+                                    data-confirm="Bạn có chắc muốn xóa mã này? Coupon đã được dùng hoặc gắn với đơn hàng sẽ không thể xóa.">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <button class="btn small danger" type="submit">Xóa</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <span class="muted"><%= total %> mã · Trang <%= page %>/<%= pages %></span>
+        <div class="row-actions">
+            <% if (page > 1) { %>
+                <a class="btn small"
+                    href="/admin/coupons?q=<%= encodeURIComponent(filters.q) %>&status=<%= encodeURIComponent(filters.status) %>&page=<%= page - 1 %>">← Trước</a>
+            <% } %>
+            <% if (page < pages) { %>
+                <a class="btn small"
+                    href="/admin/coupons?q=<%= encodeURIComponent(filters.q) %>&status=<%= encodeURIComponent(filters.status) %>&page=<%= page + 1 %>">Sau →</a>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<div id="couponNotice" class="alert" role="status" aria-live="polite" hidden></div>
+<script src="/js/admin-coupons.js" defer></script>
+
+<%- include("../partials/footer") %>

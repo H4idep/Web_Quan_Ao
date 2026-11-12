@@ -44,6 +44,10 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
                 <span>Đơn hàng</span>
             </a>
+            <a href="/admin/coupons" class="<%= active === 'coupons' ? 'active' : '' %>" <%= active === 'coupons' ? 'aria-current="page"' : '' %>>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v2a2.5 2.5 0 0 0 0 5v2a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-2a2.5 2.5 0 0 0 0-5v-2Z"/><path d="M12 8v1m0 3v1m0 3v1"/></svg>
+                <span>Mã giảm giá</span>
+            </a>
             <a href="/admin/reports" class="<%= active === 'reports' ? 'active' : '' %>" <%= active === 'reports' ? 'aria-current="page"' : '' %>>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>
                 <span>Báo cáo doanh thu</span>
