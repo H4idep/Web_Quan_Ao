@@ -147,7 +147,7 @@ const AdminOrderModel = {
 
             if (data.status === "cancelled") {
                 const [items] = await connection.execute(
-                    `SELECT product_id, quantity
+                    `SELECT product_id, variant_id, quantity
                      FROM order_items
                      WHERE order_id = ?
                      ORDER BY product_id, id
@@ -155,7 +155,6 @@ const AdminOrderModel = {
                     [id]
                 );
 
-                // Đơn mẫu cũ không có chi tiết: không đoán số lượng hoàn kho.
                 if (!items.length) {
                     throw fail(
                         "Đơn cũ chưa có chi tiết sản phẩm. Cần đối soát tồn kho trước khi hủy.",
@@ -171,6 +170,17 @@ const AdminOrderModel = {
                         );
                     }
 
+                    // 1. Hoàn kho biến thể (Màu & Size) nếu có
+                    if (item.variant_id) {
+                        await connection.execute(
+                            `UPDATE product_variants
+                             SET stock = stock + ?
+                             WHERE id = ?`,
+                            [item.quantity, item.variant_id]
+                        );
+                    }
+
+                    // 2. Hoàn kho tổng của sản phẩm
                     const [result] = await connection.execute(
                         `UPDATE products
                          SET stock = stock + ?
@@ -186,6 +196,22 @@ const AdminOrderModel = {
                         );
                     }
                 }
+            }
+
+            if (data.status === "completed") {
+                await connection.execute(
+                    `UPDATE orders 
+                     SET status = 'completed', 
+                         payment_status = 'paid', 
+                         paid_at = COALESCE(paid_at, NOW()) 
+                     WHERE id = ?`,
+                    [id]
+                );
+            } else {
+                await connection.execute(
+                    "UPDATE orders SET status = ? WHERE id = ?",
+                    [data.status, id]
+                );
             }
 
             await connection.execute(

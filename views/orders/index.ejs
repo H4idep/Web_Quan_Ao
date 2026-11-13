@@ -57,12 +57,28 @@
                                             timeZone: "Asia/Ho_Chi_Minh" }) %>
                                     </span>
                                     <span>
-                                        <span class="order-status order-status-pay-<%= order.payment_status %>">
-                                            <%= paymentStatusLabels[order.payment_status] %>
-                                        </span>
-                                        <strong>
-                                            <%= formatMoney(order.total_amount) %>
-                                        </strong>
+                                        <%# Chỉ hiển thị nhãn thanh toán khi đơn chưa bị hủy %>
+                                            <% if (order.status !=='cancelled' ) { %>
+                                                <% if (order.payment_status==='paid' || order.status==='completed' ) {
+                                                    %>
+                                                    <span class="order-status order-status-pay-paid">
+                                                        Đã thanh toán
+                                                    </span>
+                                                    <% } else if (order.payment_method==='cod' ) { %>
+                                                        <span class="order-status"
+                                                            style="background: #e8f0fe; color: #1a73e8; border: 1px solid #d2e3fc;">
+                                                            Trả tiền khi nhận hàng
+                                                        </span>
+                                                        <% } else { %>
+                                                            <span class="order-status order-status-pay-unpaid">
+                                                                Chờ chuyển khoản
+                                                            </span>
+                                                            <% } %>
+                                                                <% } %>
+
+                                                                    <strong>
+                                                                        <%= formatMoney(order.total_amount) %>
+                                                                    </strong>
                                     </span>
                                 </div>
                             </li>

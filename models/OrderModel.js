@@ -408,7 +408,7 @@ const OrderModel = {
             // Sản phẩm đã bị xóa khỏi cửa hàng (product_id NULL) thì không còn kho để hoàn.
             // Sắp xếp theo product_id để thứ tự khóa luôn giống nhau (tránh deadlock).
             const [items] = await connection.execute(
-                `SELECT product_id, quantity
+                `SELECT product_id, variant_id, quantity
                  FROM order_items
                  WHERE order_id = ? AND product_id IS NOT NULL
                  ORDER BY product_id`,
@@ -416,6 +416,13 @@ const OrderModel = {
             );
 
             for (const item of items) {
+                if (item.variant_id) {
+                    await connection.execute(
+                        "UPDATE product_variants SET stock = stock + ? WHERE id = ?",
+                        [item.quantity, item.variant_id]
+                    );
+                }
+
                 await connection.execute(
                     "UPDATE products SET stock = stock + ? WHERE id = ?",
                     [item.quantity, item.product_id]
