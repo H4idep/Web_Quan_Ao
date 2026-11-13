@@ -125,13 +125,10 @@
                                             <%= formatMoney(orderableTotal) %>
                                         </strong>
                                     </p>
-                                    <% if (hasUnavailable) { %>
-                                        <p class="cart-warn">Sản phẩm không đủ hàng không thể chọn. Hãy giảm số lượng
-                                            hoặc xóa khỏi giỏ.</p>
-                                        <% } %>
-                                            <a class="cart-btn cart-btn-secondary" href="/products">Tiếp tục mua sắm</a>
-                                            <button type="submit" form="select-form" id="checkout-btn" class="cart-btn"
-                                                <%=orderableCount===0 ? "disabled" : "" %>>Đặt hàng</button>
+
+                                    <a class="cart-btn cart-btn-secondary" href="/products">Tiếp tục mua sắm</a>
+                                    <button type="submit" form="select-form" id="checkout-btn" class="cart-btn"
+                                        <%=orderableCount===0 ? "disabled" : "" %>>Đặt hàng</button>
                                 </div>
                                 <% } %>
         </main>
